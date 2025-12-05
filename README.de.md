@@ -235,7 +235,7 @@ Beiträge sind willkommen! Zögern Sie nicht, einen Pull Request einzureichen.
 
 ## 📄 Lizenz
 
-Dieses Projekt ist unter der Apache License 2.0 lizenziert - siehe die [LICENSE](https://www.google.com/search?q=LICENSE)-Datei für Details.
+Dieses Projekt ist unter der Apache License 2.0 lizenziert - siehe die [LICENSE](LICENSE)-Datei für Details.
 
 -----
 
