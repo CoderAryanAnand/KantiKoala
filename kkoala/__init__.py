@@ -1,4 +1,5 @@
-from flask import Flask, render_template, session
+from flask import Flask, render_template, session, send_from_directory
+import os
 from kkoala.models import User
 from dotenv import load_dotenv
 import resend
@@ -49,6 +50,11 @@ def create_app(config_class="config.ProdConfig"):
     @app.errorhandler(403)
     def forbidden_error(error):
         return render_template("403.html"), 403
+
+    @app.route('/favicon.ico')
+    def favicon():
+        return send_from_directory(os.path.join(app.root_path, 'static/img'),
+                                   'KantiKoalaLogoVar2.png', mimetype='image/x-icon')
 
     # Register all application blueprints (routes)
     register_blueprints(app)
