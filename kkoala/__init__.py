@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import resend
 
 from .routes import register_blueprints
-from .extensions import db, bcrypt, migrate
+from .extensions import db, bcrypt, migrate, limiter
 from .utils import make_csrf_token
 
 load_dotenv()
@@ -27,6 +27,7 @@ def create_app(config_class="config.ProdConfig"):
     db.init_app(app)
     bcrypt.init_app(app)
     migrate.init_app(app, db)
+    limiter.init_app(app)
 
     # Configure Flask-Talisman for security headers
     # CSP allows inline styles/scripts (needed for Tailwind and FullCalendar)
