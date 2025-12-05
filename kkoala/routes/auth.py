@@ -10,7 +10,7 @@ from flask import (
     flash,
 )
 # Import extensions for database and password hashing
-from ..extensions import db, bcrypt
+from ..extensions import db, bcrypt, limiter
 # Import models for user and settings management
 from ..models import User, Settings, PrioritySetting
 # Import utility decorators for CSRF protection and login checks
@@ -29,6 +29,7 @@ auth_bp = Blueprint(
 )
 
 @auth_bp.route("/login", methods=["GET", "POST"])
+@limiter.limit("5 per minute", methods=["POST"])  # Prevent brute force
 @csrf_protect
 def login():
     """
@@ -55,6 +56,7 @@ def login():
     return render_template("login.html")
 
 @auth_bp.route("/forgot_password", methods=["GET", "POST"])
+@limiter.limit("3 per hour", methods=["POST"])  # Prevent email spam
 @csrf_protect
 def forgot_password():
     """
@@ -153,6 +155,7 @@ def reset_password(token):
         return render_template("reset_password.html", token=token)
 
 @auth_bp.route("/register", methods=["GET", "POST"])
+@limiter.limit("3 per minute", methods=["POST"])  # Prevent spam registrations
 @csrf_protect
 def register():
     """

@@ -6,12 +6,18 @@ import os, json
 # Import application models and utilities
 from ..models import Settings, User, ToDoCategory, ToDoItem
 from ..utils import login_required, csrf_protect
-from ..extensions import db
+from ..extensions import db, limiter
 
 # Define the blueprint for ToDo-related API routes
 todo_bp = Blueprint(
     "todo", __name__, template_folder="../templates", static_folder="../static"
 )
+
+# Apply rate limit to all todo API routes (60 requests per minute)
+@todo_bp.before_request
+@limiter.limit("60 per minute")
+def limit_todo_api():
+    pass
 
 @todo_bp.route("/categories", methods=["POST"])
 @csrf_protect

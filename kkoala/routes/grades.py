@@ -6,12 +6,18 @@ import os
 # Import application models and utilities
 from ..models import Subject, Grade, User, Semester
 from ..utils import login_required, csrf_protect
-from ..extensions import db
+from ..extensions import db, limiter
 
 # Define the blueprint for grades-related API routes
 grades_bp = Blueprint(
     "grades", __name__, template_folder="../templates", static_folder="../static"
 )
+
+# Apply rate limit to all grades API routes (60 requests per minute)
+@grades_bp.before_request
+@limiter.limit("60 per minute")
+def limit_grades_api():
+    pass
 
 
 @grades_bp.route("/", methods=["GET"])
