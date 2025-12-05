@@ -7,10 +7,17 @@
     <!-- Page-specific title -->
     <title>{% block title %}KantiKoala{% endblock %}</title>
     
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="{% block description %}KantiKoala - Deine Studienhilfsapp für Schweizer Gymnasiastinnen.{% endblock %}">
+    <meta name="robots" content="noindex, nofollow">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{{ request.url }}">
+    
     <!-- Common CSS (Tailwind output) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
     <!-- Update the favicon link with an ID for JS access -->
-    <link id="favicon" rel="shortcut icon" href="{{ url_for('static', filename='img/KantiKoalaLogoVar2.png') }}">
+    <link id="favicon" rel="shortcut icon" href="{{ url_for('static', filename='img/KantiKoalaLogoVar2.png') }}" data-original-src="{{ url_for('static', filename='img/KantiKoalaLogoVar2.png') }}">
     
     <!-- Page-specific CSS (optional) -->
     {% block extra_css %}{% endblock %}
