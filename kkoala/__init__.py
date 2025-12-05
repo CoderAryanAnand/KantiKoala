@@ -1,5 +1,6 @@
-from flask import Flask, render_template, session, send_from_directory
+from flask import Flask, render_template, session, send_from_directory, Response, url_for, request
 import os
+from datetime import datetime
 from kkoala.models import User
 from dotenv import load_dotenv
 import resend
@@ -55,6 +56,46 @@ def create_app(config_class="config.ProdConfig"):
     def favicon():
         return send_from_directory(os.path.join(app.root_path, 'static/img'),
                                    'KantiKoalaLogoVar2.png', mimetype='image/x-icon')
+
+    @app.route('/robots.txt')
+    def robots():
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                   'robots.txt', mimetype='text/plain')
+
+    @app.route('/sitemap.xml')
+    def sitemap():
+        """Generate sitemap.xml for SEO with public pages."""
+        pages = []
+        # Static public pages
+        public_routes = [
+            ('main.index', 1.0, 'daily'),
+            ('main.about', 0.8, 'monthly'),
+            ('main.hilfe', 0.7, 'monthly'),
+            ('main.lerntimer', 0.8, 'monthly'),
+            ('main.lerntipps', 0.8, 'weekly'),
+            ('main.datenschutzerklaerung', 0.3, 'yearly'),
+        ]
+        
+        for route, priority, changefreq in public_routes:
+            pages.append({
+                'loc': url_for(route, _external=True),
+                'lastmod': datetime.now().strftime('%Y-%m-%d'),
+                'changefreq': changefreq,
+                'priority': priority
+            })
+        
+        sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        for page in pages:
+            sitemap_xml += '  <url>\n'
+            sitemap_xml += f'    <loc>{page["loc"]}</loc>\n'
+            sitemap_xml += f'    <lastmod>{page["lastmod"]}</lastmod>\n'
+            sitemap_xml += f'    <changefreq>{page["changefreq"]}</changefreq>\n'
+            sitemap_xml += f'    <priority>{page["priority"]}</priority>\n'
+            sitemap_xml += '  </url>\n'
+        sitemap_xml += '</urlset>'
+        
+        return Response(sitemap_xml, mimetype='application/xml')
 
     # Register all application blueprints (routes)
     register_blueprints(app)
