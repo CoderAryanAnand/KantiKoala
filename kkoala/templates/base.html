@@ -10,6 +10,9 @@
     <!-- Common CSS (Tailwind output) -->
     <link rel="stylesheet" href="{{ url_for('static', filename='output.css') }}">
     
+    <!-- Update the favicon link with an ID for JS access -->
+    <link id="favicon" rel="shortcut icon" href="{{ url_for('static', filename='img/KantiKoalaLogoVar2.png') }}" data-original-src="{{ url_for('static', filename='img/KantiKoalaLogoVar2.png') }}">
+    
     <!-- Page-specific CSS (optional) -->
     {% block extra_css %}{% endblock %}
     
