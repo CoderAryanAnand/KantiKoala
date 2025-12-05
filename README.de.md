@@ -1,7 +1,7 @@
 <div align="center">
 
 <!-- Language Switch -->
-[![English](https://img.shields.io/badge/Language-English-gray?style=for-the-badge)](README.md)
+[![English](https://img.shields.io/badge/Language-English-lightgray?style=for-the-badge)](README.md)
 [![German](https://img.shields.io/badge/Sprache-Deutsch-blue?style=for-the-badge)](README.de.md)
 
 # 🐨 KantiKoala
