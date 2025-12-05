@@ -1,4 +1,5 @@
 from flask import Flask, render_template, session, send_from_directory, Response, url_for, request
+from flask_talisman import Talisman
 import os
 from datetime import datetime
 from kkoala.models import User
@@ -26,6 +27,42 @@ def create_app(config_class="config.ProdConfig"):
     db.init_app(app)
     bcrypt.init_app(app)
     migrate.init_app(app, db)
+
+    # Configure Flask-Talisman for security headers
+    # CSP allows inline styles/scripts (needed for Tailwind and FullCalendar)
+    csp = {
+        'default-src': "'self'",
+        'script-src': [
+            "'self'",
+            "'unsafe-inline'",  # Required for inline scripts
+            'https://cdn.jsdelivr.net',  # FullCalendar CDN
+        ],
+        'style-src': [
+            "'self'",
+            "'unsafe-inline'",  # Required for Tailwind and inline styles
+            'https://cdn.jsdelivr.net',
+        ],
+        'img-src': ["'self'", 'data:', 'blob:'],  # Allow data URIs for favicon inversion
+        'font-src': ["'self'", 'https://cdn.jsdelivr.net'],
+        'connect-src': "'self'",
+        'frame-ancestors': "'none'",
+    }
+    
+    # Only enforce HTTPS in production (not localhost)
+    force_https = not app.debug
+    
+    Talisman(
+        app,
+        content_security_policy=csp,
+        content_security_policy_nonce_in=['script-src'],
+        force_https=force_https,
+        strict_transport_security=True,
+        strict_transport_security_max_age=31536000,  # 1 year
+        strict_transport_security_include_subdomains=True,
+        x_content_type_options=True,
+        x_xss_protection=True,
+        referrer_policy='strict-origin-when-cross-origin',
+    )
 
     # Configure Resend API key for email sending, if set
     resend_key = app.config.get("RESEND_API_KEY")
