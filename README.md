@@ -14,6 +14,9 @@
 ![Postgres](https://img.shields.io/badge/postgres-%23316192.svg?style=for-the-badge&logo=postgresql&logoColor=white)
 ![DigitalOcean](https://img.shields.io/badge/DigitalOcean-%230167ff.svg?style=for-the-badge&logo=digitalOcean&logoColor=white)
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg?style=for-the-badge)](LICENSE)
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/CoderAryanAnand/KantiKoala/tests.yml?style=for-the-badge&logo=github)
+
+
 
 [Features](#-features) • [Quick Start](#-quick-start) • [Documentation](#-project-structure) • [Contributing](#-contributing)
 
