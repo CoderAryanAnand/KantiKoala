@@ -138,11 +138,13 @@ class Semester(db.Model):
         id (int): Primary key.
         user_id (int): Foreign key to User.
         name (str): Semester name.
+        is_current (bool): Whether this is the user's current active semester.
         subjects (relationship): All subjects in this semester.
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     name = db.Column(db.String(100), nullable=False)
+    is_current = db.Column(db.Boolean, nullable=False, default=False)
 
     # Subjects in this semester
     subjects = db.relationship(

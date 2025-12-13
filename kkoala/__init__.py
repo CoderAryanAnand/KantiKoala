@@ -44,7 +44,7 @@ def create_app(config_class="config.ProdConfig"):
             'https://cdn.jsdelivr.net',
         ],
         'img-src': ["'self'", 'data:', 'blob:'],  # Allow data URIs for favicon inversion
-        'font-src': ["'self'", 'https://cdn.jsdelivr.net'],
+        'font-src': ["'self'", 'https://cdn.jsdelivr.net', 'data:'],
         'connect-src': "'self'",
         'frame-ancestors': "'none'",
     }
@@ -55,7 +55,7 @@ def create_app(config_class="config.ProdConfig"):
     Talisman(
         app,
         content_security_policy=csp,
-        content_security_policy_nonce_in=['script-src'],
+        # content_security_policy_nonce_in=['script-src'], # Disabled to allow inline event handlers (onclick)
         force_https=force_https,
         strict_transport_security=True,
         strict_transport_security_max_age=31536000,  # 1 year
