@@ -278,7 +278,7 @@
     - Embeds priority colors for use in agenda.js.
     - Loads the main agenda.js script for calendar logic and event handling.
 -->
-<script>
+<script nonce="{{ csp_nonce() }}">
     // Embed priority colors for use in agenda.js
     // This assumes priority_levels is a list of objects like: 
     // [{priority_level: 1, color: '#ff0000'}, {priority_level: 2, color: '#00ff00'}, ...]
@@ -288,5 +288,5 @@
         {% endfor %}
     };
 </script>
-<script src="{{ url_for('static', filename='js/agenda.js') }}"></script>
+<script src="{{ url_for('static', filename='js/agenda.js') }}" nonce="{{ csp_nonce() }}"></script>
 {% endblock %}

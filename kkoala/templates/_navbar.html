@@ -80,7 +80,7 @@
 </nav>
 
 <!-- Script for toggling the mobile hamburger menu -->
-<script>
+<script nonce="{{ csp_nonce() }}">
     document.getElementById('hamburger-button').addEventListener('click', function() {
         var menu = document.getElementById('mobile-menu');
         menu.classList.toggle('hidden');
