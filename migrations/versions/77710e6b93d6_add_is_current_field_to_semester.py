@@ -23,7 +23,7 @@ def upgrade():
         batch_op.add_column(sa.Column('is_current', sa.Boolean(), nullable=True, server_default=sa.text('false')))
     
     # Set default value for any existing rows
-    op.execute("UPDATE semester SET is_current = 0 WHERE is_current IS NULL")
+    op.execute("UPDATE semester SET is_current = false WHERE is_current IS NULL")
     # ### end Alembic commands ###
 
 
