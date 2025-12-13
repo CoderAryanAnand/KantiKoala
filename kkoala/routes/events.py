@@ -6,7 +6,7 @@ import uuid
 import icalendar
 
 # Import application extensions and models
-from ..extensions import db
+from ..extensions import db, limiter
 from ..models import Event, User, Settings, PrioritySetting
 from ..utils import csrf_protect, login_required, str_to_bool
 from ..algorithms import learning_time_algorithm
@@ -14,6 +14,12 @@ from ..consts import DEFAULT_IMPORT_COLOR
 
 # Define the blueprint for event-related API routes
 events_bp = Blueprint("events", __name__)
+
+# Apply rate limit to all event API routes (60 requests per minute)
+@events_bp.before_request
+@limiter.limit("60 per minute")
+def limit_events_api():
+    pass
 
 @events_bp.route("/", methods=["GET"])
 @login_required

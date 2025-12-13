@@ -1,0 +1,29 @@
+# robots.txt for KantiKoala
+User-agent: *
+
+# Allow all public pages
+Allow: /
+Allow: /about
+Allow: /hilfe
+Allow: /lerntimer
+Allow: /lerntipps
+Allow: /datenschutzerklaerung
+
+# Disallow user-specific and authenticated pages
+Disallow: /agenda
+Disallow: /noten
+Disallow: /todo
+Disallow: /settings
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /change-password
+
+# Disallow static assets from being indexed
+Disallow: /static/js/
+Disallow: /static/css/
+
+# Sitemap location
+Sitemap: https://kantikoala.ch/sitemap.xml
