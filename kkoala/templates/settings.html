@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_color_picker.html" import color_picker %}
 
 {% block title %}Einstellungen{% endblock %}
 
@@ -73,15 +74,19 @@
                         <input type="time" id="learning_time" name="learning_time" value="{{ preferred_learning_time }}" class="mt-1 block w-full px-3 py-2 bg-zinc-100 dark:bg-zinc-700 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </label>
                     <!-- Study Block Color -->
-                    <label class="flex items-center justify-between text-zinc-700 dark:text-zinc-300">
+                    <div class="flex items-center justify-between text-zinc-700 dark:text-zinc-300">
                         <span>Lernblock-Farbe:</span>
-                        <input type="color" id="study_block_color" name="study_block_color" value="{{ study_block_color }}" class="w-10 h-10 p-0 border-none rounded-md bg-transparent">
-                    </label>
+                        <div class="w-40 flex justify-end">
+                            {{ color_picker('study_block_color', 'study_block_color', study_block_color) }}
+                        </div>
+                    </div>
                     <!-- Import Event Color -->
-                    <label class="flex items-center justify-between text-zinc-700 dark:text-zinc-300">
+                    <div class="flex items-center justify-between text-zinc-700 dark:text-zinc-300">
                         <span>Importierte Events-Farbe:</span>
-                        <input type="color" id="import_color" name="import_color" value="{{ import_color }}" class="w-10 h-10 p-0 border-none rounded-md bg-transparent">
-                    </label>
+                        <div class="w-40 flex justify-end">
+                            {{ color_picker('import_color', 'import_color', import_color) }}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -98,10 +103,12 @@
                     </div>
                     <div class="space-y-3">
                         <!-- Priority Color -->
-                        <label class="flex items-center justify-between text-zinc-700 dark:text-zinc-300">
+                        <div class="flex items-center justify-between text-zinc-700 dark:text-zinc-300">
                             <span>Farbe:</span>
-                            <input type="color" name="priority{{ prio.priority_level }}_color" value="{{ prio.color }}" class="w-10 h-10 p-0 border-none rounded-md bg-transparent">
-                        </label>
+                            <div class="w-40 flex justify-end">
+                                {{ color_picker('priority' ~ prio.priority_level ~ '_color', 'priority' ~ prio.priority_level ~ '_color', prio.color) }}
+                            </div>
+                        </div>
                         <!-- Max Hours Per Day -->
                         <label class="block text-zinc-700 dark:text-zinc-300">
                             <span>Max. Stunden pro Tag:</span>

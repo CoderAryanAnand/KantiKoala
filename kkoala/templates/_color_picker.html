@@ -1,0 +1,8 @@
+{% macro color_picker(name, id, value='#667EEA') %}
+<div class="color-picker-trigger relative inline-flex items-center border border-zinc-300 dark:border-zinc-600 rounded-md overflow-hidden transition-colors duration-200 bg-white dark:bg-zinc-800 cursor-pointer hover:border-blue-500 dark:hover:border-blue-400 group h-10" data-input-id="{{ id }}">
+    <div class="color-preview w-10 h-full border-r border-zinc-300 dark:border-zinc-600 transition-colors" style="background-color: {{ value }};"></div>
+    <span class="hex-display hidden">{{ value }}</span>
+    <div class="px-2 text-zinc-400 text-xs group-hover:text-zinc-600 dark:group-hover:text-zinc-300">▼</div>
+</div>
+<input type="hidden" name="{{ name }}" id="{{ id }}" value="{{ value }}">
+{% endmacro %}

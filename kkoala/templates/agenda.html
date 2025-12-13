@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "_color_picker.html" import color_picker %}
 
 {% block title %}Agenda{% endblock %}
 
@@ -118,9 +119,9 @@
                     <span class="text-xs font-normal text-zinc-500 dark:text-zinc-400" title="Die Farbe wird nur verwendet, wenn die Priorität die höchste Stufe hat.">ℹ️</span>
                 </label>
                 <div class="flex items-center space-x-2">
-                    <input type="color" id="event-color" name="color" 
-                           class="w-12 h-12 p-1 border border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer">
-                    <span class="text-sm text-zinc-500 dark:text-zinc-400">Wählen Sie eine Farbe</span>
+                    <div class="w-full">
+                        {{ color_picker('color', 'event-color', '#000000') }}
+                    </div>
                 </div>
             </div>
             <div>
@@ -200,9 +201,9 @@
                     Farbe 
                 </label>
                 <div class="flex items-center space-x-2">
-                    <input type="color" id="create-color" name="color" value="{{ priority_levels[0].color }}"
-                           class="w-12 h-12 p-1 border border-zinc-300 dark:border-zinc-600 rounded-lg cursor-pointer">
-                    <span class="text-sm text-zinc-500 dark:text-zinc-400">Wählen Sie eine Farbe</span>
+                    <div class="w-full">
+                        {{ color_picker('color', 'create-color', priority_levels[0].color) }}
+                    </div>
                 </div>
             </div>
             <div>
@@ -278,7 +279,7 @@
     - Embeds priority colors for use in agenda.js.
     - Loads the main agenda.js script for calendar logic and event handling.
 -->
-<script nonce="{{ csp_nonce() }}">
+<script>
     // Embed priority colors for use in agenda.js
     // This assumes priority_levels is a list of objects like: 
     // [{priority_level: 1, color: '#ff0000'}, {priority_level: 2, color: '#00ff00'}, ...]
@@ -288,5 +289,5 @@
         {% endfor %}
     };
 </script>
-<script src="{{ url_for('static', filename='js/agenda.js') }}" nonce="{{ csp_nonce() }}"></script>
+<script src="{{ url_for('static', filename='js/agenda.js') }}"></script>
 {% endblock %}

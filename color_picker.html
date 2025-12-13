@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Color Picker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: #fff;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        /* Custom Color Input */
+        .color-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.3s ease;
+            background: #fff;
+            cursor: pointer;
+        }
+
+        .color-input-wrapper:hover {
+            border-color: #aaa;
+        }
+
+        .color-input-wrapper.active {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .color-preview {
+            width: 50px;
+            height: 44px;
+            border-right: 2px solid #ddd;
+        }
+
+        .hex-display {
+            flex: 1;
+            padding: 12px 15px;
+            font-size: 16px;
+            font-family: monospace;
+            color: #333;
+            text-transform: uppercase;
+        }
+
+        .dropdown-arrow {
+            padding: 0 12px;
+            color: #999;
+        }
+
+        /* Color Picker Popup */
+        .color-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .color-popup-overlay.active {
+            display: flex;
+        }
+
+        .color-popup {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 320px;
+            animation: popupIn 0.2s ease;
+        }
+
+        @keyframes popupIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .popup-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .popup-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            line-height: 1;
+        }
+
+        .popup-close:hover {
+            color: #333;
+        }
+
+        /* Color Gradient Area */
+        .color-area-wrapper {
+            margin-bottom: 15px;
+        }
+
+        .color-area {
+            width: 100%;
+            height: 150px;
+            border-radius: 8px;
+            position: relative;
+            cursor: crosshair;
+            background: linear-gradient(to right, #fff, hsl(0, 100%, 50%));
+        }
+
+        .color-area::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom, transparent, #000);
+            border-radius: 8px;
+        }
+
+        .color-area-cursor {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border: 3px solid #fff;
+            border-radius: 50%;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.3), 0 2px 5px rgba(0,0,0,0.3);
+            transform: translate(-50%, -50%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Hue Slider */
+        .hue-slider-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .hue-slider {
+            width: 100%;
+            height: 14px;
+            border-radius: 7px;
+            background: linear-gradient(to right, 
+                hsl(0, 100%, 50%), 
+                hsl(60, 100%, 50%), 
+                hsl(120, 100%, 50%), 
+                hsl(180, 100%, 50%), 
+                hsl(240, 100%, 50%), 
+                hsl(300, 100%, 50%), 
+                hsl(360, 100%, 50%)
+            );
+            position: relative;
+            cursor: pointer;
+        }
+
+        .hue-cursor {
+            position: absolute;
+            top: 50%;
+            width: 8px;
+            height: 20px;
+            background: #fff;
+            border: 2px solid #333;
+            border-radius: 3px;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            pointer-events: none;
+        }
+
+        /* Preset Colors */
+        .preset-section {
+            margin-bottom: 20px;
+        }
+
+        .preset-label {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preset-colors {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+        }
+
+        .preset-color {
+            aspect-ratio: 1;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.15s ease;
+        }
+
+        .preset-color:hover {
+            transform: scale(1.15);
+            border-color: #333;
+            z-index: 1;
+        }
+
+        /* Color Preview & Hex Input */
+        .color-result {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .result-inputs {
+            flex: 1;
+        }
+
+        .hex-input-group {
+            display: flex;
+            align-items: center;
+            background: #f5f5f5;
+            border-radius: 6px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+        }
+
+        .hex-input-group span {
+            color: #888;
+            margin-right: 4px;
+        }
+
+        .hex-input {
+            border: none;
+            background: transparent;
+            font-family: monospace;
+            font-size: 16px;
+            width: 80px;
+            outline: none;
+            text-transform: uppercase;
+        }
+
+        .rgb-display {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Popup Buttons */
+        .popup-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .popup-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .popup-btn.cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .popup-btn.cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .popup-btn.confirm {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+        }
+
+        .popup-btn.confirm:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-message {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Color Picker</h1>
+        
+        <form method="POST" action="/color_picker" id="colorForm">
+            <div class="form-group">
+                <label>Choose a color:</label>
+                <div class="color-input-wrapper" id="colorInputWrapper">
+                    <div class="color-preview" id="mainColorPreview" style="background: #667EEA;"></div>
+                    <span class="hex-display" id="mainHexDisplay">#667EEA</span>
+                    <span class="dropdown-arrow">▼</span>
+                </div>
+                <input type="hidden" name="color" id="colorInput" value="#667EEA">
+            </div>
+
+            <button type="submit" class="submit-btn">Send Color</button>
+        </form>
+
+        {% if selected_color %}
+        <div class="result-message">
+            Color sent: <strong>{{ selected_color }}</strong>
+        </div>
+        {% endif %}
+
+        <a href="/" class="back-link">← Back to Home</a>
+    </div>
+
+    <!-- Color Picker Popup -->
+    <div class="color-popup-overlay" id="colorPopup">
+        <div class="color-popup">
+            <div class="popup-header">
+                <span class="popup-title">Select Color</span>
+                <button class="popup-close" id="popupClose">&times;</button>
+            </div>
+
+            <div class="color-area-wrapper">
+                <div class="color-area" id="colorArea">
+                    <div class="color-area-cursor" id="colorCursor"></div>
+                </div>
+            </div>
+
+            <div class="hue-slider-wrapper">
+                <div class="hue-slider" id="hueSlider">
+                    <div class="hue-cursor" id="hueCursor"></div>
+                </div>
+            </div>
+
+            <div class="preset-section">
+                <div class="preset-label">Presets</div>
+                <div class="preset-colors">
+                    <div class="preset-color" style="background: #e74c3c;" data-color="#E74C3C"></div>
+                    <div class="preset-color" style="background: #e67e22;" data-color="#E67E22"></div>
+                    <div class="preset-color" style="background: #f1c40f;" data-color="#F1C40F"></div>
+                    <div class="preset-color" style="background: #2ecc71;" data-color="#2ECC71"></div>
+                    <div class="preset-color" style="background: #1abc9c;" data-color="#1ABC9C"></div>
+                    <div class="preset-color" style="background: #3498db;" data-color="#3498DB"></div>
+                    <div class="preset-color" style="background: #9b59b6;" data-color="#9B59B6"></div>
+                    <div class="preset-color" style="background: #34495e;" data-color="#34495E"></div>
+                    <div class="preset-color" style="background: #c0392b;" data-color="#C0392B"></div>
+                    <div class="preset-color" style="background: #d35400;" data-color="#D35400"></div>
+                    <div class="preset-color" style="background: #f39c12;" data-color="#F39C12"></div>
+                    <div class="preset-color" style="background: #27ae60;" data-color="#27AE60"></div>
+                    <div class="preset-color" style="background: #16a085;" data-color="#16A085"></div>
+                    <div class="preset-color" style="background: #2980b9;" data-color="#2980B9"></div>
+                    <div class="preset-color" style="background: #8e44ad;" data-color="#8E44AD"></div>
+                    <div class="preset-color" style="background: #2c3e50;" data-color="#2C3E50"></div>
+                </div>
+            </div>
+
+            <div class="color-result">
+                <div class="result-preview" id="resultPreview" style="background: #667EEA;"></div>
+                <div class="result-inputs">
+                    <div class="hex-input-group">
+                        <span>#</span>
+                        <input type="text" class="hex-input" id="popupHexInput" value="667EEA" maxlength="6">
+                    </div>
+                    <div class="rgb-display" id="rgbDisplay">RGB: 102, 126, 234</div>
+                </div>
+            </div>
+
+            <div class="popup-buttons">
+                <button class="popup-btn cancel" id="popupCancel">Cancel</button>
+                <button class="popup-btn confirm" id="popupConfirm">Select</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Elements
+        const colorInputWrapper = document.getElementById('colorInputWrapper');
+        const mainColorPreview = document.getElementById('mainColorPreview');
+        const mainHexDisplay = document.getElementById('mainHexDisplay');
+        const colorInput = document.getElementById('colorInput');
+        const colorPopup = document.getElementById('colorPopup');
+        const popupClose = document.getElementById('popupClose');
+        const popupCancel = document.getElementById('popupCancel');
+        const popupConfirm = document.getElementById('popupConfirm');
+        const colorArea = document.getElementById('colorArea');
+        const colorCursor = document.getElementById('colorCursor');
+        const hueSlider = document.getElementById('hueSlider');
+        const hueCursor = document.getElementById('hueCursor');
+        const resultPreview = document.getElementById('resultPreview');
+        const popupHexInput = document.getElementById('popupHexInput');
+        const rgbDisplay = document.getElementById('rgbDisplay');
+
+        // State
+        let currentHue = 240;
+        let currentSat = 56;
+        let currentLight = 66;
+        let tempColor = '#667EEA';
+
+        // Color conversion functions
+        function hslToRgb(h, s, l) {
+            s /= 100;
+            l /= 100;
+            const a = s * Math.min(l, 1 - l);
+            const f = n => {
+                const k = (n + h / 30) % 12;
+                return l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+            };
+            return [Math.round(f(0) * 255), Math.round(f(8) * 255), Math.round(f(4) * 255)];
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function rgbToHsl(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const max = Math.max(r, g, b), min = Math.min(r, g, b);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
+                    case g: h = ((b - r) / d + 2) / 6; break;
+                    case b: h = ((r - g) / d + 4) / 6; break;
+                }
+            }
+            return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) };
+        }
+
+        function updateColorFromHSL() {
+            const rgb = hslToRgb(currentHue, currentSat, currentLight);
+            tempColor = rgbToHex(rgb[0], rgb[1], rgb[2]);
+            resultPreview.style.background = tempColor;
+            popupHexInput.value = tempColor.slice(1);
+            rgbDisplay.textContent = `RGB: ${rgb[0]}, ${rgb[1]}, ${rgb[2]}`;
+        }
+
+        function updateColorArea() {
+            colorArea.style.background = `linear-gradient(to right, #fff, hsl(${currentHue}, 100%, 50%))`;
+        }
+
+        function setColorFromHex(hex) {
+            const rgb = hexToRgb(hex);
+            if (rgb) {
+                const hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
+                currentHue = hsl.h;
+                currentSat = hsl.s;
+                currentLight = 100 - (100 - hsl.l);
+                
+                // Update cursors
+                hueCursor.style.left = `${(currentHue / 360) * 100}%`;
+                
+                // Calculate position in color area (approximate)
+                const satX = currentSat;
+                const lightY = 100 - (currentLight * 2 - 100 + currentSat) / 2;
+                colorCursor.style.left = `${Math.max(0, Math.min(100, satX))}%`;
+                colorCursor.style.top = `${Math.max(0, Math.min(100, lightY))}%`;
+                
+                updateColorArea();
+                updateColorFromHSL();
+            }
+        }
+
+        // Open popup
+        colorInputWrapper.addEventListener('click', () => {
+            colorPopup.classList.add('active');
+            colorInputWrapper.classList.add('active');
+            setColorFromHex(colorInput.value);
+        });
+
+        // Close popup
+        function closePopup() {
+            colorPopup.classList.remove('active');
+            colorInputWrapper.classList.remove('active');
+        }
+
+        popupClose.addEventListener('click', closePopup);
+        popupCancel.addEventListener('click', closePopup);
+        colorPopup.addEventListener('click', (e) => {
+            if (e.target === colorPopup) closePopup();
+        });
+
+        // Confirm selection
+        popupConfirm.addEventListener('click', () => {
+            colorInput.value = tempColor;
+            mainColorPreview.style.background = tempColor;
+            mainHexDisplay.textContent = tempColor;
+            closePopup();
+        });
+
+        // Color area interaction
+        let isDraggingArea = false;
+
+        function handleColorArea(e) {
+            const rect = colorArea.getBoundingClientRect();
+            let x = (e.clientX - rect.left) / rect.width * 100;
+            let y = (e.clientY - rect.top) / rect.height * 100;
+            x = Math.max(0, Math.min(100, x));
+            y = Math.max(0, Math.min(100, y));
+            
+            colorCursor.style.left = `${x}%`;
+            colorCursor.style.top = `${y}%`;
+            
+            currentSat = x;
+            currentLight = 100 - y / 2 - (x / 2) * (y / 100);
+            currentLight = Math.max(0, Math.min(100, currentLight));
+            
+            updateColorFromHSL();
+        }
+
+        colorArea.addEventListener('mousedown', (e) => {
+            isDraggingArea = true;
+            handleColorArea(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingArea) handleColorArea(e);
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingArea = false;
+        });
+
+        // Hue slider interaction
+        let isDraggingHue = false;
+
+        function handleHueSlider(e) {
+            const rect = hueSlider.getBoundingClientRect();
+            let x = (e.clientX - rect.left) / rect.width * 100;
+            x = Math.max(0, Math.min(100, x));
+            
+            hueCursor.style.left = `${x}%`;
+            currentHue = (x / 100) * 360;
+            
+            updateColorArea();
+            updateColorFromHSL();
+        }
+
+        hueSlider.addEventListener('mousedown', (e) => {
+            isDraggingHue = true;
+            handleHueSlider(e);
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDraggingHue) handleHueSlider(e);
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDraggingHue = false;
+        });
+
+        // Preset colors
+        document.querySelectorAll('.preset-color').forEach(preset => {
+            preset.addEventListener('click', () => {
+                setColorFromHex(preset.dataset.color);
+            });
+        });
+
+        // Hex input
+        popupHexInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (val.match(/^[0-9A-Fa-f]{6}$/)) {
+                setColorFromHex('#' + val);
+            }
+        });
+
+        // Initialize
+        updateColorArea();
+        hueCursor.style.left = `${(currentHue / 360) * 100}%`;
+        colorCursor.style.left = '56%';
+        colorCursor.style.top = '34%';
+    </script>
+</body>
+</html>

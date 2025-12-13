@@ -20,6 +20,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- HELPER FUNCTIONS ---
 
+    // Updates the custom color picker UI when the value changes programmatically
+    function updateColorPickerUI(inputId, color) {
+        const input = document.getElementById(inputId);
+        if (input) {
+            input.value = color;
+            // Find the trigger element associated with this input
+            const trigger = document.querySelector(`.color-picker-trigger[data-input-id="${inputId}"]`);
+            if (trigger) {
+                const preview = trigger.querySelector('.color-preview');
+                const hexDisplay = trigger.querySelector('.hex-display');
+                if (preview) preview.style.backgroundColor = color;
+                if (hexDisplay) hexDisplay.textContent = color;
+            }
+        }
+    }
+
     // Opens a popup by key and shows the overlay. Closes all other popups first.
     function openPopup(popupKey) {
         closeAllPopups();
@@ -43,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('recurrence-id').value = event.extendedProps.recurrence_id;
         document.getElementById('edit-event-priority').value = event.extendedProps.priority;
         document.getElementById('event-title').value = event.title;
-        document.getElementById('event-color').value = event.backgroundColor;
+        updateColorPickerUI('event-color', event.backgroundColor);
         // Helper to format date for input fields
         function toLocalInputValue(date) {
             if (!date) return '';
@@ -223,7 +239,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (priorityColors[selectedPriority]) {
                 newColor = priorityColors[selectedPriority];
             }
-            createColorInput.value = newColor;
+            updateColorPickerUI('create-color', newColor);
         }
         createPrioritySelect.addEventListener('change', updateCreateColorBasedOnPriority);
         updateCreateColorBasedOnPriority();
@@ -241,7 +257,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (priorityColors[selectedPriority]) {
                 newColor = priorityColors[selectedPriority];
             }
-            editColorInput.value = newColor;
+            updateColorPickerUI('event-color', newColor);
         }
         editPrioritySelect.addEventListener('change', updateEditColorBasedOnPriority);
     }

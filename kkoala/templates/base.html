@@ -67,8 +67,12 @@
         </a>
     </footer>
 
+    <!-- Color Picker Modal -->
+    {% include '_color_picker_modal.html' %}
+
     <!-- Common scripts (e.g. dark mode toggle) -->
     <script src="{{ url_for('static', filename='js/darkmode.js') }}" nonce="{{ csp_nonce() }}"></script>
+    <script src="{{ url_for('static', filename='js/color_picker.js') }}" nonce="{{ csp_nonce() }}"></script>
     
     <!-- Page-specific scripts (optional) -->
     {% block scripts %}{% endblock %}
