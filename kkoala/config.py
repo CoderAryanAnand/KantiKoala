@@ -30,5 +30,7 @@ class DevConfig(BaseConfig):
 
 class TestConfig(BaseConfig):
     TESTING = True
+    DEBUG = True  # Disable force_https in Talisman
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
     CREATE_DB = True
+    WTF_CSRF_ENABLED = False
