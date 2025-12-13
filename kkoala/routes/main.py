@@ -96,7 +96,7 @@ def index():
             "best_subject": None,
             "worst_subject": None
         }
-        current_semester = Semester.query.filter_by(user_id=user.id).order_by(Semester.id.asc()).first()
+        current_semester = Semester.query.filter_by(user_id=user.id, is_current=True).first()
 
         if current_semester:
             dashboard_stats["current_semester_name"] = current_semester.name
