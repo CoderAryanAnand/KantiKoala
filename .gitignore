@@ -215,6 +215,7 @@ report/*.nav
 report/*.nlo
 report/*.nls
 report/*.out
+report/*.pdf
 report/*.pyg
 report/*.run.xml
 report/*.snm
