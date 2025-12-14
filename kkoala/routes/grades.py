@@ -177,12 +177,15 @@ def serialize_semester(semester):
     sem_calc = calculate_semester_average(semester)
     
     subjects_data = []
-    for subject in semester.subjects:
+    # Sort subjects by display_order to maintain user-defined order
+    sorted_subjects = sorted(semester.subjects, key=lambda s: s.display_order)
+    for subject in sorted_subjects:
         subj_calc = calculate_subject_average(subject)
         subjects_data.append({
             "id": subject.id,
             "name": subject.name,
             "counts_average": subject.counts_towards_average,
+            "display_order": subject.display_order,
             "average": subj_calc["average"],
             "has_grades": subj_calc["has_grades"],
             "grades": [
@@ -544,6 +547,47 @@ def delete_subject(user, subject_id):
     except Exception:
         db.session.rollback()
         return jsonify({"error": "Failed to delete subject"}), 500
+
+
+@grades_bp.route("/semester/<int:semester_id>/subjects/order", methods=["PUT"])
+@csrf_protect
+@login_required
+def update_subject_order(user, semester_id):
+    """
+    Update the display order of subjects in a semester.
+    
+    Payload:
+        {
+            "order": [3, 1, 2]  // Array of subject IDs in desired order
+        }
+    
+    Returns:
+        JSON: Status message
+    """
+    semester = Semester.query.filter_by(id=semester_id, user_id=user.id).first()
+    if not semester:
+        return jsonify({"error": "Semester not found"}), 404
+    
+    payload = request.get_json(silent=True) or {}
+    order = payload.get("order", [])
+    
+    if not isinstance(order, list):
+        return jsonify({"error": "Order must be an array of subject IDs"}), 400
+    
+    try:
+        # Get all subjects in this semester
+        subjects = {s.id: s for s in semester.subjects}
+        
+        # Update display_order based on position in the array
+        for position, subject_id in enumerate(order):
+            if subject_id in subjects:
+                subjects[subject_id].display_order = position
+        
+        db.session.commit()
+        return jsonify({"status": "ok"})
+    except Exception:
+        db.session.rollback()
+        return jsonify({"error": "Failed to update subject order"}), 500
 
 
 # --- Grade CRUD ---

@@ -140,6 +140,12 @@ class Semester(db.Model):
         name (str): Semester name.
         is_current (bool): Whether this is the user's current active semester.
         subjects (relationship): All subjects in this semester.
+    
+    Note:
+        Only one semester per user should have is_current=True at a time.
+        This is enforced at the application level (see routes/grades.py set_current_semester).
+        A database-level partial unique index could provide additional safety but
+        has limited cross-database compatibility (especially with SQLite).
     """
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
@@ -160,12 +166,14 @@ class Subject(db.Model):
         semester_id (int): Foreign key to Semester.
         name (str): Subject name.
         counts_towards_average (bool): Whether subject counts for average.
+        display_order (int): Order in which to display the subject (lower first).
         grades (relationship): All grades for this subject.
     """
     id = db.Column(db.Integer, primary_key=True)
     semester_id = db.Column(db.Integer, db.ForeignKey("semester.id"), nullable=False)
     name = db.Column(db.String(100), nullable=False)
     counts_towards_average = db.Column(db.Boolean, nullable=False, default=True)
+    display_order = db.Column(db.Integer, nullable=False, default=0)
 
     # Grades for this subject
     grades = db.relationship(

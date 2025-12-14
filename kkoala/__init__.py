@@ -55,7 +55,11 @@ def create_app(config_class="config.ProdConfig"):
     Talisman(
         app,
         content_security_policy=csp,
-        # content_security_policy_nonce_in=['script-src'], # Disabled to allow inline event handlers (onclick)
+        # CSP nonces are disabled because inline event handlers (onclick) are still used
+        # in several templates (lerntimer.html, agenda.html, todo.html, settings.html).
+        # TODO: Refactor remaining onclick handlers to use event listeners in JS,
+        # then re-enable CSP nonces for improved XSS protection.
+        # content_security_policy_nonce_in=['script-src'],
         force_https=force_https,
         strict_transport_security=True,
         strict_transport_security_max_age=31536000,  # 1 year

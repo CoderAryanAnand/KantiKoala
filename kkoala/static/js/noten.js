@@ -7,6 +7,11 @@ let semesterIdToDelete = null;
 let subjectIdToDelete = null;
 let gradeIdToDelete = null;
 
+// Global state for popup editing (must be declared before functions that use them)
+let editingSubjectId = null;
+let editingSemesterId = null;
+let currentSubjectIdForGradeDelete = null;
+
 // DOM Elements
 const overlay = document.getElementById("overlay");
 
@@ -151,7 +156,8 @@ function renderSemester(sem) {
             animation: 150,
             handle: '.drag-handle',
             onEnd: function (evt) {
-                // Logic to save order if needed
+                // Save the new order to the server
+                saveSubjectOrder(sem.id, subjectsContainer);
             }
         });
     }
@@ -161,6 +167,7 @@ function renderSubject(subject) {
     const subjectDiv = document.createElement("div");
     subjectDiv.className = "subject bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg";
     subjectDiv.dataset.id = subject.id;
+    subjectDiv.dataset.countsAverage = subject.counts_average ? "true" : "false";
     subjectDiv.id = `subject-${subject.id}`;
 
     const avgText = subject.has_grades && subject.average !== null ? subject.average.toFixed(2) : "0";
@@ -303,11 +310,13 @@ async function saveSemesterCreate() {
         if (response.ok) {
             const sem = await response.json();
             closeSemesterCreatePopup();
-            // If set as current, reload all to update badges
+            
+            // Render the new semester
+            renderSemester(sem);
+            
+            // If set as current, update badges selectively instead of reloading all
             if (setAsCurrent) {
-                await loadSemesters();
-            } else {
-                renderSemester(sem);
+                updateCurrentSemesterBadges(sem.id);
             }
         } else {
             const error = await response.json();
@@ -325,8 +334,8 @@ async function setCurrentSemester(semesterId) {
             headers: getHeaders()
         });
         if (response.ok) {
-            // Reload all semesters to update badges and sorting
-            await loadSemesters();
+            // Update badges in DOM without reloading all semesters
+            updateCurrentSemesterBadges(semesterId);
         } else {
             const error = await response.json();
             alert(error.error || "Fehler beim Festlegen des aktuellen Semesters");
@@ -410,8 +419,9 @@ async function saveOrUpdateGrade() {
             
             const avgSpan = document.getElementById(`subj-avg-${subjectId}`);
             if (avgSpan) {
-                // We need to preserve the "(zählt nicht)" text if it exists
-                const isCounting = !avgSpan.textContent.includes("(zählt nicht)");
+                // Use data attribute to determine if subject counts towards average
+                const subjectDiv = document.getElementById(`subject-${subjectId}`);
+                const isCounting = subjectDiv && subjectDiv.dataset.countsAverage === "true";
                 avgSpan.textContent = `Schnitt: ${data.subject_average !== null ? data.subject_average.toFixed(2) : 0}${isCounting ? '' : ' (zählt nicht)'}`;
             }
 
@@ -448,6 +458,9 @@ async function saveSubjectEdit() {
             // Update DOM
             const subjectDiv = document.getElementById(`subject-${subjectId}`);
             subjectDiv.querySelector('.subject-title').textContent = data.name;
+            
+            // Update data attribute for counts_average
+            subjectDiv.dataset.countsAverage = data.counts_average ? "true" : "false";
             
             const avgSpan = document.getElementById(`subj-avg-${subjectId}`);
             const avgText = data.average !== null ? data.average.toFixed(2) : "0";
@@ -538,7 +551,9 @@ async function confirmDeleteGrade() {
             const subjectId = currentSubjectIdForGradeDelete; 
             const avgSpan = document.getElementById(`subj-avg-${subjectId}`);
             if (avgSpan) {
-                 const isCounting = !avgSpan.textContent.includes("(zählt nicht)");
+                 // Use data attribute to determine if subject counts towards average
+                 const subjectDiv = document.getElementById(`subject-${subjectId}`);
+                 const isCounting = subjectDiv && subjectDiv.dataset.countsAverage === "true";
                  avgSpan.textContent = `Schnitt: ${data.subject_average !== null ? data.subject_average.toFixed(2) : 0}${isCounting ? '' : ' (zählt nicht)'}`;
             }
             
@@ -595,6 +610,49 @@ function getHeaders() {
     };
 }
 
+/**
+ * Update current semester badges in DOM without reloading.
+ * Removes badge from old current semester and adds to new one.
+ * Also hides/shows the "set as current" button appropriately.
+ */
+function updateCurrentSemesterBadges(newCurrentSemesterId) {
+    const semesters = document.querySelectorAll('.semester');
+    
+    semesters.forEach(semesterDiv => {
+        const semesterId = semesterDiv.dataset.id;
+        const header = semesterDiv.querySelector('.dropdown-header');
+        const badgeContainer = header.querySelector('.flex.items-center.space-x-4');
+        const setCurrentBtn = header.querySelector('.set-current-btn');
+        let badge = badgeContainer.querySelector('.current-badge');
+        
+        if (String(semesterId) === String(newCurrentSemesterId)) {
+            // This is the new current semester
+            if (!badge) {
+                // Add badge
+                const newBadge = document.createElement('span');
+                newBadge.className = 'current-badge inline-flex items-center px-3 py-1 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100';
+                newBadge.textContent = 'Aktuell';
+                // Insert after semester name
+                const semesterName = badgeContainer.querySelector('.semester-name');
+                semesterName.insertAdjacentElement('afterend', newBadge);
+            }
+            // Hide set-current button
+            if (setCurrentBtn) {
+                setCurrentBtn.classList.add('hidden');
+            }
+        } else {
+            // This is not the current semester
+            if (badge) {
+                badge.remove();
+            }
+            // Show set-current button
+            if (setCurrentBtn) {
+                setCurrentBtn.classList.remove('hidden');
+            }
+        }
+    });
+}
+
 function updateSemesterStats(semesterId, stats) {
     const span = document.getElementById(`sem-avg-${semesterId}`);
     if (span) {
@@ -602,11 +660,31 @@ function updateSemesterStats(semesterId, stats) {
     }
 }
 
-// --- Popups ---
+/**
+ * Save the order of subjects after drag-drop reordering.
+ * @param {number} semesterId - The semester ID
+ * @param {HTMLElement} container - The subjects container element
+ */
+async function saveSubjectOrder(semesterId, container) {
+    const subjectElements = container.querySelectorAll('.subject');
+    const order = Array.from(subjectElements).map(el => parseInt(el.dataset.id));
+    
+    try {
+        const response = await fetch(`/api/noten/semester/${semesterId}/subjects/order`, {
+            method: "PUT",
+            headers: getHeaders(),
+            body: JSON.stringify({ order: order })
+        });
+        
+        if (!response.ok) {
+            console.error("Failed to save subject order");
+        }
+    } catch (error) {
+        console.error("Error saving subject order:", error);
+    }
+}
 
-let editingSubjectId = null;
-let editingSemesterId = null;
-let currentSubjectIdForGradeDelete = null;
+// --- Popups ---
 
 function openGradePopup(subjectId, grade = null) {
     currentSubjectIdForGrade = subjectId;
