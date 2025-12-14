@@ -1,0 +1,249 @@
+{
+  "wortarten": {
+    "title": "Wortarten",
+    "subject": "Deutsch",
+    "year": 1,
+    "difficulty": "basic",
+    "estimated_time": "30 Minuten",
+    "content": {
+      "introduction": "Die deutschen Wortarten sind die Grundbausteine unserer Sprache. Sie zu verstehen ist essenziell für korrektes Schreiben und Sprechen.",
+      "sections": [
+        {
+          "title": "Übersicht der Wortarten",
+          "content": "Im Deutschen unterscheiden wir zwischen **flektierbaren** (veränderlichen) und **nicht-flektierbaren** (unveränderlichen) Wortarten.\n\n**Flektierbare Wortarten:**\n- Nomen (Substantive)\n- Verben\n- Adjektive\n- Artikel\n- Pronomen\n- Numerale (Zahlwörter)\n\n**Nicht-flektierbare Wortarten:**\n- Adverbien\n- Präpositionen\n- Konjunktionen\n- Interjektionen"
+        },
+        {
+          "title": "Nomen (Substantive)",
+          "content": "Nomen bezeichnen Lebewesen, Dinge, Gefühle oder abstrakte Begriffe.\n\n**Eigenschaften:**\n- Werden grossgeschrieben\n- Haben ein Genus (Geschlecht): maskulin, feminin, neutral\n- Können dekliniert werden (Kasus, Numerus)\n\n**Beispiele:**\n- der Tisch (maskulin)\n- die Lampe (feminin)\n- das Buch (neutral)\n- die Freude (abstrakt)"
+        },
+        {
+          "title": "Verben",
+          "content": "Verben drücken Handlungen, Vorgänge oder Zustände aus.\n\n**Eigenschaften:**\n- Können konjugiert werden (Person, Numerus, Tempus, Modus)\n- Bilden das Prädikat im Satz\n\n**Beispiele:**\n- laufen, schreiben, denken\n- sein, haben, werden (Hilfsverben)\n- können, müssen, wollen (Modalverben)"
+        },
+        {
+          "title": "Adjektive",
+          "content": "Adjektive beschreiben Eigenschaften von Nomen.\n\n**Eigenschaften:**\n- Können gesteigert werden (Positiv, Komparativ, Superlativ)\n- Können dekliniert werden\n- Stehen meist vor dem Nomen (attributiv) oder nach dem Verb (prädikativ)\n\n**Beispiele:**\n- gross, grösser, am grössten\n- Das **schnelle** Auto fährt. (attributiv)\n- Das Auto ist **schnell**. (prädikativ)"
+        },
+        {
+          "title": "Artikel",
+          "content": "Artikel begleiten Nomen und zeigen deren Genus, Kasus und Numerus an.\n\n**Bestimmte Artikel:** der, die, das\n**Unbestimmte Artikel:** ein, eine\n\n**Beispiele:**\n- **Der** Hund bellt.\n- Ich sehe **einen** Vogel."
+        },
+        {
+          "title": "Pronomen",
+          "content": "Pronomen ersetzen oder begleiten Nomen.\n\n**Arten:**\n- Personalpronomen: ich, du, er, sie, es, wir, ihr, sie\n- Possessivpronomen: mein, dein, sein, ihr, unser, euer\n- Demonstrativpronomen: dieser, jener, derjenige\n- Relativpronomen: der, die, das, welcher\n- Interrogativpronomen: wer, was, welcher"
+        },
+        {
+          "title": "Präpositionen",
+          "content": "Präpositionen zeigen Verhältnisse zwischen Wörtern an (Ort, Zeit, Art und Weise).\n\n**Beispiele:**\n- **auf** dem Tisch (Ort)\n- **nach** der Schule (Zeit)\n- **mit** dem Auto (Art und Weise)\n- **wegen** des Regens (Grund)"
+        },
+        {
+          "title": "Konjunktionen",
+          "content": "Konjunktionen verbinden Wörter, Satzteile oder Sätze.\n\n**Nebenordnende:** und, oder, aber, denn, sondern\n**Unterordnende:** weil, dass, wenn, obwohl, während\n\n**Beispiele:**\n- Ich lerne **und** mache Sport.\n- Ich bleibe zu Hause, **weil** es regnet."
+        }
+      ],
+      "key_points": [
+        "Es gibt 10 Wortarten im Deutschen",
+        "Flektierbare Wortarten können verändert werden",
+        "Nomen werden immer grossgeschrieben",
+        "Verben bilden das Prädikat im Satz",
+        "Adjektive können gesteigert werden"
+      ],
+      "examples": [
+        {
+          "example": "Der kleine Hund läuft schnell durch den grossen Garten.",
+          "explanation": "Der = Artikel, kleine = Adjektiv, Hund = Nomen, läuft = Verb, schnell = Adverb, durch = Präposition, den = Artikel, grossen = Adjektiv, Garten = Nomen"
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Bestimme alle Wortarten im folgenden Satz: 'Die fleissige Schülerin schreibt einen langen Aufsatz.'",
+          "answer": "Die = Artikel, fleissige = Adjektiv, Schülerin = Nomen, schreibt = Verb, einen = Artikel, langen = Adjektiv, Aufsatz = Nomen"
+        }
+      ]
+    }
+  },
+  "terme": {
+    "title": "Terme und Termumformungen",
+    "subject": "Mathematik",
+    "year": 1,
+    "difficulty": "basic",
+    "estimated_time": "45 Minuten",
+    "content": {
+      "introduction": "Terme sind mathematische Ausdrücke, die aus Zahlen, Variablen und Rechenzeichen bestehen. Das Umformen von Termen ist eine grundlegende Fähigkeit in der Algebra.",
+      "sections": [
+        {
+          "title": "Was ist ein Term?",
+          "content": "Ein **Term** ist ein sinnvoller mathematischer Ausdruck.\n\n**Beispiele für Terme:**\n- $5$\n- $x$\n- $3x + 2$\n- $\\frac{a+b}{2}$\n- $(x-1)(x+1)$\n\n**Keine Terme:**\n- $+ \\cdot 3$ (sinnlos)\n- $=5$ (Gleichheitszeichen gehört nicht zu Termen)"
+        },
+        {
+          "title": "Variablen und Koeffizienten",
+          "content": "**Variable:** Ein Buchstabe, der für eine unbekannte Zahl steht (z.B. $x$, $y$, $a$)\n\n**Koeffizient:** Die Zahl vor einer Variablen\n\nIm Term $3x + 2y - 5$:\n- $3$ ist der Koeffizient von $x$\n- $2$ ist der Koeffizient von $y$\n- $-5$ ist eine Konstante"
+        },
+        {
+          "title": "Zusammenfassen gleichartiger Terme",
+          "content": "Nur **gleichartige Terme** (gleiche Variablen mit gleichen Exponenten) können zusammengefasst werden.\n\n**Beispiele:**\n$$3x + 5x = 8x$$\n$$4a^2 - 2a^2 = 2a^2$$\n$$2x + 3y + 5x - y = 7x + 2y$$\n\n**Nicht zusammenfassbar:**\n$3x + 2x^2$ (verschiedene Exponenten)\n$4a + 3b$ (verschiedene Variablen)"
+        },
+        {
+          "title": "Ausmultiplizieren",
+          "content": "Beim Ausmultiplizieren wird ein Faktor vor der Klammer mit jedem Summanden in der Klammer multipliziert.\n\n**Distributivgesetz:**\n$$a \\cdot (b + c) = a \\cdot b + a \\cdot c$$\n\n**Beispiele:**\n$$3(x + 2) = 3x + 6$$\n$$-2(a - 4) = -2a + 8$$\n$$x(x + 3) = x^2 + 3x$$"
+        },
+        {
+          "title": "Ausklammern (Faktorisieren)",
+          "content": "Das Ausklammern ist die Umkehrung des Ausmultiplizierens. Gemeinsame Faktoren werden vor die Klammer geschrieben.\n\n**Beispiele:**\n$$6x + 9 = 3(2x + 3)$$\n$$x^2 + 5x = x(x + 5)$$\n$$4a^2 - 2a = 2a(2a - 1)$$"
+        },
+        {
+          "title": "Binomische Formeln",
+          "content": "Die drei binomischen Formeln sind wichtige Werkzeuge beim Umformen:\n\n**1. Binomische Formel:**\n$$(a + b)^2 = a^2 + 2ab + b^2$$\n\n**2. Binomische Formel:**\n$$(a - b)^2 = a^2 - 2ab + b^2$$\n\n**3. Binomische Formel:**\n$$(a + b)(a - b) = a^2 - b^2$$\n\n**Beispiele:**\n$$(x + 3)^2 = x^2 + 6x + 9$$\n$$(2a - 1)^2 = 4a^2 - 4a + 1$$\n$$(x + 5)(x - 5) = x^2 - 25$$"
+        }
+      ],
+      "key_points": [
+        "Terme bestehen aus Zahlen, Variablen und Rechenzeichen",
+        "Nur gleichartige Terme können zusammengefasst werden",
+        "Das Distributivgesetz ermöglicht Ausmultiplizieren und Ausklammern",
+        "Die drei binomischen Formeln sollten auswendig gelernt werden"
+      ],
+      "examples": [
+        {
+          "example": "Vereinfache: $3(2x - 4) + 2(x + 5)$",
+          "explanation": "$= 6x - 12 + 2x + 10 = 8x - 2$"
+        },
+        {
+          "example": "Faktorisiere: $x^2 - 9$",
+          "explanation": "Mit der 3. binomischen Formel: $= (x+3)(x-3)$"
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Vereinfache: $5(a + 2) - 3(a - 1)$",
+          "answer": "$5a + 10 - 3a + 3 = 2a + 13$"
+        },
+        {
+          "question": "Berechne mit einer binomischen Formel: $(x + 4)^2$",
+          "answer": "$x^2 + 8x + 16$"
+        }
+      ]
+    }
+  },
+  "zellaufbau": {
+    "title": "Aufbau der Zelle",
+    "subject": "Biologie",
+    "year": 1,
+    "difficulty": "basic",
+    "estimated_time": "40 Minuten",
+    "content": {
+      "introduction": "Die Zelle ist die kleinste lebende Einheit aller Organismen. Das Verständnis des Zellaufbaus ist fundamental für die gesamte Biologie.",
+      "sections": [
+        {
+          "title": "Prokaryoten vs. Eukaryoten",
+          "content": "Es gibt zwei grundlegende Zelltypen:\n\n**Prokaryoten (Bakterien, Archaeen):**\n- Kein echter Zellkern (Kernäquivalent)\n- Keine membranumhüllten Organellen\n- Kleiner (1-10 μm)\n- Einfacher Aufbau\n\n**Eukaryoten (Pflanzen, Tiere, Pilze):**\n- Echter Zellkern mit Kernmembran\n- Membranumhüllte Organellen\n- Grösser (10-100 μm)\n- Komplexer Aufbau"
+        },
+        {
+          "title": "Die Zellmembran",
+          "content": "Die **Zellmembran** (Plasmamembran) umgibt jede Zelle und kontrolliert den Stoffaustausch.\n\n**Aufbau:**\n- Lipiddoppelschicht (Phospholipide)\n- Eingelagerte Proteine\n- Kohlenhydrate auf der Aussenseite\n\n**Funktionen:**\n- Abgrenzung der Zelle\n- Selektive Permeabilität\n- Signalübertragung\n- Zell-Zell-Erkennung"
+        },
+        {
+          "title": "Der Zellkern (Nucleus)",
+          "content": "Der **Zellkern** ist das Steuerzentrum der eukaryotischen Zelle.\n\n**Bestandteile:**\n- Kernmembran (doppelte Membran mit Poren)\n- Chromatin/Chromosomen (DNA)\n- Nucleolus (Ribosomen-Produktion)\n- Kernplasma\n\n**Funktionen:**\n- Speicherung der genetischen Information\n- Steuerung der Genexpression\n- Koordination der Zellaktivitäten"
+        },
+        {
+          "title": "Das Cytoplasma",
+          "content": "Das **Cytoplasma** ist die Grundsubstanz der Zelle zwischen Zellmembran und Zellkern.\n\n**Bestandteile:**\n- Cytosol (flüssige Grundsubstanz)\n- Organellen\n- Cytoskelett\n\n**Funktionen:**\n- Ort vieler Stoffwechselreaktionen\n- Transport von Stoffen\n- Formgebung durch Cytoskelett"
+        },
+        {
+          "title": "Mitochondrien",
+          "content": "**Mitochondrien** sind die \"Kraftwerke\" der Zelle.\n\n**Aufbau:**\n- Doppelmembran (äussere und innere Membran)\n- Cristae (Einfaltungen der inneren Membran)\n- Matrix (Innenraum)\n- Eigene DNA und Ribosomen\n\n**Funktion:**\n- Zellatmung (ATP-Produktion)\n- Ca. 90% der Zellenergie wird hier produziert"
+        },
+        {
+          "title": "Endoplasmatisches Retikulum (ER)",
+          "content": "Das **ER** ist ein Membransystem für Synthese und Transport.\n\n**Raues ER:**\n- Mit Ribosomen besetzt\n- Proteinsynthese\n\n**Glattes ER:**\n- Ohne Ribosomen\n- Lipidsynthese\n- Entgiftung"
+        },
+        {
+          "title": "Golgi-Apparat",
+          "content": "Der **Golgi-Apparat** verarbeitet und verpackt Proteine.\n\n**Aufbau:**\n- Stapel flacher Membransäckchen (Dictyosomen)\n- cis-Seite (Empfang) und trans-Seite (Versand)\n\n**Funktionen:**\n- Modifikation von Proteinen\n- Sortierung und Verpackung\n- Bildung von Lysosomen"
+        },
+        {
+          "title": "Pflanzenzelle - Besonderheiten",
+          "content": "Pflanzenzellen haben zusätzliche Strukturen:\n\n**Zellwand:**\n- Aus Cellulose\n- Gibt Stabilität\n\n**Vakuole:**\n- Grosser, zentraler Hohlraum\n- Speichert Wasser und Stoffe\n\n**Chloroplasten:**\n- Ort der Photosynthese\n- Enthalten Chlorophyll (grün)"
+        }
+      ],
+      "key_points": [
+        "Prokaryoten haben keinen echten Zellkern, Eukaryoten schon",
+        "Die Zellmembran besteht aus einer Lipiddoppelschicht",
+        "Der Zellkern enthält die DNA und steuert die Zelle",
+        "Mitochondrien produzieren ATP (Energie)",
+        "Pflanzenzellen haben zusätzlich Zellwand, Vakuole und Chloroplasten"
+      ],
+      "examples": [
+        {
+          "example": "Warum sind Mitochondrien und Chloroplasten besonders?",
+          "explanation": "Sie haben eigene DNA und Ribosomen - ein Hinweis auf ihre Entstehung durch Endosymbiose."
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Nenne drei Unterschiede zwischen Pflanzen- und Tierzellen.",
+          "answer": "1. Pflanzenzellen haben eine Zellwand, Tierzellen nicht. 2. Pflanzenzellen haben Chloroplasten für Photosynthese. 3. Pflanzenzellen haben eine grosse Zentralvakuole."
+        }
+      ]
+    }
+  },
+  "lineare_funktionen": {
+    "title": "Lineare Funktionen",
+    "subject": "Mathematik",
+    "year": 1,
+    "difficulty": "basic",
+    "estimated_time": "50 Minuten",
+    "content": {
+      "introduction": "Lineare Funktionen beschreiben proportionale Zusammenhänge und sind die einfachsten Funktionen in der Mathematik. Ihr Graph ist immer eine Gerade.",
+      "sections": [
+        {
+          "title": "Definition",
+          "content": "Eine **lineare Funktion** hat die allgemeine Form:\n\n$$f(x) = mx + b$$\n\noder als Funktionsgleichung:\n$$y = mx + b$$\n\n**Dabei ist:**\n- $m$ = Steigung der Geraden\n- $b$ = y-Achsenabschnitt (Schnittpunkt mit der y-Achse)\n- $x$ = unabhängige Variable\n- $y$ = abhängige Variable"
+        },
+        {
+          "title": "Die Steigung m",
+          "content": "Die **Steigung** $m$ gibt an, wie steil die Gerade verläuft.\n\n**Berechnung:**\n$$m = \\frac{\\Delta y}{\\Delta x} = \\frac{y_2 - y_1}{x_2 - x_1}$$\n\n**Interpretation:**\n- $m > 0$: Gerade steigt (von links nach rechts)\n- $m < 0$: Gerade fällt\n- $m = 0$: Horizontale Gerade\n- Je grösser $|m|$, desto steiler die Gerade\n\n**Beispiel:**\nBei $f(x) = 2x + 1$: Steigung $m = 2$\n→ Pro Einheit nach rechts geht es 2 Einheiten nach oben."
+        },
+        {
+          "title": "Der y-Achsenabschnitt b",
+          "content": "Der **y-Achsenabschnitt** $b$ ist der Funktionswert bei $x = 0$.\n\n$$f(0) = m \\cdot 0 + b = b$$\n\nDer Graph schneidet die y-Achse im Punkt $(0|b)$.\n\n**Beispiel:**\nBei $f(x) = 3x - 2$: y-Achsenabschnitt $b = -2$\n→ Die Gerade geht durch den Punkt $(0|-2)$."
+        },
+        {
+          "title": "Nullstelle berechnen",
+          "content": "Die **Nullstelle** ist der x-Wert, bei dem $f(x) = 0$.\n\n**Berechnung:**\n$$0 = mx + b$$\n$$-b = mx$$\n$$x = -\\frac{b}{m}$$\n\n**Beispiel:**\n$f(x) = 2x - 4$\n$0 = 2x - 4$\n$4 = 2x$\n$x = 2$\n\nNullstelle bei $x = 2$, also im Punkt $(2|0)$."
+        },
+        {
+          "title": "Geraden zeichnen",
+          "content": "**Methode 1: Zwei Punkte**\n1. Berechne zwei Punkte (z.B. für $x = 0$ und $x = 1$)\n2. Zeichne die Punkte ein\n3. Verbinde sie mit einer Geraden\n\n**Methode 2: Steigungsdreieck**\n1. Zeichne den y-Achsenabschnitt $(0|b)$ ein\n2. Gehe von dort $\\Delta x$ nach rechts und $\\Delta y$ nach oben/unten\n3. Verbinde die Punkte\n\n**Beispiel:** $f(x) = \\frac{1}{2}x + 1$\n- Start bei $(0|1)$\n- 2 nach rechts, 1 nach oben → $(2|2)$"
+        },
+        {
+          "title": "Funktionsgleichung aufstellen",
+          "content": "**Gegeben: Zwei Punkte**\n1. Steigung berechnen: $m = \\frac{y_2-y_1}{x_2-x_1}$\n2. Einen Punkt einsetzen, um $b$ zu finden\n\n**Beispiel:** Punkte $P(1|3)$ und $Q(3|7)$\n\nSteigung: $m = \\frac{7-3}{3-1} = \\frac{4}{2} = 2$\n\nPunkt einsetzen:\n$3 = 2 \\cdot 1 + b$\n$b = 1$\n\n**Funktionsgleichung:** $f(x) = 2x + 1$"
+        },
+        {
+          "title": "Parallele und senkrechte Geraden",
+          "content": "**Parallele Geraden:**\n- Haben die **gleiche Steigung** $m$\n- Schneiden sich nie\n\nBeispiel: $f(x) = 2x + 1$ und $g(x) = 2x - 3$ sind parallel.\n\n**Senkrechte Geraden:**\n- Steigungen sind **negative Kehrwerte**\n- $m_1 \\cdot m_2 = -1$\n\nBeispiel: $f(x) = 2x + 1$ und $g(x) = -\\frac{1}{2}x + 4$ sind senkrecht."
+        }
+      ],
+      "key_points": [
+        "Lineare Funktion: $f(x) = mx + b$",
+        "Steigung $m$ = Änderung in y / Änderung in x",
+        "y-Achsenabschnitt $b$ = Schnittpunkt mit y-Achse",
+        "Nullstelle: $x = -b/m$",
+        "Parallele Geraden haben gleiche Steigung"
+      ],
+      "examples": [
+        {
+          "example": "Bestimme Steigung und y-Achsenabschnitt von $f(x) = -3x + 5$",
+          "explanation": "Steigung $m = -3$ (Gerade fällt), y-Achsenabschnitt $b = 5$"
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Stelle die Funktionsgleichung der Geraden durch die Punkte $A(0|2)$ und $B(4|10)$ auf.",
+          "answer": "$m = \\frac{10-2}{4-0} = 2$, $b = 2$ → $f(x) = 2x + 2$"
+        }
+      ]
+    }
+  }
+}

@@ -4,6 +4,7 @@ from .grades import grades_bp     # Grades/Noten API routes
 from .settings import settings_bp # User settings routes
 from .todo import todo_bp         # ToDo list API routes
 from .main import main_bp         # Main (public) routes
+from .lernen import lernen_bp     # Learning/Theory routes
 
 
 def register_blueprints(app):
@@ -18,4 +19,5 @@ def register_blueprints(app):
     app.register_blueprint(grades_bp, url_prefix="/api/noten")    # Grades API under /api/noten
     app.register_blueprint(settings_bp, url_prefix="/settings")   # Settings under /settings
     app.register_blueprint(todo_bp, url_prefix="/api/todo")       # ToDo API under /api/todo
+    app.register_blueprint(lernen_bp, url_prefix="/lernen")       # Learning under /lernen
     app.register_blueprint(main_bp)                               # Main routes (no prefix)

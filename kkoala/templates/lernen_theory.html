@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.name }} - {{ subject.name }} - KantiKoala{% endblock %}
+{% block description %}Lerne {{ topic.name }} für {{ subject.name }}. Verständliche Theorie mit Beispielen.{% endblock %}
+
+{% block extra_css %}
+<!-- KaTeX for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+    /* Prose styling for theory content */
+    .theory-content h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: inherit;
+    }
+    .theory-content p {
+        margin-bottom: 1rem;
+        line-height: 1.75;
+    }
+    .theory-content strong {
+        font-weight: 600;
+        color: inherit;
+    }
+    .theory-content ul, .theory-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+    }
+    .theory-content li {
+        margin-bottom: 0.5rem;
+    }
+    .theory-content ul {
+        list-style-type: disc;
+    }
+    .theory-content ol {
+        list-style-type: decimal;
+    }
+    /* Math display */
+    .katex-display {
+        margin: 1.5rem 0;
+        overflow-x: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+        <ol class="flex items-center flex-wrap gap-2 text-zinc-500 dark:text-zinc-400">
+            <li><a href="{{ url_for('lernen.lernen_index') }}" class="hover:text-blue-600 dark:hover:text-blue-400">Lernen</a></li>
+            <li><span>/</span></li>
+            <li><a href="{{ url_for('lernen.lernen_year', year_id=year.id) }}" class="hover:text-blue-600 dark:hover:text-blue-400">{{ year.name }}</a></li>
+            <li><span>/</span></li>
+            <li><a href="{{ url_for('lernen.lernen_subject', year_id=year.id, subject_id=subject.id) }}" class="hover:text-blue-600 dark:hover:text-blue-400">{{ subject.name }}</a></li>
+            <li><span>/</span></li>
+            <li class="text-zinc-900 dark:text-white font-medium">{{ topic.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-3 mb-4">
+            <span class="text-3xl">{{ subject.icon }}</span>
+            <div>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ topic.parent_topic }}</p>
+                <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">{{ topic.name }}</h1>
+            </div>
+        </div>
+        
+        <!-- Meta Info -->
+        <div class="flex flex-wrap gap-4 text-sm">
+            <span class="inline-flex items-center px-3 py-1 rounded-full 
+                {% if topic.difficulty == 'basic' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                {% elif topic.difficulty == 'intermediate' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100
+                {% else %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100{% endif %}">
+                {% if topic.difficulty == 'basic' %}🟢 Grundlagen
+                {% elif topic.difficulty == 'intermediate' %}🟡 Mittelstufe
+                {% else %}🔴 Fortgeschritten{% endif %}
+            </span>
+            {% if content.get('estimated_time') %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                ⏱️ {{ content.estimated_time }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+        
+        {% if content and content.get('content') %}
+        <!-- Introduction -->
+        {% if content.content.get('introduction') %}
+        <div class="p-6 bg-blue-50 dark:bg-blue-900/20 border-b border-zinc-200 dark:border-zinc-700">
+            <p class="text-lg text-blue-900 dark:text-blue-100">
+                {{ content.content.introduction }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Theory Sections -->
+        <div class="p-6 theory-content text-zinc-700 dark:text-zinc-300">
+            {% for section in content.content.get('sections', []) %}
+            <div class="mb-8 last:mb-0">
+                <h3 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center">
+                    <span class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold mr-3">{{ loop.index }}</span>
+                    {{ section.title }}
+                </h3>
+                <div class="ml-11 theory-section-content" data-content="{{ section.content }}">
+                    <!-- Content will be rendered by JS with markdown/math support -->
+                    <div class="prose-content">{{ section.content | safe }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Key Points -->
+        {% if content.content.get('key_points') %}
+        <div class="p-6 bg-green-50 dark:bg-green-900/20 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 class="text-lg font-bold text-green-900 dark:text-green-100 mb-4 flex items-center">
+                <span class="mr-2">🎯</span> Wichtige Punkte
+            </h3>
+            <ul class="space-y-2">
+                {% for point in content.content.key_points %}
+                <li class="flex items-start text-green-800 dark:text-green-200">
+                    <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    {{ point }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Examples -->
+        {% if content.content.get('examples') and content.content.examples|length > 0 %}
+        <div class="p-6 bg-amber-50 dark:bg-amber-900/20 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 class="text-lg font-bold text-amber-900 dark:text-amber-100 mb-4 flex items-center">
+                <span class="mr-2">💡</span> Beispiele
+            </h3>
+            <div class="space-y-4">
+                {% for example in content.content.examples %}
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                    <p class="font-medium text-amber-900 dark:text-amber-100 mb-2 example-text">{{ example.example }}</p>
+                    <p class="text-sm text-amber-700 dark:text-amber-300 example-explanation">→ {{ example.explanation }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Exercises -->
+        {% if content.content.get('exercises') and content.content.exercises|length > 0 %}
+        <div class="p-6 bg-purple-50 dark:bg-purple-900/20 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 class="text-lg font-bold text-purple-900 dark:text-purple-100 mb-4 flex items-center">
+                <span class="mr-2">✏️</span> Übungen
+            </h3>
+            <div class="space-y-4">
+                {% for exercise in content.content.exercises %}
+                <div class="bg-white dark:bg-zinc-800 rounded-lg border border-purple-200 dark:border-purple-800 overflow-hidden">
+                    <div class="p-4">
+                        <p class="font-medium text-purple-900 dark:text-purple-100 exercise-question">{{ exercise.question }}</p>
+                    </div>
+                    <details class="border-t border-purple-200 dark:border-purple-800">
+                        <summary class="p-3 bg-purple-100 dark:bg-purple-900/50 cursor-pointer text-sm font-medium text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900 transition-colors">
+                            Lösung anzeigen
+                        </summary>
+                        <div class="p-4 text-purple-800 dark:text-purple-200 exercise-answer">
+                            {{ exercise.answer }}
+                        </div>
+                    </details>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Placeholder content -->
+        <div class="p-8 text-center">
+            <div class="text-6xl mb-4">🚧</div>
+            <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-2">Inhalt in Bearbeitung</h3>
+            <p class="text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
+                Die Theorie zu diesem Thema wird gerade erstellt. Schau bald wieder vorbei!
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-8 flex justify-between">
+        <a href="{{ url_for('lernen.lernen_subject', year_id=year.id, subject_id=subject.id) }}" 
+           class="inline-flex items-center px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Zurück zu {{ subject.name }}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- KaTeX for math rendering -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<script nonce="{{ csp_nonce() }}">
+document.addEventListener("DOMContentLoaded", function() {
+    // Render math in all theory content
+    const contentElements = document.querySelectorAll('.theory-section-content, .example-text, .example-explanation, .exercise-question, .exercise-answer');
+    
+    contentElements.forEach(function(element) {
+        // First, convert markdown-style formatting
+        let html = element.innerHTML;
+        
+        // Convert **bold** to <strong>
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert newlines to <br> for proper display
+        html = html.replace(/\n/g, '<br>');
+        
+        element.innerHTML = html;
+        
+        // Then render LaTeX math
+        renderMathInElement(element, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+        });
+    });
+});
+</script>
+{% endblock %}

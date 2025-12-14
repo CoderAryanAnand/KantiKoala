@@ -49,8 +49,8 @@ def create_app(config_class="config.ProdConfig"):
         'frame-ancestors': "'none'",
     }
     
-    # Only enforce HTTPS in production (not localhost)
-    force_https = not app.debug
+    # Only enforce HTTPS and HSTS in production (not localhost/debug mode)
+    is_production = not app.debug
     
     Talisman(
         app,
@@ -60,10 +60,10 @@ def create_app(config_class="config.ProdConfig"):
         # TODO: Refactor remaining onclick handlers to use event listeners in JS,
         # then re-enable CSP nonces for improved XSS protection.
         # content_security_policy_nonce_in=['script-src'],
-        force_https=force_https,
-        strict_transport_security=True,
-        strict_transport_security_max_age=31536000,  # 1 year
-        strict_transport_security_include_subdomains=True,
+        force_https=is_production,
+        strict_transport_security=is_production,  # Disable HSTS in dev to avoid browser caching
+        strict_transport_security_max_age=31536000 if is_production else 0,  # 1 year in prod
+        strict_transport_security_include_subdomains=is_production,
         x_content_type_options=True,
         x_xss_protection=True,
         referrer_policy='strict-origin-when-cross-origin',

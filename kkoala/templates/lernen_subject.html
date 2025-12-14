@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ subject.name }} - {{ year.name }} - KantiKoala{% endblock %}
+{% block description %}Lerne {{ subject.name }} für {{ year.name }}. Alle Themen und Lerninhalte.{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+        <ol class="flex items-center space-x-2 text-zinc-500 dark:text-zinc-400">
+            <li><a href="{{ url_for('lernen.lernen_index') }}" class="hover:text-blue-600 dark:hover:text-blue-400">Lernen</a></li>
+            <li><span class="mx-2">/</span></li>
+            <li><a href="{{ url_for('lernen.lernen_year', year_id=year.id) }}" class="hover:text-blue-600 dark:hover:text-blue-400">{{ year.name }}</a></li>
+            <li><span class="mx-2">/</span></li>
+            <li class="text-zinc-900 dark:text-white font-medium">{{ subject.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-8 flex items-center space-x-4">
+        <span class="text-4xl">{{ subject.icon }}</span>
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">{{ subject.name }}</h1>
+            <p class="text-zinc-600 dark:text-zinc-400">{{ year.name }}</p>
+        </div>
+    </div>
+
+    <!-- Topics -->
+    <div class="space-y-6">
+        {% for topic_group in subject.topics %}
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+            <!-- Topic Group Header -->
+            <div class="p-5 border-b border-zinc-200 dark:border-zinc-700" style="background: linear-gradient(to right, {{ subject.color }}10, transparent);">
+                <h2 class="text-xl font-bold text-zinc-900 dark:text-white">{{ topic_group.name }}</h2>
+            </div>
+            
+            <!-- Subtopics -->
+            <div class="divide-y divide-zinc-100 dark:divide-zinc-700">
+                {% for subtopic in topic_group.subtopics %}
+                <a href="{{ url_for('lernen.lernen_topic', year_id=year.id, subject_id=subject.id, topic_id=subtopic.id) }}" 
+                   class="flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors group">
+                    <div class="flex items-center space-x-4">
+                        <!-- Difficulty Badge -->
+                        <span class="w-2 h-2 rounded-full 
+                            {% if subtopic.difficulty == 'basic' %}bg-green-500
+                            {% elif subtopic.difficulty == 'intermediate' %}bg-yellow-500
+                            {% else %}bg-red-500{% endif %}">
+                        </span>
+                        
+                        <div>
+                            <h3 class="font-medium text-zinc-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                {{ subtopic.name }}
+                            </h3>
+                            <p class="text-xs text-zinc-500 dark:text-zinc-400">
+                                {% if subtopic.difficulty == 'basic' %}Grundlagen
+                                {% elif subtopic.difficulty == 'intermediate' %}Mittelstufe
+                                {% else %}Fortgeschritten{% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <svg class="w-5 h-5 text-zinc-400 group-hover:text-blue-500 transform group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Legend -->
+    <div class="mt-8 bg-zinc-50 dark:bg-zinc-800/50 rounded-lg p-4">
+        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-3">Schwierigkeitsgrad:</p>
+        <div class="flex flex-wrap gap-4 text-sm">
+            <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                <span class="text-zinc-600 dark:text-zinc-400">Grundlagen</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
+                <span class="text-zinc-600 dark:text-zinc-400">Mittelstufe</span>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-red-500"></span>
+                <span class="text-zinc-600 dark:text-zinc-400">Fortgeschritten</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back Button -->
+    <div class="mt-8">
+        <a href="{{ url_for('lernen.lernen_year', year_id=year.id) }}" 
+           class="inline-flex items-center text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Zurück zu {{ year.name }}
+        </a>
+    </div>
+</div>
+{% endblock %}
