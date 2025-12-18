@@ -5,6 +5,7 @@ This module provides endpoints for managing citation groups and citations.
 """
 from flask import Blueprint, request, jsonify
 import json
+import re
 
 from ..models import CitationGroup, Citation
 from ..utils import login_required, csrf_protect
@@ -20,6 +21,81 @@ citations_bp = Blueprint(
 @limiter.limit("60 per minute")
 def limit_citations_api():
     pass
+
+
+def clean_citation(citation: str) -> str:
+    """
+    Clean up a citation string by removing empty fields and fixing formatting.
+    
+    Args:
+        citation: Raw citation string that may have empty fields
+        
+    Returns:
+        Cleaned citation string
+    """
+    # Remove empty parentheses: (), (n.d.), ( ), (.)
+    citation = re.sub(r'\s*\(\s*\)', '', citation)
+    citation = re.sub(r'\s*\(n\.d\.\)', '', citation)
+    citation = re.sub(r'\s*\(\s*\.\s*\)', '', citation)
+    
+    # Remove empty brackets: [], [ ]
+    citation = re.sub(r'\s*\[\s*\]', '', citation)
+    citation = re.sub(r'\s*\[\s*,\s*\]', '', citation)
+    
+    # Remove patterns like ", ," or ", ." or ". ," 
+    citation = re.sub(r',\s*,', ',', citation)
+    citation = re.sub(r',\s*\.', '.', citation)
+    citation = re.sub(r'\.\s*,', '.', citation)
+    
+    # Remove patterns like ": ." or ": ,"
+    citation = re.sub(r':\s*\.', '.', citation)
+    citation = re.sub(r':\s*,', ',', citation)
+    
+    # Remove standalone periods or commas after other punctuation
+    citation = re.sub(r'\.\s*\.', '.', citation)
+    
+    # Remove leading/trailing commas, colons, semicolons in segments
+    citation = re.sub(r'\.\s*,\s*\.', '.', citation)
+    
+    # Remove "In ." or "In ," patterns
+    citation = re.sub(r'In\s*<i>\s*</i>', '', citation)
+    citation = re.sub(r'In\s*\.', '.', citation)
+    citation = re.sub(r'In\s*,', ',', citation)
+    
+    # Remove empty italic tags
+    citation = re.sub(r'<i>\s*</i>', '', citation)
+    citation = re.sub(r'<i>\s*:\s*</i>', '', citation)
+    
+    # Remove "Abgerufen am , von" or "Accessed ." patterns when no date/url
+    citation = re.sub(r'Abgerufen am\s*,\s*von\s*$', '', citation)
+    citation = re.sub(r'Abgerufen am\s*,\s*von\s*\.?$', '', citation)
+    citation = re.sub(r'Accessed\s*\.$', '', citation)
+    
+    # Clean up multiple spaces
+    citation = re.sub(r'\s+', ' ', citation)
+    
+    # Clean up space before punctuation
+    citation = re.sub(r'\s+\.', '.', citation)
+    citation = re.sub(r'\s+,', ',', citation)
+    
+    # Clean up patterns like ". ." or ",."
+    citation = re.sub(r'\.\s*\.', '.', citation)
+    citation = re.sub(r',\.', '.', citation)
+    
+    # Remove trailing/leading whitespace
+    citation = citation.strip()
+    
+    # Remove trailing comma or colon
+    citation = re.sub(r'[,:]$', '.', citation)
+    
+    # Ensure it ends with a period if it has content
+    if citation and not citation.endswith('.') and not citation.endswith('?') and not citation.endswith('!'):
+        citation += '.'
+    
+    # Fix double periods
+    citation = re.sub(r'\.\.+', '.', citation)
+    
+    return citation
 
 
 # -------------------------------
@@ -664,7 +740,7 @@ def format_kanti_baden(source_type: str, data: dict) -> str:
         return f"{authors}: {full_title}. {thesis_type}. {university}. {place}, {year}."
 
     elif source_type == "newspaper_article":
-        # [cite: 166] Name: Titel, in: Zeitung, Datum, Seiten.
+        # [cite: 166] Name: Titel. Untertitel, in: Zeitung, Erscheinungsdatum – TT.MM.JJJJ, Seitenangabe.
         authors = data.get("authors", "")
         newspaper = data.get("newspaper", "")
         date = data.get("date", "") # TT.MM.JJJJ
@@ -689,7 +765,7 @@ def format_kanti_baden(source_type: str, data: dict) -> str:
     # --- 3. Digitale Publikationen (Digital Publications) ---
 
     elif source_type == "website":
-        # [cite: 184] Name: Titel. Untertitel, Datum. URL, abgerufen am...
+        # [cite: 184] Name: Titel. Untertitel, Veröffentlichungsdatum – TT.MM.JJJJ. URL, abgerufen am TT.MM.JJJJ.
         authors = data.get("authors", "")
         date = data.get("date", "") # TT.MM.JJJJ
         url = data.get("url", "")
@@ -698,7 +774,7 @@ def format_kanti_baden(source_type: str, data: dict) -> str:
         if authors:
              return f"{authors}: {full_title}, {date}. {url}, abgerufen am {access_date}."
         else:
-            # [cite: 188] No author: Titel, in: Website, Datum. URL...
+            # [cite: 188] No author: Titel des Eintrages, in: Name der Website, Veröffentlichungsdatum – TT.MM.JJJJ. URL, abgerufen am TT.MM.JJJJ.
             site_name = data.get("site_name", "")
             return f"{full_title}, in: {site_name}, {date}. {url}, abgerufen am {access_date}."
 
@@ -882,7 +958,9 @@ def format_citation(style: str, source_type: str, data: dict) -> str:
     if not formatter:
         return f"[Unbekannter Zitierstil: {style}]"
     
-    return formatter(source_type, data)
+    # Format and clean the citation
+    raw_citation = formatter(source_type, data)
+    return clean_citation(raw_citation)
 
 
 # -------------------------------
