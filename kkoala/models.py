@@ -1,4 +1,5 @@
 from .extensions import db
+from datetime import datetime
 
 # -------------------------------
 # User authentication and profile
@@ -35,6 +36,9 @@ class User(db.Model):
     )
     todo_categories = db.relationship(
         "ToDoCategory", backref="user", lazy=True, cascade="all, delete-orphan"
+    )
+    citation_groups = db.relationship(
+        "CitationGroup", backref="user", lazy=True, cascade="all, delete-orphan"
     )
 
 # -------------------------------
@@ -235,3 +239,76 @@ class ToDoItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey("to_do_category.id"), nullable=False)
     description = db.Column(db.String(500), nullable=False)
+
+# -------------------------------
+# Citation Generator feature
+# -------------------------------
+
+class CitationGroup(db.Model):
+    """
+    Stores citation groups for organizing citations.
+
+    Attributes:
+        id (int): Primary key.
+        user_id (int): Foreign key to User.
+        name (str): Group name.
+        citations (relationship): All citations in this group.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id", ondelete="CASCADE"), nullable=False, index=True)
+    name = db.Column(db.String(200), nullable=False)
+
+    # Citations in this group
+    citations = db.relationship(
+        "Citation", backref="group", lazy=True, cascade="all, delete-orphan"
+    )
+
+
+class Citation(db.Model):
+    """
+    Stores individual citations within a group.
+
+    Attributes:
+        id (int): Primary key.
+        group_id (int): Foreign key to CitationGroup.
+        source_type (str): Type of source (book, website, article, etc.).
+        style (str): Citation style (APA, MLA, Chicago, etc.).
+        data (str): JSON string with source details (author, title, year, etc.).
+        formatted_citation (str): The generated formatted citation text.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey("citation_group.id", ondelete="CASCADE"), nullable=False, index=True)
+    source_type = db.Column(db.String(50), nullable=False)  # book, website, article, etc.
+    style = db.Column(db.String(50), nullable=False)  # APA, MLA, Chicago, etc.
+    data = db.Column(db.Text, nullable=False)  # JSON string with source details
+
+
+# -------------------------------
+# Flashcards
+# -------------------------------
+
+class FlashcardSet(db.Model):
+    """
+    Represents a set of flashcards.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(255), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationship to cards
+    cards = db.relationship(
+        "Flashcard", backref="set", lazy=True, cascade="all, delete-orphan"
+    )
+
+class Flashcard(db.Model):
+    """
+    Represents a single flashcard within a set.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    set_id = db.Column(db.Integer, db.ForeignKey("flashcard_set.id"), nullable=False)
+    term = db.Column(db.Text, nullable=False)
+    definition = db.Column(db.Text, nullable=False)
+    rank = db.Column(db.Integer, default=0)  # For ordering
+    starred = db.Column(db.Boolean, default=False)

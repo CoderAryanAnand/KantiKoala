@@ -36,7 +36,7 @@ class TestMainRoutes:
 
     def test_todo_page_loads(self, authenticated_client):
         """Test that the to-do page loads correctly."""
-        response = authenticated_client.get("/todo", follow_redirects=True)
+        response = authenticated_client.get("/tools/todo", follow_redirects=True)
         
         assert response.status_code == 200
 
@@ -52,9 +52,15 @@ class TestMainRoutes:
         
         assert response.status_code == 200
 
+    def test_tools_page_loads(self, authenticated_client):
+        """Test that the tools index page loads correctly."""
+        response = authenticated_client.get("/tools/", follow_redirects=True)
+        
+        assert response.status_code == 200
+
     def test_lerntimer_page_loads(self, authenticated_client):
         """Test that the learning timer page loads correctly."""
-        response = authenticated_client.get("/lerntimer", follow_redirects=True)
+        response = authenticated_client.get("/tools/lerntimer", follow_redirects=True)
         
         assert response.status_code == 200
 

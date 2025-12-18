@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+
+{% block title %}Zitierungsgenerator - KantiKoala{% endblock %}
+
+{% block content %}
+<!--
+    Citation Generator Tool Page
+    - Select citation style (APA, MLA, Chicago)
+    - Add sources and generate citations automatically
+    - Save citations in groups with editable names
+-->
+
+<!-- Back to Tools Link -->
+<div class="w-full mb-4">
+    <a href="{{ url_for('tools.tools_index') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Zurück zu Tools
+    </a>
+</div>
+
+<div class="w-full mb-6">
+    <h1 class="text-4xl font-bold text-zinc-800 dark:text-white mb-2">Zitierungsgenerator</h1>
+    <p class="text-zinc-600 dark:text-zinc-400">Erstelle korrekte Quellenangaben für deine wissenschaftlichen Arbeiten.</p>
+</div>
+
+<!-- CSRF Token for API requests -->
+<input type="hidden" id="csrf-token" value="{{ session.get('csrf_token', '') }}">
+
+<!-- Main Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    
+    <!-- Left Column: Citation Form -->
+    <div class="lg:col-span-2 space-y-6">
+        
+        <!-- Citation Style Selection -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-zinc-800 dark:text-white mb-4">Zitierstil</h2>
+            <div class="flex flex-wrap gap-3">
+                <button type="button" data-style="apa" class="style-btn px-6 py-2.5 rounded-lg font-medium border-2 border-blue-500 bg-blue-500 text-white">
+                    APA (7. Edition)
+                </button>
+                <button type="button" data-style="mla" class="style-btn px-6 py-2.5 rounded-lg font-medium border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                    MLA (9. Edition)
+                </button>
+                <button type="button" data-style="chicago" class="style-btn px-6 py-2.5 rounded-lg font-medium border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                    Chicago (17. Edition)
+                </button>
+                <button type="button" data-style="kanti_baden" class="style-btn px-6 py-2.5 rounded-lg font-medium border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-blue-500 hover:text-blue-500 dark:hover:border-blue-500 dark:hover:text-blue-400">
+                    Kanti Baden (2025)
+                </button>
+            </div>
+        </div>
+        
+        <!-- Source Type Selection -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-zinc-800 dark:text-white mb-4">Quellentyp</h2>
+            
+            <!-- Print Sources -->
+            <h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">Gedruckte Quellen</h3>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button type="button" data-type="book" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-green-500 bg-green-500 text-white">
+                    📖 Buch
+                </button>
+                <button type="button" data-type="anthology" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📚 Sammelband
+                </button>
+                <button type="button" data-type="anthology_chapter" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📄 Beitrag in Sammelband
+                </button>
+                <button type="button" data-type="journal_article" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📰 Zeitschriftenartikel
+                </button>
+                <button type="button" data-type="newspaper_article" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🗞️ Zeitungsartikel
+                </button>
+                <button type="button" data-type="thesis" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🎓 Hochschulschrift
+                </button>
+            </div>
+            
+            <!-- Digital Sources -->
+            <h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">Digitale Quellen</h3>
+            <div class="flex flex-wrap gap-2 mb-4">
+                <button type="button" data-type="website" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🌐 Webseite
+                </button>
+                <button type="button" data-type="online_media_article" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📱 Online-Artikel
+                </button>
+                <button type="button" data-type="ebook" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📕 E-Book
+                </button>
+                <button type="button" data-type="blog" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    ✍️ Blog
+                </button>
+                <button type="button" data-type="social_media" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    💬 Social Media
+                </button>
+                <button type="button" data-type="online_lexicon" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📖 Online-Lexikon
+                </button>
+                <button type="button" data-type="ai" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🤖 KI-Tool
+                </button>
+            </div>
+            
+            <!-- Media Sources -->
+            <h3 class="text-sm font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wide mb-2">Medien & andere</h3>
+            <div class="flex flex-wrap gap-2">
+                <button type="button" data-type="podcast" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🎙️ Podcast
+                </button>
+                <button type="button" data-type="song" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🎵 Song
+                </button>
+                <button type="button" data-type="film" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🎬 Film
+                </button>
+                <button type="button" data-type="streaming_series" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    📺 Streaming-Serie
+                </button>
+                <button type="button" data-type="video_stream" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    ▶️ Video (YouTube etc.)
+                </button>
+                <button type="button" data-type="game" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🎮 Videospiel
+                </button>
+                <button type="button" data-type="image_web" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🖼️ Bild (Web)
+                </button>
+                <button type="button" data-type="interview" class="type-btn px-4 py-2 rounded-lg font-medium text-sm border-2 border-zinc-300 dark:border-zinc-600 text-zinc-700 dark:text-zinc-300 hover:border-green-500 hover:text-green-600 dark:hover:border-green-500 dark:hover:text-green-400">
+                    🎤 Interview
+                </button>
+            </div>
+        </div>
+        
+        <!-- Source Details Form -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-zinc-800 dark:text-white mb-4">Quellendetails</h2>
+            
+            <form id="citation-form" class="space-y-4">
+                <!-- Dynamic fields container - JavaScript will populate this -->
+                <div id="dynamic-fields" class="space-y-4">
+                    <!-- Fields will be inserted here by JavaScript based on selected source type -->
+                </div>
+            </form>
+        </div>
+        
+        <!-- Citation Preview -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-xl font-semibold text-zinc-800 dark:text-white">Vorschau</h2>
+                <button type="button" id="copy-citation" class="text-sm text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Kopieren
+                </button>
+            </div>
+            <div id="citation-preview" class="p-4 bg-zinc-50 dark:bg-zinc-900 rounded-lg border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 min-h-[60px]">
+                <span class="text-zinc-400 dark:text-zinc-500 italic">Fülle die Felder aus, um eine Vorschau zu sehen...</span>
+            </div>
+            
+            <!-- Save to Group -->
+            <div class="mt-4 flex flex-wrap items-center gap-3">
+                <select id="target-group" class="flex-grow px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    <option value="">Gruppe wählen...</option>
+                </select>
+                <button type="button" id="save-citation" class="px-6 py-2.5 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    Speichern
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Right Column: Citation Groups -->
+    <div class="space-y-6">
+        
+        <!-- New Group -->
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-zinc-800 dark:text-white mb-4">Neue Gruppe</h2>
+            <div class="flex gap-2">
+                <input type="text" id="new-group-name" placeholder="Gruppenname" class="flex-grow px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <button type="button" id="create-group" class="px-4 py-2.5 font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 dark:focus:ring-offset-zinc-800">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Groups List -->
+        <div id="groups-container" class="space-y-4">
+            <!-- Groups will be loaded here via JavaScript -->
+            <div class="text-center py-8 text-zinc-500 dark:text-zinc-400">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-12 h-12 mx-auto mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                <p>Noch keine Gruppen vorhanden.</p>
+                <p class="text-sm">Erstelle eine neue Gruppe, um Zitate zu speichern.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Group Modal -->
+<div id="edit-group-modal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50" onclick="closeEditGroupModal()"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none">
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl max-w-md w-full p-6 pointer-events-auto">
+            <h3 class="text-xl font-semibold text-zinc-800 dark:text-white mb-4">Gruppe bearbeiten</h3>
+            <input type="hidden" id="edit-group-id">
+            <input type="text" id="edit-group-name" class="w-full px-4 py-2.5 rounded-lg border border-zinc-300 dark:border-zinc-600 bg-white dark:bg-zinc-700 text-zinc-800 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none mb-4">
+            <div class="flex justify-end gap-3">
+                <button type="button" onclick="closeEditGroupModal()" class="px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white">Abbrechen</button>
+                <button type="button" onclick="saveGroupName()" class="px-6 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Citation Modal -->
+<div id="edit-citation-modal" class="fixed inset-0 z-50 hidden">
+    <div class="fixed inset-0 bg-black/50" onclick="closeEditCitationModal()"></div>
+    <div class="fixed inset-0 flex items-center justify-center p-4 pointer-events-none overflow-y-auto">
+        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-2xl max-w-2xl w-full p-6 pointer-events-auto my-8">
+            <h3 class="text-xl font-semibold text-zinc-800 dark:text-white mb-4">Zitat bearbeiten</h3>
+            <input type="hidden" id="edit-citation-id">
+            <div id="edit-citation-form" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Form fields will be populated dynamically -->
+            </div>
+            <div class="flex justify-end gap-3 mt-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                <button type="button" onclick="closeEditCitationModal()" class="px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-white">Abbrechen</button>
+                <button type="button" onclick="updateCitation()" class="px-6 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700">Speichern</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/citation.js') }}"></script>
+{% endblock %}

@@ -47,6 +47,15 @@
     <div id="mobile-menu" class="hidden md:hidden p-4 space-y-2 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700 shadow-md z-50">
         <!-- Navigation links for mobile -->
         {% include '_nav_links.html' %}
+
+        <!-- Logout Button for Mobile -->
+        {% if session.username %}
+        <div class="pt-2 mt-2 border-t border-zinc-200 dark:border-zinc-700">
+            <a href="{{ url_for('auth.logout') }}" class="flex items-center px-4 py-2 text-red-600 dark:text-red-500 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30">
+                Logout
+            </a>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Desktop Sidebar (Hidden on small screens, visible as a flex column on medium and up) -->

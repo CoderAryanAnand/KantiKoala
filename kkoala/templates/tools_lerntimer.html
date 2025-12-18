@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Lerntimer - KantiKoala{% endblock %}
+
+{% block content %}
+<!--
+    Lerntimer (Pomodoro Timer) Page
+    - Provides a customizable Pomodoro-style timer for focused study sessions.
+    - Allows users to set work, break, long break durations, and number of rounds.
+    - Displays timer, status, round info, and control buttons.
+    - Uses Tailwind CSS for styling and supports dark mode.
+-->
+
+<!-- Back to Tools Link -->
+<div class="w-full mb-4">
+    <a href="{{ url_for('tools.tools_index') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+        </svg>
+        Zurück zu Tools
+    </a>
+</div>
+
+<div class="w-full">
+    <h1 class="text-4xl font-bold text-zinc-800 dark:text-white mb-8">Lerntimer</h1>
+</div>
+
+<!-- Timer Card -->
+<div class="w-full max-w-lg mx-auto p-8 space-y-6 bg-white dark:bg-zinc-800 rounded-xl shadow-lg text-center">
+    
+    <!-- Status and Round Info -->
+    <div>
+        <div id="status" class="text-2xl font-semibold text-zinc-800 dark:text-white">Fokus</div>
+        <div id="round-info" class="text-sm text-zinc-500 dark:text-zinc-400"></div>
+    </div>
+
+    <!-- Timer Display -->
+    <div id="timer" class="text-8xl font-bold transition-colors dark:text-white duration-300">25:00</div>
+
+    <!-- Control Buttons -->
+    <div class="controls flex flex-wrap justify-center gap-4">
+        <button onclick="startTimer()" class="px-6 py-2.5 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 dark:focus:ring-offset-zinc-800">Start</button>
+        <button onclick="pauseTimer()" class="px-6 py-2.5 font-semibold text-white bg-yellow-500 rounded-lg hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 dark:focus:ring-offset-zinc-800">Pause</button>
+        <button onclick="resetTimer()" class="px-6 py-2.5 font-semibold text-white bg-gray-500 rounded-lg hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 dark:focus:ring-offset-zinc-800">Zurücksetzen</button>
+    </div>
+
+    <!-- Settings Section -->
+    <div class="settings pt-4 border-t border-zinc-200 dark:border-zinc-700">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+            <!-- Work Minutes Input -->
+            <label class="flex flex-col items-center space-y-1 text-zinc-600 dark:text-zinc-300">
+                <span>Arbeit (min)</span>
+                <input type="number" id="work-minutes" value="25" min="1" class="w-20 p-2 text-center bg-zinc-100 dark:bg-zinc-700 rounded-md border border-zinc-300 dark:border-zinc-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </label>
+            <!-- Break Minutes Input -->
+            <label class="flex flex-col items-center space-y-1 text-zinc-600 dark:text-zinc-300">
+                <span>Pause (min)</span>
+                <input type="number" id="break-minutes" value="5" min="1" class="w-20 p-2 text-center bg-zinc-100 dark:bg-zinc-700 rounded-md border border-zinc-300 dark:border-zinc-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </label>
+            <!-- Long Break Minutes Input -->
+            <label class="flex flex-col items-center space-y-1 text-zinc-600 dark:text-zinc-300">
+                <span>Lange Pause</span>
+                <input type="number" id="longbreak-minutes" value="15" min="1" class="w-20 p-2 text-center bg-zinc-100 dark:bg-zinc-700 rounded-md border border-zinc-300 dark:border-zinc-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </label>
+            <!-- Rounds Input -->
+            <label class="flex flex-col items-center space-y-1 text-zinc-600 dark:text-zinc-300">
+                <span>Runden</span>
+                <input type="number" id="rounds" value="4" min="1" class="w-20 p-2 text-center bg-zinc-100 dark:bg-zinc-700 rounded-md border border-zinc-300 dark:border-zinc-600 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+            </label>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!--
+    JavaScript for Lerntimer functionality.
+    Handles timer logic, controls, and user settings.
+-->
+<script src="{{ url_for('static', filename='js/lerntimer.js') }}"></script>
+{% endblock %}
