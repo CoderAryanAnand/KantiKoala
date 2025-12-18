@@ -1,155 +1,212 @@
 {% extends "base.html" %}
 
-{% block title %}{{ card_set.title }} - Lernkarten{% endblock %}
+{% block title %}{{ card_set.title }} | Quizlet Clone{% endblock %}
 
 {% block content %}
-<div class="w-full max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="mb-6 flex justify-between items-start">
-        <div>
-            <a href="{{ url_for('tools.flashcards') }}" class="text-sm text-blue-600 hover:underline mb-2 inline-block">&larr; Alle Sets</a>
-            <h1 class="text-3xl font-bold text-zinc-800 dark:text-white">{{ card_set.title }}</h1>
-            <p class="text-zinc-600 dark:text-zinc-400">{{ card_set.description }}</p>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="exportSet()" class="p-2 text-zinc-600 hover:bg-zinc-100 rounded dark:text-zinc-400 dark:hover:bg-zinc-700" title="Exportieren">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-            </button>
-            <button onclick="deleteSet()" class="p-2 text-red-600 hover:bg-red-50 rounded dark:hover:bg-red-900/20" title="Löschen">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Mode Switcher -->
-    <div class="flex justify-center mb-8 bg-white dark:bg-zinc-800 p-1 rounded-lg shadow-sm w-fit mx-auto border border-zinc-200 dark:border-zinc-700">
-        <button onclick="switchMode('flashcards')" id="tab-flashcards" class="px-6 py-2 rounded-md text-sm font-medium transition-all bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-            Karteikarten
-        </button>
-        <button onclick="switchMode('write')" id="tab-write" class="px-6 py-2 rounded-md text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-all">
-            Schreiben
-        </button>
-        <button onclick="switchMode('list')" id="tab-list" class="px-6 py-2 rounded-md text-sm font-medium text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200 transition-all">
-            Liste
-        </button>
-    </div>
-
-    <!-- Star Filter Toggle -->
-    <div id="star-filter-container" class="flex justify-center mb-6 hidden">
-        <label class="inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="star-filter" class="sr-only peer" onchange="toggleStarFilter()">
-            <div class="relative w-11 h-6 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-zinc-600 peer-checked:bg-blue-600"></div>
-            <span class="ms-3 text-sm font-medium text-zinc-900 dark:text-zinc-300">Nur markierte lernen (<span id="starred-count">0</span>)</span>
-        </label>
-    </div>
-
-    <!-- Flashcards Mode -->
-    <div id="mode-flashcards" class="mode-section">
-        <div class="flex justify-between mb-4">
-            <div class="flex items-center gap-2">
-                <label class="text-sm text-zinc-600 dark:text-zinc-400">Vorderseite:</label>
-                <select id="flashcard-side" onchange="updateFlashcardView()" class="text-sm border rounded p-1 dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
-                    <option value="term">Begriff</option>
-                    <option value="definition">Definition</option>
-                </select>
-            </div>
-            <div class="text-sm text-zinc-600 dark:text-zinc-400">
-                <span id="current-card-index">1</span> / <span id="total-cards">0</span>
-            </div>
-        </div>
-
-        <div class="relative h-80 w-full perspective-1000 cursor-pointer group" onclick="flipCard()">
-            <div id="flashcard-inner" class="relative w-full h-full transition-transform duration-500 transform-style-3d shadow-xl rounded-xl">
-                <!-- Front -->
-                <div class="absolute w-full h-full bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center p-8 backface-hidden border border-zinc-200 dark:border-zinc-700">
-                    <div id="card-front-content" class="text-3xl font-medium text-zinc-800 dark:text-white text-center"></div>
-                    <span class="absolute top-4 left-4 text-xs font-bold text-zinc-300 uppercase tracking-wider">Vorderseite</span>
-                    <button onclick="event.stopPropagation(); toggleStarCurrent()" class="absolute top-4 right-4 text-zinc-300 hover:text-yellow-400 transition-colors" id="star-btn-front">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
-                    </button>
-                </div>
-                <!-- Back -->
-                <div class="absolute w-full h-full bg-white dark:bg-zinc-800 rounded-xl flex items-center justify-center p-8 backface-hidden rotate-y-180 border border-zinc-200 dark:border-zinc-700">
-                    <div id="card-back-content" class="text-2xl text-zinc-600 dark:text-zinc-300 text-center"></div>
-                    <span class="absolute top-4 left-4 text-xs font-bold text-zinc-300 uppercase tracking-wider">Rückseite</span>
-                    <button onclick="event.stopPropagation(); toggleStarCurrent()" class="absolute top-4 right-4 text-zinc-300 hover:text-yellow-400 transition-colors" id="star-btn-back">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
-                    </button>
+<div class="min-h-screen bg-[#f6f7fb] dark:bg-zinc-950 pb-20">
+    
+    <!-- Top Header Section -->
+    <div class="bg-white dark:bg-zinc-900 shadow-sm border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-10">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="py-4">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-2xl font-bold text-zinc-900 dark:text-zinc-100">{{ card_set.title }}</h1>
+                        <div class="flex items-center gap-2 mt-1 text-sm text-zinc-500 dark:text-zinc-400">
+                            <span class="font-medium">{{ cards|length }} Begriffe</span>
+                            <span>•</span>
+                            <span>{{ card_set.description or 'Keine Beschreibung' }}</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                         <a href="{{ url_for('tools.flashcards') }}" class="p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors" title="Zurück">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                         </a>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <div class="flex justify-center gap-4 mt-6">
-            <button onclick="prevCard()" class="p-3 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-500 dark:text-zinc-400 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
-            </button>
-            <button onclick="nextCard()" class="p-3 rounded-full bg-zinc-100 hover:bg-zinc-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-zinc-500 dark:text-zinc-400 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
-            </button>
-        </div>
-    </div>
-
-    <!-- Write Mode -->
-    <div id="mode-write" class="mode-section hidden max-w-2xl mx-auto">
-        <!-- Progress Bar -->
-        <div class="w-full bg-zinc-200 dark:bg-zinc-700 rounded-full h-2.5 mb-8">
-            <div id="write-progress" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
-        </div>
-
-        <div class="bg-white dark:bg-zinc-800 shadow-lg rounded-xl p-8 border border-zinc-200 dark:border-zinc-700">
-            <div class="mb-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">Frage</div>
-            <div id="write-prompt" class="text-xl text-zinc-800 dark:text-white mb-8 font-medium leading-relaxed"></div>
             
-            <div id="write-feedback" class="hidden mb-6 p-4 rounded-md text-sm"></div>
+            <!-- Navigation Tabs -->
+            <div class="flex space-x-6 overflow-x-auto no-scrollbar">
+                <button onclick="switchMode('flashcards')" id="tab-flashcards" class="pb-3 border-b-2 border-blue-600 text-blue-600 font-semibold text-sm whitespace-nowrap transition-colors">
+                    Karteikarten
+                </button>
+                <button onclick="switchMode('write')" id="tab-write" class="pb-3 border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 font-medium text-sm whitespace-nowrap transition-colors">
+                    Lernen
+                </button>
+                <button onclick="switchMode('list')" id="tab-list" class="pb-3 border-b-2 border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200 font-medium text-sm whitespace-nowrap transition-colors">
+                    Liste bearbeiten
+                </button>
+            </div>
+        </div>
+    </div>
 
-            <div class="relative">
-                <label for="write-input" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Deine Antwort</label>
-                <input type="text" id="write-input" class="w-full rounded-md border-zinc-300 dark:border-zinc-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border dark:bg-zinc-700 dark:text-white" placeholder="Antwort eingeben..." autocomplete="off" onkeydown="if(event.key==='Enter') checkAnswer()">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-8">
+        
+        <!-- Flashcards Mode -->
+        <div id="mode-flashcards" class="mode-section">
+            
+            <!-- Card Container -->
+            <div class="relative w-full max-w-3xl mx-auto perspective-1000 h-[500px] cursor-pointer group mb-6" onclick="flipCard()">
+                <div id="flashcard-inner" class="relative w-full h-full transition-transform duration-500 transform-style-3d shadow-lg rounded-xl bg-white dark:bg-zinc-900">
+                    
+                    <!-- Front -->
+                    <div class="absolute w-full h-full bg-white dark:bg-zinc-900 rounded-xl flex flex-col backface-hidden border border-zinc-200 dark:border-zinc-800">
+                        <button onclick="event.stopPropagation(); toggleStarCurrent()" class="absolute top-4 right-4 z-20 p-2 text-zinc-300 dark:text-zinc-500 hover:text-zinc-400 transition-colors" id="star-btn-front">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                        </button>
+                        <div class="p-6">
+                            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Begriff</span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center p-8 overflow-y-auto">
+                            <div id="card-front-content" class="text-4xl font-normal text-zinc-800 dark:text-zinc-100 text-center leading-tight"></div>
+                        </div>
+                        <div class="p-6 text-center text-zinc-400 text-sm">Klicken zum Umdrehen</div>
+                    </div>
+
+                    <!-- Back -->
+                    <div class="absolute w-full h-full bg-white dark:bg-zinc-900 rounded-xl flex flex-col backface-hidden rotate-y-180 border border-zinc-200 dark:border-zinc-800">
+                        <button onclick="event.stopPropagation(); toggleStarCurrent()" class="absolute top-4 right-4 z-20 p-2 text-zinc-300 dark:text-zinc-500 hover:text-zinc-400 transition-colors" id="star-btn-back">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>
+                        </button>
+                        <div class="p-6">
+                            <span class="text-xs font-bold text-zinc-400 uppercase tracking-wider">Definition</span>
+                        </div>
+                        <div class="flex-1 flex items-center justify-center p-8 overflow-y-auto">
+                            <div id="card-back-content" class="text-3xl font-normal text-zinc-700 dark:text-zinc-300 text-center leading-tight"></div>
+                        </div>
+                        <div class="p-6 text-center text-zinc-400 text-sm">Klicken zum Umdrehen</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Controls - Centered -->
+            <div class="max-w-3xl mx-auto flex items-center justify-center gap-6 mb-6">
+                <button onclick="prevCard()" class="p-4 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all disabled:opacity-50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+                </button>
                 
-                <div class="mt-6 flex justify-between items-center">
-                    <div class="text-sm text-zinc-500 dark:text-zinc-400">
-                        Verbleibend: <span id="write-remaining" class="font-bold">0</span>
+                <span class="font-medium text-zinc-700 dark:text-zinc-300 min-w-[80px] text-center text-lg">
+                    <span id="current-card-index">1</span> / <span id="total-cards">0</span>
+                </span>
+
+                <button onclick="nextCard()" class="p-4 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-700 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-300 transition-all disabled:opacity-50">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                </button>
+            </div>
+
+            <!-- Secondary Controls Bar -->
+            <div class="max-w-3xl mx-auto flex items-center justify-between mb-12">
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleAutoplay()" id="btn-autoplay" class="p-2 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-colors" title="Automatische Wiedergabe">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </button>
+                    <button onclick="shuffleCards()" class="p-2 text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-700 rounded-full transition-colors" title="Karten mischen">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <div class="relative">
+                        <select id="flashcard-side" onchange="updateFlashcardView()" class="appearance-none bg-zinc-100 dark:bg-zinc-800 pl-3 pr-8 py-1.5 text-zinc-700 dark:text-zinc-300 text-sm font-medium cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-md border border-zinc-200 dark:border-zinc-700">
+                            <option value="term">Begriff zuerst</option>
+                            <option value="definition">Definition zuerst</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-zinc-500">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </div>
                     </div>
-                    <div class="flex space-x-3">
-                        <button onclick="overrideAnswer()" id="btn-override" class="hidden inline-flex items-center px-4 py-2 border border-yellow-300 text-sm font-medium rounded-md shadow-sm text-yellow-800 bg-yellow-50 hover:bg-yellow-100 focus:outline-none">
-                            Ich hatte recht
-                        </button>
-                        <button onclick="checkAnswer()" id="btn-check" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                            Antworten
-                        </button>
-                        <button onclick="nextWriteCard()" id="btn-next-write" class="hidden inline-flex items-center px-6 py-2 border border-zinc-300 dark:border-zinc-600 text-sm font-medium rounded-md shadow-sm text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-600 focus:outline-none">
-                            Nächste Karte
+                </div>
+            </div>
+
+            <!-- Terms List Section -->
+            <div class="max-w-3xl mx-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-lg font-bold text-zinc-900 dark:text-zinc-100">Begriffe in diesem Lernset (<span id="terms-count-list">{{ cards|length }}</span>)</h2>
+                    <div id="star-filter-container" class="hidden">
+                        <button onclick="toggleStarFilter()" id="star-filter-btn" class="text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 border border-blue-200 dark:border-blue-800 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-md transition-colors">
+                            Nur markierte lernen
                         </button>
                     </div>
+                </div>
+                
+                <div id="static-terms-list" class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+                    <!-- Populated by JavaScript -->
+                </div>
+                
+                <div class="mt-8 text-center">
+                    <button onclick="switchMode('list')" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-md transition-colors">
+                        Lernset bearbeiten
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Finished State -->
-        <div id="write-finished" class="hidden text-center py-10">
-            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
-                <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-            </div>
-            <h2 class="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Gut gemacht!</h2>
-            <p class="text-zinc-500 dark:text-zinc-400 mb-6">Du hast alle Karten durchgearbeitet.</p>
-            <button onclick="initWriteMode()" class="text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300">Nochmal lernen</button>
-        </div>
-    </div>
+        <!-- Write Mode -->
+        <div id="mode-write" class="mode-section hidden max-w-2xl mx-auto">
+            <!-- Active Write Area -->
+            <div id="write-active-area">
+                <!-- Progress Bar -->
+                <div class="w-full bg-zinc-200 dark:bg-zinc-800 rounded-full h-2.5 mb-8">
+                    <div id="write-progress" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
 
-    <!-- List / Edit Mode -->
-    <div id="mode-list" class="mode-section hidden">
-        <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-700 overflow-hidden">
-            <div class="p-4 bg-zinc-50 dark:bg-zinc-700/50 border-b border-zinc-200 dark:border-zinc-700 flex justify-between items-center">
-                <h3 class="font-bold text-zinc-700 dark:text-zinc-300">Begriffe & Definitionen</h3>
-                <button onclick="saveSet()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">Speichern</button>
+                <div class="bg-white dark:bg-zinc-900 shadow-lg rounded-xl p-8 border border-zinc-200 dark:border-zinc-800">
+                    <div class="mb-2 text-xs font-bold text-zinc-400 uppercase tracking-wider">Frage</div>
+                    <div id="write-prompt" class="text-xl text-zinc-800 dark:text-zinc-100 mb-8 font-medium leading-relaxed"></div>
+                    
+                    <div id="write-feedback" class="mb-6 p-4 rounded-md text-sm hidden"></div>
+
+                    <div class="relative">
+                        <label for="write-input" class="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">Deine Antwort</label>
+                        <input type="text" id="write-input" class="w-full rounded-md border-zinc-300 dark:border-zinc-700 shadow-sm focus:border-blue-500 focus:ring-blue-500 p-3 border dark:bg-zinc-800 dark:text-white" placeholder="Antwort eingeben..." autocomplete="off" onkeydown="if(event.key==='Enter') checkAnswer()">
+                        
+                        <div class="mt-6 flex justify-between items-center">
+                            <div class="text-sm text-zinc-500 dark:text-zinc-400">
+                                Verbleibend: <span id="write-remaining" class="font-bold">0</span>
+                            </div>
+                            <div class="flex space-x-3">
+                                <button onclick="overrideAnswer()" id="btn-override" class="items-center px-4 py-2 border border-yellow-400 dark:border-yellow-500 text-sm font-medium rounded-md shadow-sm text-yellow-700 dark:text-yellow-300 bg-yellow-50 dark:bg-yellow-900/30 hover:bg-yellow-100 dark:hover:bg-yellow-900/50 focus:outline-none hidden">
+                                    Ich hatte recht
+                                </button>
+                                <button onclick="checkAnswer()" id="btn-check" class="items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    Antworten
+                                </button>
+                                <button onclick="nextWriteCard()" id="btn-next-write" class="items-center px-6 py-2 border border-zinc-300 dark:border-zinc-700 text-sm font-medium rounded-md shadow-sm text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 focus:outline-none hidden">
+                                    Nächste Karte
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div id="cards-list" class="divide-y divide-zinc-200 dark:divide-zinc-700">
-                <!-- Cards injected by JS -->
+
+            <!-- Finished State -->
+            <div id="write-finished" class="hidden text-center py-10">
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4">
+                    <svg class="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Gut gemacht!</h2>
+                <p class="text-zinc-500 dark:text-zinc-400 mb-6">Du hast alle Karten durchgearbeitet.</p>
+                <button onclick="initWriteMode()" class="text-blue-600 dark:text-blue-400 font-medium hover:text-blue-800 dark:hover:text-blue-300">Nochmal lernen</button>
             </div>
-            <div class="p-4 bg-zinc-50 dark:bg-zinc-700/50">
-                <button onclick="addCardInput()" class="w-full py-3 border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg text-zinc-500 hover:border-blue-500 hover:text-blue-500 transition-colors font-medium">
-                    + Karte hinzufügen
-                </button>
+        </div>
+
+        <!-- List / Edit Mode -->
+        <div id="mode-list" class="mode-section hidden max-w-3xl mx-auto">
+            <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-800 overflow-hidden">
+                <div class="p-4 bg-zinc-50 dark:bg-zinc-800/50 border-b border-zinc-200 dark:border-zinc-800 flex justify-between items-center">
+                    <h3 class="font-bold text-zinc-700 dark:text-zinc-300">Begriffe & Definitionen</h3>
+                    <button onclick="saveSet()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm font-medium">Speichern</button>
+                </div>
+                <div id="cards-list" class="divide-y divide-zinc-200 dark:divide-zinc-800">
+                    <!-- Cards injected by JS -->
+                </div>
+                <div class="p-4 bg-zinc-50 dark:bg-zinc-800/50">
+                    <button onclick="addCardInput()" class="w-full py-4 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-lg text-zinc-500 hover:border-blue-500 hover:text-blue-500 transition-colors font-bold uppercase tracking-wide text-sm">
+                        + Karte hinzufügen
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -171,5 +228,26 @@
 .transform-style-3d { transform-style: preserve-3d; }
 .backface-hidden { backface-visibility: hidden; }
 .rotate-y-180 { transform: rotateY(180deg); }
+/* Hide scrollbar for Chrome, Safari and Opera */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.no-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+/* Fix select dropdown colors in dark mode */
+#flashcard-side option {
+    background-color: white;
+    color: #374151;
+}
+
+.dark #flashcard-side option,
+html.dark #flashcard-side option {
+    background-color: #27272a;
+    color: #d4d4d8;
+}
 </style>
 {% endblock %}
