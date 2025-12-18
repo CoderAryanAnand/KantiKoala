@@ -113,7 +113,7 @@ def create_app(config_class="config.ProdConfig"):
             ('main.index', 1.0, 'daily'),
             ('main.about', 0.8, 'monthly'),
             ('main.hilfe', 0.7, 'monthly'),
-            ('main.lerntimer', 0.8, 'monthly'),
+            ('tools.tools_index', 0.8, 'monthly'),
             ('main.lerntipps', 0.8, 'weekly'),
             ('main.datenschutzerklaerung', 0.3, 'yearly'),
         ]
