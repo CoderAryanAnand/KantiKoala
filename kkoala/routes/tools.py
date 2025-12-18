@@ -249,21 +249,6 @@ def export_flashcard_set(user, set_id):
     return jsonify(data)
 
 
-@tools_bp.route("/budget")
-@login_required
-def budget_tracker(user):
-    """
-    Budget tracker route: Renders the budget tracker tool page.
-
-    Args:
-        user: The authenticated user object.
-
-    Returns:
-        str: Rendered HTML template ('tools_budget.html').
-    """
-    return render_template("tools_budget.html")
-
-
 @tools_bp.route("/todo")
 @login_required
 def todo_index(user):
