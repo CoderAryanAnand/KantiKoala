@@ -98,9 +98,14 @@ def create_todo_item(user, category_id):
     if not description:
         return jsonify({"message": "Description is required"}), 400
     
+    # Get max position to append to the end
+    max_pos = db.session.query(db.func.max(ToDoItem.position)).filter_by(category_id=category_id).scalar()
+    new_pos = (max_pos if max_pos is not None else -1) + 1
+
     new_item = ToDoItem(
         category_id=category_id,
-        description=description
+        description=description,
+        position=new_pos
     )
     db.session.add(new_item)
     db.session.commit()
@@ -109,9 +114,39 @@ def create_todo_item(user, category_id):
         "message": "Item created",
         "item": {
             "id": new_item.id,
-            "description": new_item.description
+            "description": new_item.description,
+            "completed": new_item.completed,
+            "position": new_item.position
         }
     }), 201
+
+@todo_bp.route("/categories/<int:category_id>/reorder", methods=["PUT"])
+@csrf_protect
+@login_required
+def reorder_items(user, category_id):
+    """
+    API endpoint to reorder items within a category.
+    Expects a JSON body with 'itemIds': [id1, id2, id3, ...]
+    """
+    category = ToDoCategory.query.get(category_id)
+    
+    if not category or category.user_id != user.id:
+        return jsonify({"message": "Category not found or unauthorized"}), 404
+    
+    data = request.json
+    item_ids = data.get("itemIds", [])
+    
+    # Update positions
+    for index, item_id in enumerate(item_ids):
+        item = ToDoItem.query.get(item_id)
+        # Verify item belongs to this category to prevent moving items between categories (if that's not desired)
+        # or just to ensure we are updating the right items.
+        if item and item.category_id == category_id:
+            item.position = index
+            
+    db.session.commit()
+    
+    return jsonify({"message": "Items reordered"}), 200
 
 @todo_bp.route("/items/<int:item_id>", methods=["DELETE"])
 @csrf_protect

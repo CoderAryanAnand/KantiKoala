@@ -112,22 +112,31 @@ async function addTodoItem(categoryId) {
             // Create and append the new item element to the DOM
             const itemsContainer = document.getElementById(`items-${categoryId}`);
             const itemEl = document.createElement('div');
-            itemEl.className = 'flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group cursor-pointer';
-            itemEl.onclick = function(event) {
-                if (event.target.tagName !== 'INPUT') {
-                    this.querySelector('input[type=checkbox]').checked = true;
-                    completeAndDeleteTodoItem(data.item.id, this.querySelector('input[type=checkbox]'));
-                }
-            };
+            itemEl.className = 'flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group';
             itemEl.setAttribute('data-item-id', data.item.id);
+            itemEl.setAttribute('data-category-id', categoryId);
+            itemEl.setAttribute('draggable', 'true');
+            
             itemEl.innerHTML = `
+                <div class="cursor-move text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 mt-0.5 flex-shrink-0 drag-handle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                    </svg>
+                </div>
                 <input type="checkbox" 
                        onchange="completeAndDeleteTodoItem(${data.item.id}, this)"
                        class="h-5 w-5 mt-0.5 flex-shrink-0 rounded border-zinc-300 dark:border-zinc-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer">
-                <span class="flex-1 text-zinc-800 dark:text-zinc-200 break-words min-w-0">
+                <span class="flex-1 text-zinc-800 dark:text-zinc-200 break-words min-w-0 cursor-pointer" onclick="this.previousElementSibling.click()">
                     ${escapeHtml(data.item.description)}
                 </span>
             `;
+            
+            // Attach drag listeners
+            itemEl.addEventListener('dragstart', handleDragStart);
+            itemEl.addEventListener('dragover', handleDragOver);
+            itemEl.addEventListener('drop', handleDrop);
+            itemEl.addEventListener('dragend', handleDragEnd);
+            
             itemsContainer.appendChild(itemEl);
             updateItemCount(categoryId);
             input.value = '';
@@ -214,6 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.remove('rotated');
         }
     });
+    initDragAndDrop();
 });
 
 // Closes all popups when the Escape key is pressed
@@ -222,3 +232,81 @@ document.addEventListener('keydown', (e) => {
         closeAllPopups();
     }
 });
+
+// Drag and Drop Logic
+let draggedItem = null;
+
+function initDragAndDrop() {
+    const items = document.querySelectorAll('[draggable="true"]');
+    items.forEach(item => {
+        item.addEventListener('dragstart', handleDragStart);
+        item.addEventListener('dragover', handleDragOver);
+        item.addEventListener('drop', handleDrop);
+        item.addEventListener('dragend', handleDragEnd);
+    });
+}
+
+function handleDragStart(e) {
+    draggedItem = this;
+    this.style.opacity = '0.4';
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', this.dataset.itemId);
+}
+
+function handleDragOver(e) {
+    if (e.preventDefault) {
+        e.preventDefault();
+    }
+    e.dataTransfer.dropEffect = 'move';
+    return false;
+}
+
+function handleDrop(e) {
+    if (e.stopPropagation) {
+        e.stopPropagation();
+    }
+    
+    if (draggedItem && draggedItem !== this) {
+        // Check if we are in the same category
+        if (draggedItem.dataset.categoryId !== this.dataset.categoryId) {
+            return false;
+        }
+
+        const bounding = this.getBoundingClientRect();
+        const offset = bounding.y + (bounding.height / 2);
+        
+        if (e.clientY - offset > 0) {
+            this.parentNode.insertBefore(draggedItem, this.nextSibling);
+        } else {
+            this.parentNode.insertBefore(draggedItem, this);
+        }
+        
+        // Save the new order
+        saveOrder(this.dataset.categoryId);
+    }
+    return false;
+}
+
+function handleDragEnd(e) {
+    this.style.opacity = '1';
+    draggedItem = null;
+}
+
+async function saveOrder(categoryId) {
+    const container = document.getElementById(`items-${categoryId}`);
+    const items = container.querySelectorAll('[data-item-id]');
+    const itemIds = Array.from(items).map(item => item.dataset.itemId);
+    
+    try {
+        await fetch(`/api/todo/categories/${categoryId}/reorder`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify({ itemIds })
+        });
+    } catch (error) {
+        console.error('Error saving order:', error);
+    }
+}

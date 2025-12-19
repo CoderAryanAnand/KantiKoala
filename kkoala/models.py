@@ -223,7 +223,11 @@ class ToDoCategory(db.Model):
 
     # To-do items in this category
     items = db.relationship(
-        "ToDoItem", backref="category", lazy=True, cascade="all, delete-orphan"
+        "ToDoItem", 
+        backref="category", 
+        lazy=True, 
+        cascade="all, delete-orphan",
+        order_by="ToDoItem.position"
     )
 
 class ToDoItem(db.Model):
@@ -239,6 +243,8 @@ class ToDoItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey("to_do_category.id"), nullable=False)
     description = db.Column(db.String(500), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    position = db.Column(db.Integer, default=0)
 
 # -------------------------------
 # Citation Generator feature
@@ -281,6 +287,7 @@ class Citation(db.Model):
     source_type = db.Column(db.String(50), nullable=False)  # book, website, article, etc.
     style = db.Column(db.String(50), nullable=False)  # APA, MLA, Chicago, etc.
     data = db.Column(db.Text, nullable=False)  # JSON string with source details
+    formatted_citation = db.Column(db.Text, nullable=False)  # The generated formatted citation text
 
 
 # -------------------------------

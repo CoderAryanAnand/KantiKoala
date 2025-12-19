@@ -935,18 +935,123 @@ def format_kanti_baden(source_type: str, data: dict) -> str:
     return f"[Unbekannter Quellentyp: {source_type}]"
 
 
+def format_bibtex(source_type: str, data: dict) -> str:
+    """
+    Format a citation in BibTeX format.
+    """
+    # Helper to clean values for BibTeX
+    def clean(val):
+        return str(val).replace("{", "\\{").replace("}", "\\}")
+
+    # Generate citation key
+    authors = data.get("authors", "") or data.get("editors", "") or data.get("username", "") or "Unknown"
+    # Try to get first author's last name
+    first_author = authors.split(",")[0].split(" ")[0].strip()
+    if not first_author and "directors" in data:
+        first_author = data["directors"].split(",")[0].split(" ")[0].strip()
+    
+    year = data.get("year", "") or data.get("date", "")[:4] or "nd"
+    title = data.get("title", "") or data.get("full_title", "") or data.get("site_name", "") or "NoTitle"
+    first_word_title = title.split(" ")[0].strip()
+    
+    # Remove non-alphanumeric characters from key parts
+    first_author = re.sub(r'\W+', '', first_author)
+    year = re.sub(r'\W+', '', year)
+    first_word_title = re.sub(r'\W+', '', first_word_title)
+    
+    citation_key = f"{first_author}{year}{first_word_title}"
+    
+    entry_type = "misc"
+    fields = {}
+
+    # Common fields
+    if "authors" in data: fields["author"] = data["authors"]
+    if "title" in data: fields["title"] = data["title"]
+    if "year" in data: fields["year"] = data["year"]
+    if "date" in data: fields["year"] = data["date"][:4] # Approximate
+    if "url" in data: fields["url"] = data["url"]
+    if "access_date" in data: fields["note"] = f"Accessed: {data['access_date']}"
+
+    if source_type == "book":
+        entry_type = "book"
+        if "publisher" in data: fields["publisher"] = data["publisher"]
+        if "place" in data: fields["address"] = data["place"]
+        if "edition" in data: fields["edition"] = data["edition"]
+        if "subtitle" in data: fields["title"] += f": {data['subtitle']}"
+
+    elif source_type == "anthology":
+        entry_type = "book" # or collection
+        if "editors" in data: fields["editor"] = data["editors"]
+        if "publisher" in data: fields["publisher"] = data["publisher"]
+        if "place" in data: fields["address"] = data["place"]
+        if "subtitle" in data: fields["title"] += f": {data['subtitle']}"
+
+    elif source_type == "anthology_chapter":
+        entry_type = "incollection"
+        if "container_title" in data: fields["booktitle"] = data["container_title"]
+        if "editors" in data: fields["editor"] = data["editors"]
+        if "publisher" in data: fields["publisher"] = data["publisher"]
+        if "place" in data: fields["address"] = data["place"]
+        if "pages" in data: fields["pages"] = data["pages"]
+
+    elif source_type == "journal_article":
+        entry_type = "article"
+        if "journal" in data: fields["journal"] = data["journal"]
+        if "volume" in data: fields["volume"] = data["volume"]
+        if "issue" in data: fields["number"] = data["issue"]
+        if "pages" in data: fields["pages"] = data["pages"]
+
+    elif source_type == "newspaper_article":
+        entry_type = "article"
+        if "newspaper" in data: fields["journal"] = data["newspaper"]
+        if "pages" in data: fields["pages"] = data["pages"]
+
+    elif source_type == "thesis":
+        entry_type = "phdthesis"
+        if "university" in data: fields["school"] = data["university"]
+        if "place" in data: fields["address"] = data["place"]
+        if "thesis_type" in data: fields["type"] = data["thesis_type"]
+
+    elif source_type == "website":
+        entry_type = "misc"
+        if "site_name" in data: fields["howpublished"] = data["site_name"]
+
+    elif source_type == "ebook":
+        entry_type = "book"
+        if "publisher" in data: fields["publisher"] = data["publisher"]
+        if "place" in data: fields["address"] = data["place"]
+        if "identifier" in data: fields["note"] = f"DOI/ISBN: {data['identifier']}"
+
+    elif source_type == "film":
+        entry_type = "movie" # biblatex supports movie, bibtex might need misc
+        if "directors" in data: fields["director"] = data["directors"]
+        if "distributor" in data: fields["publisher"] = data["distributor"]
+
+    # Construct BibTeX string
+    lines = [f"@{entry_type}{{{citation_key},"]
+    for key, value in fields.items():
+        if value:
+            lines.append(f"  {key} = {{{clean(value)}}},")
+    lines.append("}")
+    
+    return "\n".join(lines)
+
+
 def format_citation(style: str, source_type: str, data: dict) -> str:
     """
     Format a citation based on the specified style.
     
     Args:
-        style: Citation style (apa, mla, chicago, kanti_baden)
+        style: Citation style (apa, mla, chicago, kanti_baden, bibtex)
         source_type: Type of source (book, website, article, etc.)
         data: Dictionary with source information
         
     Returns:
         Formatted citation string
     """
+    if style.lower() == "bibtex":
+        return format_bibtex(source_type, data)
+
     formatters = {
         "apa": format_apa,
         "mla": format_mla,
