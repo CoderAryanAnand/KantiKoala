@@ -100,11 +100,10 @@
                         {% for item in category.items %}
                         <div class="flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group"
                              data-item-id="{{ item.id }}"
-                             data-category-id="{{ category.id }}"
-                             draggable="true">
+                             data-category-id="{{ category.id }}">
                             <!-- Drag Handle -->
                             <div class="cursor-move text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 mt-0.5 flex-shrink-0 drag-handle">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
                                 </svg>
                             </div>
@@ -178,9 +177,11 @@
 
 {% block scripts %}
 <!--
-    JavaScript for To-Do List functionality.
-    - Handles category expand/collapse, item completion, adding, and deleting.
-    - Manages popup modals and UI interactions.
+    SortableJS for drag-and-drop functionality.
+    - Enables drag-and-drop sorting with SortableJS.
+    - Loaded from CDN with nonce for CSP compliance.
 -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js" nonce="{{ csp_nonce() }}"></script>
 <script src="{{ url_for('static', filename='js/todo.js') }}"></script>
 {% endblock %}
+

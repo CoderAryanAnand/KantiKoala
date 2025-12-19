@@ -115,11 +115,10 @@ async function addTodoItem(categoryId) {
             itemEl.className = 'flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group';
             itemEl.setAttribute('data-item-id', data.item.id);
             itemEl.setAttribute('data-category-id', categoryId);
-            itemEl.setAttribute('draggable', 'true');
             
             itemEl.innerHTML = `
                 <div class="cursor-move text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 mt-0.5 flex-shrink-0 drag-handle">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
                     </svg>
                 </div>
@@ -132,10 +131,7 @@ async function addTodoItem(categoryId) {
             `;
             
             // Attach drag listeners
-            itemEl.addEventListener('dragstart', handleDragStart);
-            itemEl.addEventListener('dragover', handleDragOver);
-            itemEl.addEventListener('drop', handleDrop);
-            itemEl.addEventListener('dragend', handleDragEnd);
+            // No need to attach listeners manually, SortableJS handles it
             
             itemsContainer.appendChild(itemEl);
             updateItemCount(categoryId);
@@ -223,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.remove('rotated');
         }
     });
-    initDragAndDrop();
+    initSortable();
 });
 
 // Closes all popups when the Escape key is pressed
@@ -233,63 +229,42 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Drag and Drop Logic
-let draggedItem = null;
+// SortableJS Logic
+function initSortable() {
+    // Check if Sortable is loaded
+    if (typeof Sortable === 'undefined') {
+        console.warn('SortableJS not loaded yet, retrying in 100ms...');
+        setTimeout(initSortable, 100);
+        return;
+    }
 
-function initDragAndDrop() {
-    const items = document.querySelectorAll('[draggable="true"]');
-    items.forEach(item => {
-        item.addEventListener('dragstart', handleDragStart);
-        item.addEventListener('dragover', handleDragOver);
-        item.addEventListener('drop', handleDrop);
-        item.addEventListener('dragend', handleDragEnd);
+    const categories = document.querySelectorAll('[data-category-id]');
+    console.log(`Found ${categories.length} categories to initialize Sortable.`);
+
+    categories.forEach(cat => {
+        const categoryId = cat.getAttribute('data-category-id');
+        const itemsContainer = document.getElementById(`items-${categoryId}`);
+        
+        if (itemsContainer) {
+            // Check if Sortable is already initialized on this element
+            if (itemsContainer._sortable) {
+                itemsContainer._sortable.destroy();
+            }
+
+            itemsContainer._sortable = new Sortable(itemsContainer, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'bg-zinc-100',
+                delay: 0, 
+                touchStartThreshold: 5, // Helps with touch devices
+                onEnd: function (evt) {
+                    console.log(`Moved item in category ${categoryId}`);
+                    saveOrder(categoryId);
+                }
+            });
+            console.log(`Sortable initialized for category ${categoryId}`);
+        }
     });
-}
-
-function handleDragStart(e) {
-    draggedItem = this;
-    this.style.opacity = '0.4';
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', this.dataset.itemId);
-}
-
-function handleDragOver(e) {
-    if (e.preventDefault) {
-        e.preventDefault();
-    }
-    e.dataTransfer.dropEffect = 'move';
-    return false;
-}
-
-function handleDrop(e) {
-    if (e.stopPropagation) {
-        e.stopPropagation();
-    }
-    
-    if (draggedItem && draggedItem !== this) {
-        // Check if we are in the same category
-        if (draggedItem.dataset.categoryId !== this.dataset.categoryId) {
-            return false;
-        }
-
-        const bounding = this.getBoundingClientRect();
-        const offset = bounding.y + (bounding.height / 2);
-        
-        if (e.clientY - offset > 0) {
-            this.parentNode.insertBefore(draggedItem, this.nextSibling);
-        } else {
-            this.parentNode.insertBefore(draggedItem, this);
-        }
-        
-        // Save the new order
-        saveOrder(this.dataset.categoryId);
-    }
-    return false;
-}
-
-function handleDragEnd(e) {
-    this.style.opacity = '1';
-    draggedItem = null;
 }
 
 async function saveOrder(categoryId) {
