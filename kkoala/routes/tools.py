@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file
-from ..models import ToDoCategory, FlashcardSet, Flashcard
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file, abort
+from ..models import ToDoCategory, FlashcardSet, Flashcard, UserFlashcardStar
 from ..extensions import db
 from ..utils import login_required
 import json
@@ -71,28 +71,58 @@ def create_flashcard_set(user):
     data = request.json
     title = data.get("title")
     description = data.get("description")
+    is_public = data.get("is_public", False)
     
     if not title:
         return jsonify({"error": "Title is required"}), 400
         
-    new_set = FlashcardSet(user_id=user.id, title=title, description=description)
+    new_set = FlashcardSet(user_id=user.id, title=title, description=description, is_public=is_public)
     db.session.add(new_set)
     db.session.commit()
     
-    return jsonify({"id": new_set.id, "message": "Set created successfully"})
+    return jsonify({"id": new_set.share_token, "message": "Set created successfully"})
 
-@tools_bp.route("/lernkarten/<int:set_id>")
+@tools_bp.route("/lernkarten/<string:token_or_id>")
 @login_required
-def view_flashcard_set(user, set_id):
-    card_set = FlashcardSet.query.filter_by(id=set_id, user_id=user.id).first_or_404()
+def view_flashcard_set(user, token_or_id):
+    # Try to find by token first, then by ID (for backward compatibility or internal links)
+    card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()
+    if not card_set:
+        if token_or_id.isdigit():
+            card_set = FlashcardSet.query.get_or_404(int(token_or_id))
+        else:
+            abort(404)
+    
+    # Check permissions
+    is_owner = (card_set.user_id == user.id)
+    if not is_owner and not card_set.is_public:
+        abort(403)
+        
     # Sort cards by rank
     cards = sorted(card_set.cards, key=lambda x: x.rank)
-    return render_template("tools_flashcards_view.html", card_set=card_set, cards=cards)
+    
+    # Annotate cards with starred status for the current user
+    starred_card_ids = {
+        star.flashcard_id for star in UserFlashcardStar.query.filter_by(user_id=user.id).all()
+    }
+    
+    # We can't modify the card objects directly as they are DB objects, so we'll pass a set of IDs
+    # or attach a temporary attribute if not committed
+    for card in cards:
+        card.is_starred_by_user = (card.id in starred_card_ids)
 
-@tools_bp.route("/lernkarten/<int:set_id>/update", methods=["POST"])
+    return render_template("tools_flashcards_view.html", card_set=card_set, cards=cards, is_owner=is_owner)
+
+@tools_bp.route("/lernkarten/<string:token_or_id>/update", methods=["POST"])
 @login_required
-def update_flashcard_set(user, set_id):
-    card_set = FlashcardSet.query.filter_by(id=set_id, user_id=user.id).first_or_404()
+def update_flashcard_set(user, token_or_id):
+    card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()
+    if not card_set and token_or_id.isdigit():
+        card_set = FlashcardSet.query.get(int(token_or_id))
+        
+    if not card_set or card_set.user_id != user.id:
+        abort(404) # Or 403
+
     data = request.json
     
     # Update set details
@@ -100,29 +130,62 @@ def update_flashcard_set(user, set_id):
         card_set.title = data["title"]
     if "description" in data:
         card_set.description = data["description"]
+    if "is_public" in data:
+        card_set.is_public = data["is_public"]
         
-    # Update cards
+    # Update cards (Full replacement logic - only for owner)
     if "cards" in data:
-        # Remove existing cards (simple approach for now)
-        Flashcard.query.filter_by(set_id=set_id).delete()
+        # Remove existing cards
+        Flashcard.query.filter_by(set_id=card_set.id).delete()
         
         for i, card_data in enumerate(data["cards"]):
             new_card = Flashcard(
-                set_id=set_id,
+                set_id=card_set.id,
                 term=card_data["term"],
                 definition=card_data["definition"],
-                rank=i,
-                starred=card_data.get("starred", False)
+                rank=i
+                # starred is ignored here as it's per-user now
             )
             db.session.add(new_card)
             
     db.session.commit()
     return jsonify({"message": "Set updated successfully"})
 
-@tools_bp.route("/lernkarten/<int:set_id>/delete", methods=["DELETE"])
+@tools_bp.route("/lernkarten/card/<int:card_id>/star", methods=["POST"])
 @login_required
-def delete_flashcard_set(user, set_id):
-    card_set = FlashcardSet.query.filter_by(id=set_id, user_id=user.id).first_or_404()
+def toggle_card_star(user, card_id):
+    data = request.json
+    starred = data.get("starred")
+    
+    # Check if card exists
+    card = Flashcard.query.get_or_404(card_id)
+    
+    # Check access (must be public or owner)
+    if not card.set.is_public and card.set.user_id != user.id:
+        abort(403)
+
+    if starred:
+        # Add star
+        if not UserFlashcardStar.query.filter_by(user_id=user.id, flashcard_id=card_id).first():
+            star = UserFlashcardStar(user_id=user.id, flashcard_id=card_id)
+            db.session.add(star)
+    else:
+        # Remove star
+        UserFlashcardStar.query.filter_by(user_id=user.id, flashcard_id=card_id).delete()
+        
+    db.session.commit()
+    return jsonify({"success": True})
+
+@tools_bp.route("/lernkarten/<string:token_or_id>/delete", methods=["DELETE"])
+@login_required
+def delete_flashcard_set(user, token_or_id):
+    card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()
+    if not card_set and token_or_id.isdigit():
+        card_set = FlashcardSet.query.get(int(token_or_id))
+        
+    if not card_set or card_set.user_id != user.id:
+        abort(404)
+        
     db.session.delete(card_set)
     db.session.commit()
     return jsonify({"message": "Set deleted successfully"})
@@ -156,7 +219,7 @@ def import_flashcard_set(user):
                 db.session.add(new_card)
                 
             db.session.commit()
-            return jsonify({"message": "Set imported successfully", "id": new_set.id})
+            return jsonify({"message": "Set imported successfully", "id": new_set.share_token})
         except Exception as e:
             return jsonify({"error": str(e)}), 400
 
@@ -229,20 +292,29 @@ def import_flashcard_set(user):
             db.session.add(new_card)
         
         db.session.commit()
-        return jsonify({"message": "Set imported successfully", "id": new_set.id})
+        return jsonify({"message": "Set imported successfully", "id": new_set.share_token})
 
     else:
         return jsonify({"error": "Invalid request"}), 400
 
-@tools_bp.route("/lernkarten/<int:set_id>/export")
+@tools_bp.route("/lernkarten/<string:token_or_id>/export")
 @login_required
-def export_flashcard_set(user, set_id):
-    card_set = FlashcardSet.query.filter_by(id=set_id, user_id=user.id).first_or_404()
+def export_flashcard_set(user, token_or_id):
+    card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()
+    if not card_set and token_or_id.isdigit():
+        card_set = FlashcardSet.query.get(int(token_or_id))
+        
+    if not card_set:
+        abort(404)
+        
+    # Check permissions (must be public or owner)
+    if not card_set.is_public and card_set.user_id != user.id:
+        abort(403)
     
     data = {
         "title": card_set.title,
         "description": card_set.description,
-        "cards": [{"term": c.term, "definition": c.definition, "starred": c.starred} for c in card_set.cards]
+        "cards": [{"term": c.term, "definition": c.definition} for c in card_set.cards]
     }
     
     # Return as a downloadable JSON file

@@ -31,7 +31,7 @@
 <!-- Sets Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for set in sets %}
-    <a href="{{ url_for('tools.view_flashcard_set', set_id=set.id) }}" class="block p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-700">
+    <a href="{{ url_for('tools.view_flashcard_set', token_or_id=set.share_token) }}" class="block p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-700">
         <h3 class="text-xl font-bold text-zinc-800 dark:text-white mb-2">{{ set.title }}</h3>
         <p class="text-zinc-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">{{ set.description or 'Keine Beschreibung' }}</p>
         <div class="flex justify-between items-center text-sm text-zinc-500 dark:text-zinc-500">
@@ -52,6 +52,11 @@
         <h2 class="text-2xl font-bold text-zinc-800 dark:text-white mb-4">Neues Lernset</h2>
         <input type="text" id="new-set-title" placeholder="Titel" class="w-full mb-4 p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
         <textarea id="new-set-desc" placeholder="Beschreibung (optional)" class="w-full mb-4 p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white"></textarea>
+        <label class="relative inline-flex items-center cursor-pointer mb-4">
+            <input type="checkbox" id="new-set-public" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">Öffentlich (Teilbar per Link)</span>
+        </label>
         <div class="flex justify-end gap-2">
             <button onclick="closeCreateModal()" class="px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded">Abbrechen</button>
             <button onclick="createSet()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Erstellen</button>
@@ -140,13 +145,14 @@ function switchImportTab(tab) {
 async function createSet() {
     const title = document.getElementById('new-set-title').value;
     const description = document.getElementById('new-set-desc').value;
+    const is_public = document.getElementById('new-set-public').checked;
     
     if (!title) return alert('Titel ist erforderlich');
     
     const response = await fetch('/tools/lernkarten/create', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({title, description})
+        body: JSON.stringify({title, description, is_public})
     });
     
     if (response.ok) {
@@ -170,7 +176,8 @@ async function submitImport() {
         });
         
         if (response.ok) {
-            window.location.reload();
+            const data = await response.json();
+            window.location.href = `/tools/lernkarten/${data.id}`;
         } else {
             const data = await response.json();
             alert(data.error || 'Fehler beim Importieren');
@@ -194,7 +201,8 @@ async function submitImport() {
         });
         
         if (response.ok) {
-            window.location.reload();
+            const data = await response.json();
+            window.location.href = `/tools/lernkarten/${data.id}`;
         } else {
             const data = await response.json();
             alert(data.error || 'Fehler beim Importieren');

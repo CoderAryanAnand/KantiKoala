@@ -1,5 +1,9 @@
 from .extensions import db
 from datetime import datetime
+import secrets
+
+def generate_token():
+    return secrets.token_urlsafe(12)
 
 # -------------------------------
 # User authentication and profile
@@ -302,6 +306,8 @@ class FlashcardSet(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=True)
+    is_public = db.Column(db.Boolean, default=False)
+    share_token = db.Column(db.String(32), unique=True, nullable=False, default=generate_token)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationship to cards
@@ -318,4 +324,12 @@ class Flashcard(db.Model):
     term = db.Column(db.Text, nullable=False)
     definition = db.Column(db.Text, nullable=False)
     rank = db.Column(db.Integer, default=0)  # For ordering
+    # starred is deprecated in favor of UserFlashcardStar, but kept for migration/compatibility if needed
     starred = db.Column(db.Boolean, default=False)
+
+class UserFlashcardStar(db.Model):
+    """
+    Tracks which user has starred which flashcard.
+    """
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
+    flashcard_id = db.Column(db.Integer, db.ForeignKey('flashcard.id', ondelete='CASCADE'), primary_key=True)

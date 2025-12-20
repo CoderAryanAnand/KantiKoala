@@ -19,7 +19,7 @@ module.exports = {
 module.exports = {
   content: [
     './kkoala/templates/**/*.{html,js}',
-    './kkoala/components/**/*.{html,js}',
+    './kkoala/static/**/*.{html,js}',
   ],
   darkMode: 'class',
   theme: {
