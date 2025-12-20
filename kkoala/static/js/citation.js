@@ -522,7 +522,7 @@ async function createGroup() {
     const name = nameInput.value.trim();
     
     if (!name) {
-        alert('Bitte gib einen Gruppennamen ein.');
+        showCitationNotification('Fehler', 'Bitte gib einen Gruppennamen ein.', 'error');
         return;
     }
     
@@ -541,21 +541,72 @@ async function createGroup() {
             loadGroups();
         } else {
             const result = await response.json();
-            alert(result.error || 'Fehler beim Erstellen der Gruppe');
+            showCitationNotification('Fehler', result.error || 'Fehler beim Erstellen der Gruppe', 'error');
         }
     } catch (error) {
         console.error('Error creating group:', error);
-        alert('Fehler beim Erstellen der Gruppe');
+        showCitationNotification('Fehler', 'Fehler beim Erstellen der Gruppe', 'error');
     }
 }
 
-async function deleteGroup(groupId) {
-    if (!confirm('Möchtest du diese Gruppe und alle Zitate darin wirklich löschen?')) {
-        return;
+let groupIdToDelete = null;
+
+function showCitationNotification(title, message, type = 'info') {
+    const popup = document.getElementById('citation-notification-popup');
+    const icon = document.getElementById('citation-notification-icon');
+    const titleEl = document.getElementById('citation-notification-title');
+    const messageEl = document.getElementById('citation-notification-message');
+    const overlay = document.getElementById('citation-overlay');
+    
+    if (!popup) return; // Fallback if modal doesn't exist
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set icon based on type
+    if (type === 'error') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    } else if (type === 'success') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    } else {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
     }
     
+    overlay.classList.remove('hidden');
+    popup.classList.remove('hidden');
+}
+
+function closeCitationNotification() {
+    const popup = document.getElementById('citation-notification-popup');
+    const overlay = document.getElementById('citation-overlay');
+    if (popup) popup.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+}
+
+function openDeleteGroupConfirm(groupId) {
+    groupIdToDelete = groupId;
+    document.getElementById('citation-overlay').classList.remove('hidden');
+    document.getElementById('delete-group-confirm-popup').classList.remove('hidden');
+}
+
+function closeDeleteGroupConfirm() {
+    groupIdToDelete = null;
+    document.getElementById('citation-overlay').classList.add('hidden');
+    document.getElementById('delete-group-confirm-popup').classList.add('hidden');
+}
+
+function deleteGroup(groupId) {
+    openDeleteGroupConfirm(groupId);
+}
+
+async function confirmDeleteGroup() {
+    if (!groupIdToDelete) return;
+    
     try {
-        const response = await fetch(`${API_BASE}/groups/${groupId}`, {
+        const response = await fetch(`${API_BASE}/groups/${groupIdToDelete}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-Token': getCsrfToken()
@@ -563,14 +614,15 @@ async function deleteGroup(groupId) {
         });
         
         if (response.ok) {
+            closeDeleteGroupConfirm();
             loadGroups();
         } else {
             const result = await response.json();
-            alert(result.error || 'Fehler beim Löschen der Gruppe');
+            showCitationNotification('Fehler', result.error || 'Fehler beim Löschen der Gruppe', 'error');
         }
     } catch (error) {
         console.error('Error deleting group:', error);
-        alert('Fehler beim Löschen der Gruppe');
+        showCitationNotification('Fehler', 'Fehler beim Löschen der Gruppe', 'error');
     }
 }
 
@@ -593,7 +645,7 @@ async function saveGroupName() {
     const name = document.getElementById('edit-group-name').value.trim();
     
     if (!name) {
-        alert('Bitte gib einen Gruppennamen ein.');
+        showCitationNotification('Fehler', 'Bitte gib einen Gruppennamen ein.', 'error');
         return;
     }
     
@@ -612,11 +664,11 @@ async function saveGroupName() {
             loadGroups();
         } else {
             const result = await response.json();
-            alert(result.error || 'Fehler beim Speichern');
+            showCitationNotification('Fehler', result.error || 'Fehler beim Speichern', 'error');
         }
     } catch (error) {
         console.error('Error updating group:', error);
-        alert('Fehler beim Speichern');
+        showCitationNotification('Fehler', 'Fehler beim Speichern', 'error');
     }
 }
 
@@ -628,7 +680,7 @@ async function saveCitation() {
     const groupId = document.getElementById('target-group').value;
     
     if (!groupId) {
-        alert('Bitte wähle eine Gruppe aus.');
+        showCitationNotification('Fehler', 'Bitte wähle eine Gruppe aus.', 'error');
         return;
     }
     
@@ -659,21 +711,37 @@ async function saveCitation() {
             loadGroups();
         } else {
             const result = await response.json();
-            alert(result.error || 'Fehler beim Speichern des Zitats');
+            showCitationNotification('Fehler', result.error || 'Fehler beim Speichern des Zitats', 'error');
         }
     } catch (error) {
         console.error('Error saving citation:', error);
-        alert('Fehler beim Speichern des Zitats');
+        showCitationNotification('Fehler', 'Fehler beim Speichern des Zitats', 'error');
     }
 }
 
-async function deleteCitation(citationId) {
-    if (!confirm('Möchtest du dieses Zitat wirklich löschen?')) {
-        return;
-    }
+let citationIdToDelete = null;
+
+function openDeleteCitationConfirm(citationId) {
+    citationIdToDelete = citationId;
+    document.getElementById('citation-overlay').classList.remove('hidden');
+    document.getElementById('delete-citation-confirm-popup').classList.remove('hidden');
+}
+
+function closeDeleteCitationConfirm() {
+    citationIdToDelete = null;
+    document.getElementById('citation-overlay').classList.add('hidden');
+    document.getElementById('delete-citation-confirm-popup').classList.add('hidden');
+}
+
+function deleteCitation(citationId) {
+    openDeleteCitationConfirm(citationId);
+}
+
+async function confirmDeleteCitation() {
+    if (!citationIdToDelete) return;
     
     try {
-        const response = await fetch(`${API_BASE}/citations/${citationId}`, {
+        const response = await fetch(`${API_BASE}/citations/${citationIdToDelete}`, {
             method: 'DELETE',
             headers: {
                 'X-CSRF-Token': getCsrfToken()
@@ -681,14 +749,15 @@ async function deleteCitation(citationId) {
         });
         
         if (response.ok) {
+            closeDeleteCitationConfirm();
             loadGroups();
         } else {
             const result = await response.json();
-            alert(result.error || 'Fehler beim Löschen des Zitats');
+            showCitationNotification('Fehler', result.error || 'Fehler beim Löschen des Zitats', 'error');
         }
     } catch (error) {
         console.error('Error deleting citation:', error);
-        alert('Fehler beim Löschen des Zitats');
+        showCitationNotification('Fehler', 'Fehler beim Löschen des Zitats', 'error');
     }
 }
 
@@ -705,7 +774,7 @@ function openEditCitationModal(citationId) {
     }
     
     if (!citation) {
-        alert('Zitat nicht gefunden');
+        showCitationNotification('Fehler', 'Zitat nicht gefunden', 'error');
         return;
     }
     
@@ -819,11 +888,11 @@ async function updateCitation() {
             loadGroups();
         } else {
             const result = await response.json();
-            alert(result.error || 'Fehler beim Aktualisieren des Zitats');
+            showCitationNotification('Fehler', result.error || 'Fehler beim Aktualisieren des Zitats', 'error');
         }
     } catch (error) {
         console.error('Error updating citation:', error);
-        alert('Fehler beim Aktualisieren des Zitats');
+        showCitationNotification('Fehler', 'Fehler beim Aktualisieren des Zitats', 'error');
     }
 }
 
@@ -834,7 +903,7 @@ async function updateCitation() {
 function copyGroupCitations(groupId) {
     const group = groups.find(g => g.id === groupId);
     if (!group || !group.citations || group.citations.length === 0) {
-        alert('Keine Zitate zum Kopieren vorhanden.');
+        showCitationNotification('Info', 'Keine Zitate zum Kopieren vorhanden.', 'info');
         return;
     }
     
@@ -929,4 +998,37 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.getElementById('save-citation').addEventListener('click', saveCitation);
     document.getElementById('copy-citation').addEventListener('click', copyCitation);
+    
+    // Delete modal event listeners
+    const deleteGroupCancelBtn = document.getElementById('delete-group-cancel-btn');
+    const confirmDeleteGroupBtn = document.getElementById('confirm-delete-group-btn');
+    const deleteCitationCancelBtn = document.getElementById('delete-citation-cancel-btn');
+    const confirmDeleteCitationBtn = document.getElementById('confirm-delete-citation-btn');
+    const citationOverlay = document.getElementById('citation-overlay');
+    
+    if (deleteGroupCancelBtn) {
+        deleteGroupCancelBtn.addEventListener('click', closeDeleteGroupConfirm);
+    }
+    if (confirmDeleteGroupBtn) {
+        confirmDeleteGroupBtn.addEventListener('click', confirmDeleteGroup);
+    }
+    if (deleteCitationCancelBtn) {
+        deleteCitationCancelBtn.addEventListener('click', closeDeleteCitationConfirm);
+    }
+    if (confirmDeleteCitationBtn) {
+        confirmDeleteCitationBtn.addEventListener('click', confirmDeleteCitation);
+    }
+    if (citationOverlay) {
+        citationOverlay.addEventListener('click', () => {
+            closeDeleteGroupConfirm();
+            closeDeleteCitationConfirm();
+        });
+    }
+    
+    // Notification modal event listener
+    const citationNotificationOkBtn = document.getElementById('citation-notification-ok-btn');
+    if (citationNotificationOkBtn) {
+        citationNotificationOkBtn.addEventListener('click', closeCitationNotification);
+    }
 });
+

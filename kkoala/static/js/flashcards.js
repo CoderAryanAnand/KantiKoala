@@ -25,9 +25,65 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('star-filter-container').classList.remove('hidden');
     }
     
+    // Setup delete modal event listeners
+    const deleteSetCancelBtn = document.getElementById('delete-set-cancel-btn');
+    const confirmDeleteSetBtn = document.getElementById('confirm-delete-set-btn');
+    const overlay = document.getElementById('overlay');
+    
+    if (deleteSetCancelBtn) {
+        deleteSetCancelBtn.addEventListener('click', closeDeleteSetConfirm);
+    }
+    if (confirmDeleteSetBtn) {
+        confirmDeleteSetBtn.addEventListener('click', confirmDeleteSet);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', closeDeleteSetConfirm);
+    }
+    
+    // Setup notification modal event listeners
+    const notificationOkBtn = document.getElementById('notification-ok-btn');
+    if (notificationOkBtn) {
+        notificationOkBtn.addEventListener('click', closeNotification);
+    }
+    
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboard);
 });
+
+function showNotification(title, message, type = 'info') {
+    const popup = document.getElementById('notification-popup');
+    const icon = document.getElementById('notification-icon');
+    const titleEl = document.getElementById('notification-title');
+    const messageEl = document.getElementById('notification-message');
+    const overlay = document.getElementById('overlay');
+    
+    if (!popup) return; // Fallback if modal doesn't exist
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set icon based on type
+    if (type === 'error') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    } else if (type === 'success') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    } else {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+    }
+    
+    overlay.classList.remove('hidden');
+    popup.classList.remove('hidden');
+}
+
+function closeNotification() {
+    const popup = document.getElementById('notification-popup');
+    const overlay = document.getElementById('overlay');
+    if (popup) popup.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+}
 
 function handleKeyboard(e) {
     // Don't trigger if user is typing in an input
@@ -751,7 +807,7 @@ function addCardInput() {
     if (allCards.length > 0) {
         const lastCard = allCards[allCards.length - 1];
         if (!lastCard.term.trim() || !lastCard.definition.trim()) {
-            alert("Bitte fülle die letzte Karte aus, bevor du eine neue hinzufügst.");
+            showNotification('Fehler', 'Bitte fülle die letzte Karte aus, bevor du eine neue hinzufügst.', 'error');
             return;
         }
     }
@@ -786,7 +842,7 @@ async function saveSet() {
     // Validation: Check for empty fields
     const invalidCards = allCards.filter(c => !c.term.trim() || !c.definition.trim());
     if (invalidCards.length > 0) {
-        alert('Bitte fülle alle Begriffe und Definitionen aus.');
+        showNotification('Fehler', 'Bitte fülle alle Begriffe und Definitionen aus.', 'error');
         return;
     }
 
@@ -824,13 +880,25 @@ async function saveSet() {
     } catch (error) {
         saveBtn.textContent = originalText;
         saveBtn.disabled = false;
-        alert('Fehler beim Speichern');
+        showNotification('Fehler', 'Fehler beim Speichern', 'error');
     }
 }
 
+function openDeleteSetConfirm() {
+    document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('delete-set-confirm-popup').classList.remove('hidden');
+}
+
+function closeDeleteSetConfirm() {
+    document.getElementById('overlay').classList.add('hidden');
+    document.getElementById('delete-set-confirm-popup').classList.add('hidden');
+}
+
 async function deleteSet() {
-    if (!confirm('Möchtest du dieses Set wirklich löschen?')) return;
-    
+    openDeleteSetConfirm();
+}
+
+async function confirmDeleteSet() {
     const response = await fetch(`/tools/lernkarten/${SET_ID}/delete`, {
         method: 'DELETE'
     });
@@ -873,23 +941,23 @@ async function togglePublicStatus() {
             // Reload to update UI (e.g. show/hide share button)
             window.location.reload();
         } else {
-            alert('Fehler beim Aktualisieren des Status');
+            showNotification('Fehler', 'Fehler beim Aktualisieren des Status', 'error');
             // Revert toggle
             document.getElementById('public-toggle').checked = !isPublic;
             label.textContent = !isPublic ? 'Öffentlich' : 'Privat';
         }
     } catch (e) {
         console.error(e);
-        alert('Fehler beim Aktualisieren des Status');
+        showNotification('Fehler', 'Fehler beim Aktualisieren des Status', 'error');
     }
 }
 
 function shareSet() {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
-        alert('Link in die Zwischenablage kopiert!');
+        showNotification('Erfolg', 'Link in die Zwischenablage kopiert!', 'success');
     }).catch(err => {
         console.error('Fehler beim Kopieren:', err);
-        alert('Konnte Link nicht kopieren. Bitte kopiere die URL aus der Adresszeile.');
+        showNotification('Fehler', 'Konnte Link nicht kopieren. Bitte kopiere die URL aus der Adresszeile.', 'error');
     });
 }

@@ -64,6 +64,18 @@
     </div>
 </div>
 
+<!-- Notification/Error Modal -->
+<div id="notification-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-xl w-full max-w-md text-center">
+        <div id="notif-icon" class="mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full">
+            <!-- Icon will be inserted here -->
+        </div>
+        <h3 id="notif-title" class="text-xl font-bold text-zinc-800 dark:text-white mb-2"></h3>
+        <p id="notif-message" class="text-zinc-600 dark:text-zinc-400 mb-4"></p>
+        <button onclick="closeNotificationModal()" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">OK</button>
+    </div>
+</div>
+
 <!-- Import Modal -->
 <div id="import-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
     <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-xl w-full max-w-md">
@@ -117,6 +129,37 @@ function closeImportModal() {
     document.getElementById('import-modal').classList.remove('flex');
 }
 
+function showNotification(title, message, type = 'info') {
+    const modal = document.getElementById('notification-modal');
+    const icon = document.getElementById('notif-icon');
+    const titleEl = document.getElementById('notif-title');
+    const messageEl = document.getElementById('notif-message');
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set icon based on type
+    if (type === 'error') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    } else if (type === 'success') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    } else {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeNotificationModal() {
+    const modal = document.getElementById('notification-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
 let currentImportTab = 'file';
 function switchImportTab(tab) {
     currentImportTab = tab;
@@ -147,7 +190,7 @@ async function createSet() {
     const description = document.getElementById('new-set-desc').value;
     const is_public = document.getElementById('new-set-public').checked;
     
-    if (!title) return alert('Titel ist erforderlich');
+    if (!title) return showNotification('Fehler', 'Titel ist erforderlich', 'error');
     
     const response = await fetch('/tools/lernkarten/create', {
         method: 'POST',
@@ -165,7 +208,7 @@ async function submitImport() {
     if (currentImportTab === 'file') {
         const fileInput = document.getElementById('import-file-input');
         const file = fileInput.files[0];
-        if (!file) return alert('Bitte wähle eine Datei aus.');
+        if (!file) return showNotification('Fehler', 'Bitte wähle eine Datei aus.', 'error');
         
         const formData = new FormData();
         formData.append('file', file);
@@ -180,15 +223,15 @@ async function submitImport() {
             window.location.href = `/tools/lernkarten/${data.id}`;
         } else {
             const data = await response.json();
-            alert(data.error || 'Fehler beim Importieren');
+            showNotification('Fehler', data.error || 'Fehler beim Importieren', 'error');
         }
     } else {
         const title = document.getElementById('import-text-title').value;
         const content = document.getElementById('import-text-content').value;
         const delimiter = document.getElementById('import-delimiter').value;
         
-        if (!title) return alert('Bitte gib einen Titel ein.');
-        if (!content) return alert('Bitte gib Begriffe ein.');
+        if (!title) return showNotification('Fehler', 'Bitte gib einen Titel ein.', 'error');
+        if (!content) return showNotification('Fehler', 'Bitte gib Begriffe ein.', 'error');
         
         const response = await fetch('/tools/lernkarten/import', {
             method: 'POST',
@@ -205,7 +248,7 @@ async function submitImport() {
             window.location.href = `/tools/lernkarten/${data.id}`;
         } else {
             const data = await response.json();
-            alert(data.error || 'Fehler beim Importieren');
+            showNotification('Fehler', data.error || 'Fehler beim Importieren', 'error');
         }
     }
 }
