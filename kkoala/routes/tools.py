@@ -56,7 +56,7 @@ def citation_generator(user):
     return render_template("tools_citation.html")
 
 
-@tools_bp.route("/lernkarten")
+@tools_bp.route("/lernsets")
 @login_required
 def flashcards(user):
     """
@@ -65,7 +65,7 @@ def flashcards(user):
     sets = FlashcardSet.query.filter_by(user_id=user.id).order_by(FlashcardSet.created_at.desc()).all()
     return render_template("tools_flashcards.html", sets=sets)
 
-@tools_bp.route("/lernkarten/create", methods=["POST"])
+@tools_bp.route("/lernsets/create", methods=["POST"])
 @login_required
 def create_flashcard_set(user):
     data = request.json
@@ -82,7 +82,7 @@ def create_flashcard_set(user):
     
     return jsonify({"id": new_set.share_token, "message": "Set created successfully"})
 
-@tools_bp.route("/lernkarten/<string:token_or_id>")
+@tools_bp.route("/lernsets/<string:token_or_id>")
 @login_required
 def view_flashcard_set(user, token_or_id):
     # Try to find by token first, then by ID (for backward compatibility or internal links)
@@ -113,7 +113,7 @@ def view_flashcard_set(user, token_or_id):
 
     return render_template("tools_flashcards_view.html", card_set=card_set, cards=cards, is_owner=is_owner)
 
-@tools_bp.route("/lernkarten/<string:token_or_id>/update", methods=["POST"])
+@tools_bp.route("/lernsets/<string:token_or_id>/update", methods=["POST"])
 @login_required
 def update_flashcard_set(user, token_or_id):
     card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()
@@ -151,7 +151,7 @@ def update_flashcard_set(user, token_or_id):
     db.session.commit()
     return jsonify({"message": "Set updated successfully"})
 
-@tools_bp.route("/lernkarten/card/<int:card_id>/star", methods=["POST"])
+@tools_bp.route("/lernsets/card/<int:card_id>/star", methods=["POST"])
 @login_required
 def toggle_card_star(user, card_id):
     data = request.json
@@ -176,7 +176,7 @@ def toggle_card_star(user, card_id):
     db.session.commit()
     return jsonify({"success": True})
 
-@tools_bp.route("/lernkarten/<string:token_or_id>/delete", methods=["DELETE"])
+@tools_bp.route("/lernsets/<string:token_or_id>/delete", methods=["DELETE"])
 @login_required
 def delete_flashcard_set(user, token_or_id):
     card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()
@@ -190,7 +190,7 @@ def delete_flashcard_set(user, token_or_id):
     db.session.commit()
     return jsonify({"message": "Set deleted successfully"})
 
-@tools_bp.route("/lernkarten/import", methods=["POST"])
+@tools_bp.route("/lernsets/import", methods=["POST"])
 @login_required
 def import_flashcard_set(user):
     # Handle File Upload (JSON)
@@ -297,7 +297,7 @@ def import_flashcard_set(user):
     else:
         return jsonify({"error": "Invalid request"}), 400
 
-@tools_bp.route("/lernkarten/<string:token_or_id>/export")
+@tools_bp.route("/lernsets/<string:token_or_id>/export")
 @login_required
 def export_flashcard_set(user, token_or_id):
     card_set = FlashcardSet.query.filter_by(share_token=token_or_id).first()

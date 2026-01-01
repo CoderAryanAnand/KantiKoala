@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Lernkarten - KantiKoala{% endblock %}
+{% block title %}Lernsets - KantiKoala{% endblock %}
 
 {% block content %}
 <div class="w-full mb-4">
@@ -14,8 +14,8 @@
 
 <div class="flex justify-between items-center mb-8">
     <div>
-        <h1 class="text-4xl font-bold text-zinc-800 dark:text-white mb-2">Lernkarten</h1>
-        <p class="text-zinc-600 dark:text-zinc-400">Erstelle und lerne mit digitalen Karteikarten.</p>
+        <h1 class="text-4xl font-bold text-zinc-800 dark:text-white mb-2">Lernsets</h1>
+        <p class="text-zinc-600 dark:text-zinc-400">Erstelle und lerne mit digitalen Lernsets.</p>
     </div>
     <div class="flex gap-2">
         <button onclick="openImportModal()" class="px-4 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
@@ -192,7 +192,7 @@ async function createSet() {
     
     if (!title) return showNotification('Fehler', 'Titel ist erforderlich', 'error');
     
-    const response = await fetch('/tools/lernkarten/create', {
+    const response = await fetch('/tools/lernsets/create', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({title, description, is_public})
@@ -200,7 +200,7 @@ async function createSet() {
     
     if (response.ok) {
         const data = await response.json();
-        window.location.href = `/tools/lernkarten/${data.id}`;
+        window.location.href = `/tools/lernsets/${data.id}`;
     }
 }
 
@@ -213,14 +213,14 @@ async function submitImport() {
         const formData = new FormData();
         formData.append('file', file);
         
-        const response = await fetch('/tools/lernkarten/import', {
+        const response = await fetch('/tools/lernsets/import', {
             method: 'POST',
             body: formData
         });
         
         if (response.ok) {
             const data = await response.json();
-            window.location.href = `/tools/lernkarten/${data.id}`;
+            window.location.href = `/tools/lernsets/${data.id}`;
         } else {
             const data = await response.json();
             showNotification('Fehler', data.error || 'Fehler beim Importieren', 'error');
@@ -233,7 +233,7 @@ async function submitImport() {
         if (!title) return showNotification('Fehler', 'Bitte gib einen Titel ein.', 'error');
         if (!content) return showNotification('Fehler', 'Bitte gib Begriffe ein.', 'error');
         
-        const response = await fetch('/tools/lernkarten/import', {
+        const response = await fetch('/tools/lernsets/import', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -245,7 +245,7 @@ async function submitImport() {
         
         if (response.ok) {
             const data = await response.json();
-            window.location.href = `/tools/lernkarten/${data.id}`;
+            window.location.href = `/tools/lernsets/${data.id}`;
         } else {
             const data = await response.json();
             showNotification('Fehler', data.error || 'Fehler beim Importieren', 'error');

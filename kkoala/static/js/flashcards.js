@@ -258,7 +258,7 @@ function toggleStarCurrent() {
         renderStaticTermsList();
         
         // Save to server
-        fetch(`/tools/lernkarten/card/${originalCard.id}/star`, {
+        fetch(`/tools/lernsets/card/${originalCard.id}/star`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ starred: originalCard.starred })
@@ -792,7 +792,7 @@ async function toggleStarInStaticList(index) {
     
     // Save to server immediately (using new endpoint)
     try {
-        await fetch(`/tools/lernkarten/card/${allCards[index].id}/star`, {
+        await fetch(`/tools/lernsets/card/${allCards[index].id}/star`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ starred: allCards[index].starred })
@@ -852,7 +852,7 @@ async function saveSet() {
     saveBtn.disabled = true;
 
     try {
-        const response = await fetch(`/tools/lernkarten/${SET_ID}/update`, {
+        const response = await fetch(`/tools/lernsets/${SET_ID}/update`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ cards: allCards })
@@ -899,12 +899,12 @@ async function deleteSet() {
 }
 
 async function confirmDeleteSet() {
-    const response = await fetch(`/tools/lernkarten/${SET_ID}/delete`, {
+    const response = await fetch(`/tools/lernsets/${SET_ID}/delete`, {
         method: 'DELETE'
     });
     
     if (response.ok) {
-        window.location.href = '/tools/lernkarten';
+        window.location.href = '/tools/lernsets';
     }
 }
 
@@ -913,7 +913,7 @@ async function exportSet() {
     // But export route likely needs ID or token. Let's assume token works if backend supports it.
     // Wait, export route wasn't updated to use token_or_id. I should check that.
     // Assuming I update export route too.
-    const response = await fetch(`/tools/lernkarten/${SET_ID}/export`);
+    const response = await fetch(`/tools/lernsets/${SET_ID}/export`);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -931,7 +931,7 @@ async function togglePublicStatus() {
     label.textContent = isPublic ? 'Öffentlich' : 'Privat';
     
     try {
-        const response = await fetch(`/tools/lernkarten/${SET_ID}/update`, {
+        const response = await fetch(`/tools/lernsets/${SET_ID}/update`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({is_public: isPublic})
