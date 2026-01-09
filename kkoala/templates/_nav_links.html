@@ -15,6 +15,24 @@
     <a href="{{ url_for('main.about') }}" class="flex items-center px-4 py-2 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700">Über uns</a>
     <a href="{{ url_for('main.hilfe') }}" class="flex items-center px-4 py-2 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700">Hilfe</a>
     <a href="{{ url_for('settings.settings_view') }}" class="flex items-center px-4 py-2 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700">Einstellungen</a>
+    
+    {% if session.is_teacher or session.is_admin %}
+    <div class="border-t border-zinc-200 dark:border-zinc-700 my-2 pt-2">
+        <p class="px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Lehrerbereich</p>
+        <a href="{{ url_for('lernen.manage') }}" class="flex items-center px-4 py-2 text-purple-600 dark:text-purple-400 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-900/30 font-medium">
+            Lehrplan verwalten
+        </a>
+    </div>
+    {% endif %}
+
+    {% if session.is_admin %}
+    <div class="border-t border-zinc-200 dark:border-zinc-700 my-2 pt-2">
+        <p class="px-4 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Admin</p>
+        <a href="{{ url_for('admin.users') }}" class="flex items-center px-4 py-2 text-red-600 dark:text-red-400 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/30 font-medium">
+            Benutzer verwalten
+        </a>
+    </div>
+    {% endif %}
 {% else %}
     <!-- Navigation for guests (not logged in) -->
     <a href="{{ url_for('auth.login') }}" class="flex items-center px-4 py-2 text-zinc-700 dark:text-zinc-300 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700">Login</a>

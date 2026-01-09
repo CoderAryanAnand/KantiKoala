@@ -1,0 +1,79 @@
+\documentclass[12pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[german]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{pgfplots}
+
+\geometry{top=2cm, bottom=2cm, left=2.5cm, right=2.5cm}
+\pgfplotsset{compat=1.18}
+
+% Titel und Header
+\title{\textbf{Advanced KantiKoala LaTeX Test}}
+\author{Demo Teacher}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Einführung}
+Dieses Dokument demonstriert, dass nun \textbf{alle} auf dem Server installierten LaTeX-Pakete unterstützt werden. Da das Dokument als echtes PDF kompiliert und eingebettet wird, ist das Layout 100\% originalgetreu.
+
+\section{Paket-Unterstützung}
+
+Die folgenden Pakete sind Beispiele, die in der einfachen HTML-Konvertierung nicht funktioniert hätten, jetzt aber möglich sind:
+
+\subsection{TikZ Grafiken}
+Hier ist eine Vektorgrafik, die direkt in LaTeX generiert wird:
+
+\begin{center}
+\begin{tikzpicture}
+    \draw[fill=blue!20] (0,0) circle (1.5cm);
+    \draw[->, thick, red] (-2,0) -- (2,0) node[right] {$x$};
+    \draw[->, thick, red] (0,-2) -- (0,2) node[above] {$y$};
+    \node at (0.5,0.5) {$r=1.5$};
+    \draw (0,0) -- (1.06, 1.06);
+\end{tikzpicture}
+\end{center}
+
+\subsection{PGFPlots Funktionsgraphen}
+\begin{center}
+\begin{tikzpicture}
+\begin{axis}[
+    axis lines = middle,
+    xlabel = $x$,
+    ylabel = {$f(x)$},
+    width=8cm, height=6cm,
+]
+\addplot [
+    domain=-2:2, 
+    samples=100, 
+    color=blue,
+    thick,
+]
+{x^3 - x};
+\addlegendentry{$x^3 - x$}
+\end{axis}
+\end{tikzpicture}
+\end{center}
+
+\section{Mathematik (Advanced)}
+Natürlich funktioniert auch komplexe Mathematik weiterhin tadellos, da es natives LaTeX ist.
+
+$$ \oint_C \vec{F} \cdot d\vec{r} = \iint_S (\nabla \times \vec{F}) \cdot d\vec{S} $$
+
+\section{Hinweis für Lehrpersonen}
+Welche Pakete können verwendet werden?
+\begin{itemize}
+    \item \textbf{Alle Standardpakete} (geometry, fancyhdr, babel, etc.)
+    \item \textbf{TikZ / PGFPlots} für Diagramme
+    \item \textbf{Tabularx / Longtable} für komplexe Tabellen
+    \item \textbf{Hinweis:} Externe Bilder (JPG/PNG) funktionieren nur, wenn sie auf dem Server liegen (was schwierig ist). Es wird empfohlen, Grafiken mit TikZ zu erstellen oder Word zu nutzen, wenn viele Bilder benötigt werden.
+\end{itemize}
+
+\end{document}

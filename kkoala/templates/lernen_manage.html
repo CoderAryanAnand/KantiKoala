@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Theorie-Inhalte verwalten - KantiKoala{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-700">
+    <h1 class="text-3xl font-bold text-zinc-900 dark:text-white mb-6">📚 Theorie-Inhalte verwalten</h1>
+    
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="space-y-8">
+        <!-- 1. Add Subject -->
+        <section class="border-b border-zinc-200 dark:border-zinc-700 pb-8">
+            <h2 class="text-xl font-semibold text-zinc-900 dark:text-white mb-4">1. Neues Fach erstellen</h2>
+            <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <input type="hidden" name="action" value="add_subject">
+                <input type="text" name="name" placeholder="Name (z.B. Mathematik)" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                <input type="color" name="color" value="#3B82F6" class="h-10 w-full p-1 rounded cursor-pointer">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Fach hinzufügen</button>
+            </form>
+        </section>
+
+        <!-- 2. Add Topic -->
+        <section class="border-b border-zinc-200 dark:border-zinc-700 pb-8">
+            <h2 class="text-xl font-semibold text-zinc-900 dark:text-white mb-4">2. Neues Thema erstellen</h2>
+            <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" name="action" value="add_topic">
+                
+                <select name="subject_id" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                    <option value="">Fach wählen...</option>
+                    {% for subject in subjects %}
+                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="year" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                    <option value="">Jahrgang wählen...</option>
+                    <option value="1">1. Klasse</option>
+                    <option value="2">2. Klasse</option>
+                    <option value="3">3. Klasse</option>
+                    <option value="4">4. Klasse</option>
+                </select>
+
+                <input type="text" name="name" placeholder="Thema (z.B. Algebra)" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white col-span-2">
+                
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-2">Thema hinzufügen</button>
+            </form>
+        </section>
+
+        <!-- 3. Add Content (Subtopic) via Docx -->
+        <section>
+            <h2 class="text-xl font-semibold text-zinc-900 dark:text-white mb-4">3. Lerninhalt hochladen (Word .docx oder LaTeX .tex)</h2>
+            <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                <input type="hidden" name="action" value="add_subtopic">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <select id="topic_select" name="topic_id" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                        <option value="">Thema wählen...</option>
+                        <!-- Populated via JS ideally, but for now flat list or grouped -->
+                        {% for subject in subjects %}
+                            <optgroup label="{{ subject.name }}">
+                                {% for topic in subject.topics %}
+                                    <option value="{{ topic.id }}">{{ topic.year }}. Kl: {{ topic.name }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                    </select>
+
+                    <select name="difficulty" class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                        <option value="basic">Grundlagen</option>
+                        <option value="intermediate" selected>Mittel</option>
+                        <option value="advanced">Fortgeschritten</option>
+                        <option value="expert">Experte</option>
+                    </select>
+                </div>
+
+                <input type="text" name="name" placeholder="Titel des Inhalts (z.B. Quadratische Gleichungen)" required class="w-full p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                
+                <div class="border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg p-6 text-center">
+                    <label class="cursor-pointer block">
+                        <span class="text-zinc-500 dark:text-zinc-400">Datei hier ablegen oder klicken (.docx, .tex)</span>
+                        <input type="file" name="docx_file" accept=".docx,.tex" required class="hidden" onchange="document.getElementById('file-name').textContent = this.files[0].name">
+                    </label>
+                    <p id="file-name" class="mt-2 text-sm text-blue-500 font-medium"></p>
+                </div>
+
+                <button type="submit" class="w-full bg-green-600 text-white px-4 py-3 rounded-lg font-bold hover:bg-green-700 transition-colors">
+                    Inhalt hochladen & konvertieren
+                </button>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

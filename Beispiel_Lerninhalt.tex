@@ -1,0 +1,59 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% KantiKoala LaTeX Unterstützung
+% ==============================
+% Laden Sie dieses Dokument hoch, um zu sehen, wie es konvertiert wird.
+
+\begin{document}
+
+\section{Einführung in LaTeX}
+
+Dieses Dokument zeigt, welche LaTeX-Befehle von KantiKoala direkt unterstützt werden.
+Der Text wird automatisch formatiert.
+
+\subsection{Unterstützte Formatierungen}
+
+Sie können \textbf{fetten Text}, \textit{kursiven Text} oder \underline{unterstrichenen Text} verwenden.
+
+\subsection{Listen}
+
+Normale Aufzählungen funktionieren:
+
+\begin{itemize}
+    \item Erster Punkt
+    \item Zweiter Punkt mit \textbf{wichtigem} Detail
+\end{itemize}
+
+Nummerierte Listen funktionieren ebenfalls:
+
+\begin{enumerate}
+    \item Schritt Eins
+    \item Schritt Zwei
+\end{enumerate}
+
+\section{Mathematik}
+
+KantiKoala nutzt \textbf{KaTeX} für die Darstellung von Formeln. Alle gängigen Mathe-Pakete (amsmath, amssymb) werden unterstützt.
+
+Inline-Formeln: $f(x) = x^2$ oder $e^{i\pi} + 1 = 0$.
+
+Abgesetzte Formeln:
+
+$$ \int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi} $$
+
+Oder komplexere Brüche:
+$$ x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a} $$
+
+\section{Hinweise für Lehrpersonen}
+
+\begin{itemize}
+    \item Verwenden Sie \texttt{section} und \texttt{subsection} für die Gliederung.
+    \item Bilder werden aktuell in LaTeX-Dateien NICHT unterstützt. Bitte nutzen Sie dafür Word (.docx).
+    \item Komplizierte Tabellen sollten vermieden werden oder als Bild eingefügt werden.
+    \item TikZ-Grafiken werden nicht gerendert.
+\end{itemize}
+
+\end{document}

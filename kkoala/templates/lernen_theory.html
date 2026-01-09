@@ -8,13 +8,20 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
     /* Prose styling for theory content */
-    .theory-content h3 {
-        font-size: 1.25rem;
+    .theory-content h1, .theory-content h2, .theory-content h3, .theory-content h4 {
         font-weight: 700;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
         color: inherit;
     }
+    .theory-content h1 { font-size: 1.75rem; }
+    .theory-content h2 { font-size: 1.5rem; border-bottom: 1px solid #e4e4e7; padding-bottom: 0.5rem; }
+    /* dark mode border */
+    :is(.dark .theory-content h2) { border-color: #3f3f46; }
+    
+    .theory-content h3 { font-size: 1.25rem; }
+    .theory-content h4 { font-size: 1.1rem; }
+
     .theory-content p {
         margin-bottom: 1rem;
         line-height: 1.75;
@@ -36,6 +43,40 @@
     .theory-content ol {
         list-style-type: decimal;
     }
+    
+    /* Tables from Docx */
+    .theory-content table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+    .theory-content th, .theory-content td {
+        border: 1px solid #e4e4e7;
+        padding: 0.75rem;
+        text-align: left;
+    }
+    :is(.dark .theory-content th), :is(.dark .theory-content td) { border-color: #3f3f46; }
+    .theory-content th { background-color: #f4f4f5; font-weight: 600; }
+    :is(.dark .theory-content th) { background-color: #27272a; }
+
+    /* Images */
+    .theory-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 0.5rem;
+        margin: 1.5rem 0;
+    }
+
+    /* Blockquotes */
+    .theory-content blockquote {
+        border-left: 4px solid #3b82f6;
+        padding-left: 1rem;
+        font-style: italic;
+        color: #52525b; /* zinc-600 */
+        margin: 1.5rem 0;
+    }
+    :is(.dark .theory-content blockquote) { color: #a1a1aa; border-color: #60a5fa; }
+
     /* Math display */
     .katex-display {
         margin: 1.5rem 0;
@@ -207,9 +248,17 @@
 <!-- KaTeX for math rendering -->
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- PDF.js for rendering embedded PDFs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script nonce="{{ csp_nonce() }}">
+    // Initialize PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+
 <script nonce="{{ csp_nonce() }}">
 document.addEventListener("DOMContentLoaded", function() {
-    // Render math in all theory content
+    // 1. Render Math (KaTeX)
     const contentElements = document.querySelectorAll('.theory-section-content, .example-text, .example-explanation, .exercise-question, .exercise-answer');
     
     contentElements.forEach(function(element) {
@@ -233,6 +282,52 @@ document.addEventListener("DOMContentLoaded", function() {
             throwOnError: false
         });
     });
+
+    // 2. Render PDF figures via PDF.js (for TikZ graphics)
+    const pdfGraphics = document.querySelectorAll('.latex-graphic');
+    
+    if (pdfGraphics.length > 0) {
+        pdfGraphics.forEach(function(container) {
+            const b64Data = container.dataset.pdf;
+            if (!b64Data) return;
+            
+            // Decode Base64
+            const pdfData = atob(b64Data);
+            
+            // Allow PDF.js to load the document
+            const loadingTask = pdfjsLib.getDocument({data: pdfData});
+            
+            loadingTask.promise.then(function(pdf) {
+                // Get page 1 (assuming snippets are 1 page)
+                pdf.getPage(1).then(function(page) {
+                    const scale = 2.0; // Higher scale for crisp graphics
+                    const viewport = page.getViewport({scale: scale});
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'shadow-md rounded bg-white mx-auto';
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    // Responsive styling
+                    canvas.style.maxWidth = '100%';
+                    canvas.style.height = 'auto';
+                    
+                    container.innerHTML = '';
+                    container.appendChild(canvas);
+                    
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            }).catch(function (reason) {
+                console.error(reason);
+                container.innerHTML = '<span class="text-xs text-red-400">Error rendering graphic</span>';
+            });
+        });
+    }
 });
 </script>
 {% endblock %}

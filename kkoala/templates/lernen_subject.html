@@ -37,7 +37,7 @@
             <!-- Subtopics -->
             <div class="divide-y divide-zinc-100 dark:divide-zinc-700">
                 {% for subtopic in topic_group.subtopics %}
-                <a href="{{ url_for('lernen.lernen_topic', year_id=year.id, subject_id=subject.id, topic_id=subtopic.id) }}" 
+                <a href="{{ url_for('lernen.lernen_topic', year_id=year.id, subject_id=subject.id, subtopic_id=subtopic.id) }}" 
                    class="flex items-center justify-between p-4 hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors group">
                     <div class="flex items-center space-x-4">
                         <!-- Difficulty Badge -->

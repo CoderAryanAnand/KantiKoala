@@ -23,6 +23,8 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)  # Hashed password
     email = db.Column(db.String(100), unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_teacher = db.Column(db.Boolean, default=False)
 
     # Relationships
     events = db.relationship(
@@ -239,6 +241,8 @@ class ToDoItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     category_id = db.Column(db.Integer, db.ForeignKey("to_do_category.id"), nullable=False)
     description = db.Column(db.String(500), nullable=False)
+    completed = db.Column(db.Boolean, default=False)
+    position = db.Column(db.Integer, default=0)
 
 # -------------------------------
 # Citation Generator feature
@@ -281,6 +285,7 @@ class Citation(db.Model):
     source_type = db.Column(db.String(50), nullable=False)  # book, website, article, etc.
     style = db.Column(db.String(50), nullable=False)  # APA, MLA, Chicago, etc.
     data = db.Column(db.Text, nullable=False)  # JSON string with source details
+    formatted_citation = db.Column(db.Text, nullable=True)
 
 
 # -------------------------------
@@ -312,3 +317,39 @@ class Flashcard(db.Model):
     definition = db.Column(db.Text, nullable=False)
     rank = db.Column(db.Integer, default=0)  # For ordering
     starred = db.Column(db.Boolean, default=False)
+
+# -------------------------------
+# Curriculum and Learning Content
+# -------------------------------
+
+class CurriculumSubject(db.Model):
+    """
+    Represents a school subject (e.g., Math, German).
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    icon = db.Column(db.String(10), default="📖")
+    color = db.Column(db.String(20), default="#3B82F6")
+    topics = db.relationship("CurriculumTopic", backref="subject", lazy=True, cascade="all, delete-orphan")
+
+class CurriculumTopic(db.Model):
+    """
+    Represents a main topic within a subject (e.g., Algebra).
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('curriculum_subject.id'), nullable=False)
+    year = db.Column(db.Integer, nullable=False) # 1, 2, 3, 4
+    subtopics = db.relationship("CurriculumSubTopic", backref="topic", lazy=True, cascade="all, delete-orphan")
+
+class CurriculumSubTopic(db.Model):
+    """
+    Represents a specific learning module/subtopic (e.g., Quadratic Equations).
+    Storage for the actual theory content.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey('curriculum_topic.id'), nullable=False)
+    difficulty = db.Column(db.String(20), default="intermediate")
+    content_html = db.Column(db.Text, nullable=True) # HTML content from uploaded file
+    estimated_time = db.Column(db.String(50), default="45 Minuten")

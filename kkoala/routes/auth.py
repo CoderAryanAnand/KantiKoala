@@ -50,6 +50,8 @@ def login():
         # Check if user exists and password hash matches
         if user and bcrypt.check_password_hash(user.password, password):
             session["username"] = username
+            session["is_admin"] = user.is_admin
+            session["is_teacher"] = user.is_teacher
             return redirect(url_for("main.index"))
         flash("Ungültige Anmeldedaten. Bitte erneut versuchen.", "error")
         return render_template("login.html")
