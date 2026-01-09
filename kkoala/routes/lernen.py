@@ -6,10 +6,6 @@ Using Database models defined in kkoala.models.
 from flask import Blueprint, render_template, session, jsonify, abort, request, flash, redirect, url_for
 import os
 import mammoth
-import base64
-import subprocess
-import tempfile
-import shutil
 from pylatexenc.latexwalker import LatexWalker, LatexEnvironmentNode, LatexMacroNode, LatexGroupNode, LatexCharsNode, LatexMathNode
 
 from ..utils import login_required
@@ -20,104 +16,21 @@ lernen_bp = Blueprint(
     "lernen", __name__, template_folder="../templates", static_folder="../static"
 )
 
-def compile_snippet_to_pdf(snippet_code, preamble=""):
-    """
-    Compiles a LaTeX snippet (like a tikzpicture) into a single-page PDF
-    and returns tuple (base64_string, error_message).
-    """
-    if not shutil.which('pdflatex'):
-        return None, "pdflatex not found on server"
 
-    # Default preamble if none provided or partial
-    base_preamble = r"""
-\documentclass[tikz,border=2pt]{standalone}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{pgfplots}
-\pgfplotsset{compat=1.18}
-\usetikzlibrary{calc, arrows.meta, positioning, shapes, patterns, decorations.pathmorphing, babel, quotes, angles, intersections, backgrounds, fit, petri}
-"""
-    # Filter user preamble to strip documentclass and problematic packages if needed
-    # For now, we just append it, assuming the user doesn't re-declare documentclass.
-    # Actually, we MUST strip documentclass from user preamble if present.
-    user_preamble_clean = ""
-    if preamble:
-        lines = preamble.split('\n')
-        for line in lines:
-            if not line.strip().startswith(r'\documentclass') and not line.strip().startswith(r'\usepackage{standalone}'):
-                 user_preamble_clean += line + "\n"
-
-    # Valid LaTeX requires document environment even for standalone class
-    final_latex = base_preamble + "\n" + user_preamble_clean + "\n\\begin{document}\n" + snippet_code + "\n\\end{document}"
-    
-    print("DEBUG: Compiling snippet:")
-    print(final_latex)
-
-    try:
-        with tempfile.TemporaryDirectory() as temp_dir:
-            tex_path = os.path.join(temp_dir, 'snippet.tex')
-            with open(tex_path, 'w', encoding='utf-8') as f:
-                f.write(final_latex)
-            
-            # Compile
-            result = subprocess.run(
-                ['pdflatex', '-interaction=nonstopmode', '-output-directory', temp_dir, tex_path],
-                capture_output=True,
-                timeout=15
-            )
-            
-            pdf_path = os.path.join(temp_dir, 'snippet.pdf')
-            if os.path.exists(pdf_path):
-                with open(pdf_path, 'rb') as f:
-                    return base64.b64encode(f.read()).decode('utf-8'), None
-            else:
-                 # Debug: Print stdout to see why it failed
-                 stdout = result.stdout.decode('latin-1', errors='ignore')
-                 print(f"Snippet compilation failed. Return code: {result.returncode}")
-                 print(stdout[-500:])
-                 
-                 # Helper to extract relevant error from log
-                 try:
-                    log_file = os.path.join(temp_dir, 'snippet.log')
-                    if os.path.exists(log_file):
-                        with open(log_file, 'r', encoding='latin-1') as lg:
-                            log_content = lg.read()
-                            # Search for the first '!' which indicates an error
-                            error_index = log_content.find('!')
-                            if error_index != -1:
-                                # Return context around the error (e.g., 200 chars before and 500 after)
-                                start = max(0, error_index - 200)
-                                end = min(len(log_content), error_index + 800)
-                                return None, f"LaTeX Error found:\n{log_content[start:end]}"
-                            else:
-                                # No explicit error marker found, return tail
-                                return None, f"Log Tail (No '!' found):\n{log_content[-1000:]}"
-                 except Exception:
-                     pass
-
-                 return None, f"Compilation failed: {stdout[-200:]}"
-    except Exception as e:
-        print(f"Snippet compilation error: {e}")
-        return None, str(e)
-    
-    return None, "Unknown error"
 
 def latex_to_html(latex_content):
     """
     Parses LaTeX content and converts it to HTML using pylatexenc.
     Preserves math for KaTeX and basic structure (sections, lists).
-    Compiles TikZ graphics to embedded PDFs.
+    Simple conversion without TikZ support.
     """
     try:
         # Normalize
         if isinstance(latex_content, bytes):
             latex_content = latex_content.decode('utf-8', errors='ignore')
             
-        # Extract preamble for potential reuse (simplified)
-        preamble = ""
+        # Extract body content if document environment exists
         if '\\begin{document}' in latex_content:
-            preamble = latex_content.split('\\begin{document}')[0]
             latex_content = latex_content.split('\\begin{document}')[1]
             if '\\end{document}' in latex_content:
                 latex_content = latex_content.split('\\end{document}')[0]
@@ -191,33 +104,14 @@ def latex_to_html(latex_content):
                          content = node.latex_verbatim()
                          res += f"$${content}$$"
                     
-                    elif node.environmentname in ['tikzpicture', 'axis']:
-                         # Visual Package Handler!
-                         # We treat the generic 'tikzpicture' or 'axis' environment as a scalable graphic
-                         # We need to wrap 'axis' in tikzpicture if it isn't already, but usually it is used inside one.
-                         # Pylatexenc provides the environment as nested nodes.
-                         # It is safer to grab the verbatim source for compilation.
-                         
-                         code_snippet = node.latex_verbatim()
-                         # If axis is standalone (which is rare but valid in some frameworks), ensure it's in a tikzpicture
-                         if node.environmentname == 'axis':
-                              code_snippet = f"\\begin{{tikzpicture}}\n{code_snippet}\n\\end{{tikzpicture}}"
-
-                         b64_pdf, error_msg = compile_snippet_to_pdf(code_snippet, preamble)
-                         
-                         if b64_pdf:
-                             res += f'''
-                             <div class="latex-graphic-container my-4 flex justify-center">
-                                <div class="latex-graphic" data-pdf="{b64_pdf}" style="width: 100%; max-width: 600px;"></div>
-                             </div>
-                             '''
-                         else:
-                             res += f"<div class='p-2 bg-red-50 text-red-500 text-xs font-mono overflow-auto'>Grafik Error: {error_msg}</div>"
-
                     elif node.environmentname == 'center':
                         content = process_nodes(node.nodelist)
                         res += f"<div style='text-align:center'>{content}</div>"
                     
+                    # Ignore TikZ and other complex environments or treat as text if needed
+                    elif node.environmentname in ['tikzpicture', 'axis']:
+                        res += f"<div class='text-zinc-500 italic'>[Grafik nicht unterstützt]</div>"
+
                     else:
                         res += process_nodes(node.nodelist)
                         
@@ -544,6 +438,80 @@ def manage(user):
                 flash("Lerninhalt erstellt", "success")
             else:
                  flash("Fehler: Name und Thema erforderlich", "error")
+
+        elif action == "delete_subject":
+            subject_id = request.form.get("subject_id")
+            subject = CurriculumSubject.query.get(subject_id)
+            if subject:
+                db.session.delete(subject)
+                db.session.commit()
+                flash(f"Fach '{subject.name}' gelöscht", "success")
+
+        elif action == "delete_topic":
+            topic_id = request.form.get("topic_id")
+            topic = CurriculumTopic.query.get(topic_id)
+            if topic:
+                db.session.delete(topic)
+                db.session.commit()
+                flash(f"Thema '{topic.name}' gelöscht", "success")
+
+        elif action == "delete_subtopic":
+            subtopic_id = request.form.get("subtopic_id")
+            subtopic = CurriculumSubTopic.query.get(subtopic_id)
+            if subtopic:
+                db.session.delete(subtopic)
+                db.session.commit()
+                flash(f"Inhalt '{subtopic.name}' gelöscht", "success")
+
+        elif action == "edit_subject":
+            subject_id = request.form.get("subject_id")
+            subject = CurriculumSubject.query.get(subject_id)
+            if subject:
+                if request.form.get("name"):
+                    subject.name = request.form.get("name")
+                if request.form.get("color"):
+                    subject.color = request.form.get("color")
+                db.session.commit()
+                flash(f"Fach '{subject.name}' aktualisiert", "success")
+
+        elif action == "edit_topic":
+            topic_id = request.form.get("topic_id")
+            topic = CurriculumTopic.query.get(topic_id)
+            if topic:
+                 if request.form.get("name"):
+                    topic.name = request.form.get("name")
+                 db.session.commit()
+                 flash(f"Thema '{topic.name}' aktualisiert", "success")
+
+        elif action == "edit_subtopic":
+            subtopic_id = request.form.get("subtopic_id")
+            subtopic = CurriculumSubTopic.query.get(subtopic_id)
+            if subtopic:
+                # Update metadata
+                if request.form.get("name"):
+                    subtopic.name = request.form.get("name")
+                if request.form.get("difficulty"):
+                    subtopic.difficulty = request.form.get("difficulty")
+                
+                # Update content file if provided
+                file = request.files.get("docx_file")
+                if file and file.filename:
+                    if file.filename.endswith('.docx'):
+                        result = mammoth.convert_to_html(file)
+                        subtopic.content_html = result.value
+                        flash("Inhalt und Datei aktualisiert", "success")
+                    elif file.filename.endswith('.tex'):
+                        raw_content = file.read()
+                        subtopic.content_html = latex_to_html(raw_content)
+                        flash("Inhalt und Datei aktualisiert", "success")
+                    else:
+                        flash("Ungültiges Dateiformat. Nur .docx oder .tex", "error")
+                else:
+                    flash("Metadaten aktualisiert", "success")
+                
+                db.session.commit()
+            else:
+                flash("Fehler: Inhalt nicht gefunden", "error")
                 
     subjects = CurriculumSubject.query.all()
     return render_template("lernen_manage.html", subjects=subjects)
