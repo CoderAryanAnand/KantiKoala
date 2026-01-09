@@ -272,6 +272,8 @@ def lernen_year(year_id):
                 "topics": [] 
             }
             
+        subjects_map[topic.subject.id]["topics"].append(topic)
+
     subjects_list = list(subjects_map.values())
 
     return render_template(
