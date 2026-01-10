@@ -4,155 +4,14 @@ Allows users to browse and study theory content by year, subject, and topic.
 Using Database models defined in kkoala.models.
 """
 from flask import Blueprint, render_template, session, jsonify, abort, request, flash, redirect, url_for
-import os
-import mammoth
-from pylatexenc.latexwalker import LatexWalker, LatexEnvironmentNode, LatexMacroNode, LatexGroupNode, LatexCharsNode, LatexMathNode
-
 from ..utils import login_required
 from ..models import CurriculumSubject, CurriculumTopic, CurriculumSubTopic
 from ..extensions import db
+from ..converters import docx_to_html, pdf_to_html, plastex_to_html
 
 lernen_bp = Blueprint(
     "lernen", __name__, template_folder="../templates", static_folder="../static"
 )
-
-
-
-def latex_to_html(latex_content):
-    """
-    Parses LaTeX content and converts it to HTML using pylatexenc.
-    Preserves math for KaTeX and basic structure (sections, lists).
-    Simple conversion without TikZ support.
-    """
-    try:
-        # Normalize
-        if isinstance(latex_content, bytes):
-            latex_content = latex_content.decode('utf-8', errors='ignore')
-            
-        # Extract body content if document environment exists
-        if '\\begin{document}' in latex_content:
-            latex_content = latex_content.split('\\begin{document}')[1]
-            if '\\end{document}' in latex_content:
-                latex_content = latex_content.split('\\end{document}')[0]
-                
-        walker = LatexWalker(latex_content)
-        nodes, _, _ = walker.get_latex_nodes()
-        
-        def process_nodes(nodelist):
-            res = ""
-            for node in nodelist:
-                if isinstance(node, LatexCharsNode):
-                    res += node.chars
-                    
-                elif isinstance(node, LatexMacroNode):
-                    if node.macroname in ['section', 'section*']:
-                        title = process_nodes(node.nodeargs[0].nodelist) if node.nodeargs else ""
-                        res += f"<h2>{title}</h2>"
-                    elif node.macroname in ['subsection', 'subsection*']:
-                        title = process_nodes(node.nodeargs[0].nodelist) if node.nodeargs else ""
-                        res += f"<h3>{title}</h3>"
-                    elif node.macroname in ['subsubsection', 'subsubsection*']:
-                        title = process_nodes(node.nodeargs[0].nodelist) if node.nodeargs else ""
-                        res += f"<h4>{title}</h4>"
-                    elif node.macroname == 'textbf':
-                        text = process_nodes(node.nodeargs[0].nodelist) if node.nodeargs else ""
-                        res += f"<strong>{text}</strong>"
-                    elif node.macroname == 'textit':
-                        text = process_nodes(node.nodeargs[0].nodelist) if node.nodeargs else ""
-                        res += f"<em>{text}</em>"
-                    elif node.macroname == 'underline':
-                        text = process_nodes(node.nodeargs[0].nodelist) if node.nodeargs else ""
-                        res += f"<u>{text}</u>"
-                    elif node.macroname == 'item':
-                        pass 
-                    else:
-                        if node.nodeargs:
-                            for arg in node.nodeargs:
-                                if arg and arg.nodelist:
-                                    res += process_nodes(arg.nodelist)
-                                    
-                elif isinstance(node, LatexEnvironmentNode):
-                    if node.environmentname == 'itemize':
-                        items_html = ""
-                        curr_item = []
-                        for child in node.nodelist:
-                            if isinstance(child, LatexMacroNode) and child.macroname == 'item':
-                                if curr_item:
-                                    items_html += f"<li>{process_nodes(curr_item)}</li>"
-                                curr_item = []
-                            else:
-                                curr_item.append(child)
-                        if curr_item:
-                             items_html += f"<li>{process_nodes(curr_item)}</li>"
-                        res += f"<ul>{items_html}</ul>"
-                        
-                    elif node.environmentname == 'enumerate':
-                        items_html = ""
-                        curr_item = []
-                        for child in node.nodelist:
-                            if isinstance(child, LatexMacroNode) and child.macroname == 'item':
-                                if curr_item:
-                                    items_html += f"<li>{process_nodes(curr_item)}</li>"
-                                curr_item = []
-                            else:
-                                curr_item.append(child)
-                        if curr_item:
-                             items_html += f"<li>{process_nodes(curr_item)}</li>"
-                        res += f"<ol>{items_html}</ol>"
-                        
-                    elif node.environmentname in ['equation', 'align', 'gather', 'equation*', 'align*', 'gather*']:
-                         content = node.latex_verbatim()
-                         res += f"$${content}$$"
-                    
-                    elif node.environmentname == 'center':
-                        content = process_nodes(node.nodelist)
-                        res += f"<div style='text-align:center'>{content}</div>"
-                    
-                    # Ignore TikZ and other complex environments or treat as text if needed
-                    elif node.environmentname in ['tikzpicture', 'axis']:
-                        res += f"<div class='text-zinc-500 italic'>[Grafik nicht unterstützt]</div>"
-
-                    else:
-                        res += process_nodes(node.nodelist)
-                        
-                elif isinstance(node, LatexGroupNode):
-                    res += process_nodes(node.nodelist)
-                    
-                elif isinstance(node, LatexMathNode):
-                    math_content = node.latex_verbatim()
-                    if math_content.startswith('$') and math_content.endswith('$'):
-                        if math_content.startswith('$$'):
-                            res += f"$${math_content[2:-2]}$$"
-                        else:
-                            res += f"${math_content[1:-1]}$"
-                    elif math_content.startswith(r'\('):
-                         res += f"${math_content[2:-2]}$"
-                    elif math_content.startswith(r'\['):
-                         res += f"$${math_content[2:-2]}$$"
-                    else:
-                        res += f"${math_content}$"
-                        
-            return res
-
-        raw_html = process_nodes(nodes)
-        
-        # Post-processing paragraphs
-        final_html = ""
-        parts = raw_html.split('\n\n')
-        for p in parts:
-            p = p.strip()
-            if not p: continue
-            if any(p.startswith(tag) for tag in ['<h', '<ul', '<ol', '<div', '$$']):
-                final_html += p + "\n"
-            else:
-                final_html += f"<p>{p}</p>\n"
-                
-        return final_html
-
-
-    except Exception as e:
-        print(f"Error converting latex: {e}")
-        return "<p class='text-red-500'>Fehler bei der Konvertierung der LaTeX-Datei.</p>"
 
 
 @lernen_bp.route("/")
@@ -289,11 +148,8 @@ def lernen_subject(year_id, subject_id):
         sid = int(subject_id)
         subject = CurriculumSubject.query.get(sid)
     except ValueError:
-        # If legacy string IDs are used, try to find by name? Or abort.
-        # Import script mapped name->ID.
-        # But if the user clicks a link from OLD cache, it might involve strings like "mathematik_1".
-        # We can implement a fallback lookup if needed, but better to break and fix.
-        abort(404) 
+        # Legacy support for string IDs is deprecated.
+        abort(404)
         
     if not subject:
         abort(404)
@@ -427,12 +283,11 @@ def manage(user):
             
             if file:
                 if file.filename.endswith('.docx'):
-                    result = mammoth.convert_to_html(file)
-                    content_html = result.value
+                    content_html = docx_to_html(file)
                 elif file.filename.endswith('.tex'):
-                    # Convert LaTeX to styled HTML using pylatexenc (Word-like look)
-                    raw_content = file.read()
-                    content_html = latex_to_html(raw_content)
+                    content_html = plastex_to_html(file, file.filename)
+                elif file.filename.endswith('.pdf'):
+                    content_html = pdf_to_html(file)
 
             if name and topic_id:
                 db.session.add(CurriculumSubTopic(name=name, topic_id=topic_id, difficulty=difficulty, content_html=content_html))
@@ -499,15 +354,16 @@ def manage(user):
                 file = request.files.get("docx_file")
                 if file and file.filename:
                     if file.filename.endswith('.docx'):
-                        result = mammoth.convert_to_html(file)
-                        subtopic.content_html = result.value
-                        flash("Inhalt und Datei aktualisiert", "success")
+                        subtopic.content_html = docx_to_html(file)
+                        flash("Inhalt und Datei aktualisiert (Word)", "success")
                     elif file.filename.endswith('.tex'):
-                        raw_content = file.read()
-                        subtopic.content_html = latex_to_html(raw_content)
-                        flash("Inhalt und Datei aktualisiert", "success")
+                        subtopic.content_html = plastex_to_html(file, file.filename)
+                        flash("Inhalt und Datei aktualisiert (LaTeX)", "success")
+                    elif file.filename.endswith('.pdf'):
+                        subtopic.content_html = pdf_to_html(file)
+                        flash("Inhalt und Datei aktualisiert (PDF)", "success")
                     else:
-                        flash("Ungültiges Dateiformat. Nur .docx oder .tex", "error")
+                        flash("Ungültiges Dateiformat. Nur .docx, .tex oder .pdf", "error")
                 else:
                     flash("Metadaten aktualisiert", "success")
                 

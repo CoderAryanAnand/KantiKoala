@@ -1,3 +1,7 @@
+"""
+Tools routes providing various student utilities.
+Includes flashcards, learning timer, and grade calculator.
+"""
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, send_file
 from ..models import ToDoCategory, FlashcardSet, Flashcard
 from ..extensions import db

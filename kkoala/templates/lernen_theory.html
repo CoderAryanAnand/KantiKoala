@@ -5,7 +5,9 @@
 
 {% block extra_css %}
 <!-- KaTeX for math rendering -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
 <style>
     /* Prose styling for theory content */
     .theory-content h1, .theory-content h2, .theory-content h3, .theory-content h4 {
@@ -30,54 +32,16 @@
         font-weight: 600;
         color: inherit;
     }
-    .theory-content ul, .theory-content ol {
-        margin-bottom: 1rem;
-        padding-left: 1.5rem;
-    }
-    .theory-content li {
-        margin-bottom: 0.5rem;
-    }
-    .theory-content ul {
-        list-style-type: disc;
-    }
-    .theory-content ol {
-        list-style-type: decimal;
-    }
+    /* Theory Content Styling now handled via Tailwind Typography */
     
     /* Tables from Docx */
-    .theory-content table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 1.5rem;
-    }
-    .theory-content th, .theory-content td {
-        border: 1px solid #e4e4e7;
-        padding: 0.75rem;
-        text-align: left;
-    }
-    :is(.dark .theory-content th), :is(.dark .theory-content td) { border-color: #3f3f46; }
-    .theory-content th { background-color: #f4f4f5; font-weight: 600; }
-    :is(.dark .theory-content th) { background-color: #27272a; }
+    /* Handled by prose, minor fix for borders if needed */
+    .prose table { width: 100%; border-collapse: collapse; }
 
-    /* Images */
-    .theory-content img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 0.5rem;
-        margin: 1.5rem 0;
-    }
-
-    /* Blockquotes */
-    .theory-content blockquote {
-        border-left: 4px solid #3b82f6;
-        padding-left: 1rem;
-        font-style: italic;
-        color: #52525b; /* zinc-600 */
-        margin: 1.5rem 0;
-    }
-    :is(.dark .theory-content blockquote) { color: #a1a1aa; border-color: #60a5fa; }
-
-    /* Math display */
+    /* Theory Content Styling now handled via Tailwind Typography */
+    .prose u { text-decoration-color: currentColor; text-underline-offset: 4px; }
+    
+    /* Math display adjustment */
     .katex-display {
         margin: 1.5rem 0;
         overflow-x: auto;
@@ -142,16 +106,18 @@
         {% endif %}
 
         <!-- Theory Sections -->
-        <div class="p-6 theory-content text-zinc-700 dark:text-zinc-300">
+        <div class="p-6 text-zinc-700 dark:text-zinc-300">
             {% for section in content.content.get('sections', []) %}
             <div class="mb-8 last:mb-0">
-                <h3 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center">
+                <h3 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center mb-4">
                     <span class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold mr-3">{{ loop.index }}</span>
                     {{ section.title }}
                 </h3>
-                <div class="ml-11 theory-section-content" data-content="{{ section.content }}">
-                    <!-- Content will be rendered by JS with markdown/math support -->
-                    <div class="prose-content">{{ section.content | safe }}</div>
+                
+                <div class="ml-11 prose prose-blue dark:prose-invert max-w-none
+                            prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400
+                            prose-img:rounded-xl prose-img:shadow-lg prose-img:mx-auto">
+                    {{ section.content | safe }}
                 </div>
             </div>
             {% endfor %}
@@ -328,6 +294,26 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         });
     }
+});
+
+// Initialize KaTeX
+document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$', right: '$', display: false},
+            {left: "\\begin{equation}", right: "\\end{equation}", display: true},
+            {left: "\\begin{align}", right: "\\end{align}", display: true},
+            {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+            {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+            {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+            {left: "\\begin{equation*}", right: "\\end{equation*}", display: true},
+            {left: "\\begin{align*}", right: "\\end{align*}", display: true}
+        ],
+        throwOnError : false
+    });
 });
 </script>
 {% endblock %}

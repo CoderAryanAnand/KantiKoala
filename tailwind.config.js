@@ -1,20 +1,3 @@
-module.exports = {
-  content: [
-    '/kkoala/templates/*.{html,js}',
-  ],
-  darkMode: 'class',
-  theme: {
-    extend: {},
-  },
-  variants: {
-    extend: {},
-  },
-  plugins: [
-    'postcss',
-  ],
-  
-}
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
@@ -25,11 +8,7 @@ module.exports = {
   theme: {
     extend: {},
   },
-  variants: {
-    extend: {},
-  },
   plugins: [
-    'postcss',
+    require('@tailwindcss/typography'),
   ],
-  // ...
 }

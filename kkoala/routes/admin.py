@@ -1,3 +1,7 @@
+"""
+Admin routes for managing users and system-wide settings.
+Restricted to users with the 'is_admin' flag.
+"""
 from flask import Blueprint, render_template, request, flash, redirect, url_for, abort
 from ..models import User
 from ..extensions import db
