@@ -22,9 +22,18 @@
         <!-- 1. Add Subject -->
         <section class="border-b border-zinc-200 dark:border-zinc-700 pb-8">
             <h2 class="text-xl font-semibold text-zinc-900 dark:text-white mb-4">1. Neues Fach erstellen</h2>
-            <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <form method="POST" class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
                 <input type="hidden" name="action" value="add_subject">
                 <input type="text" name="name" placeholder="Name (z.B. Mathematik)" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                
+                <select name="year" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                    <option value="">Jahrgang wählen...</option>
+                    <option value="1">1. Klasse</option>
+                    <option value="2">2. Klasse</option>
+                    <option value="3">3. Klasse</option>
+                    <option value="4">4. Klasse</option>
+                </select>
+
                 <div>
                      {{ color_picker('color', 'new_subject_color', '#3B82F6') }}
                 </div>
@@ -41,7 +50,7 @@
                 <select name="subject_id" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
                     <option value="">Fach wählen...</option>
                     {% for subject in subjects %}
-                    <option value="{{ subject.id }}">{{ subject.name }}</option>
+                    <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.year }}. Kl)</option>
                     {% endfor %}
                 </select>
 
@@ -70,7 +79,7 @@
                         <option value="">Thema wählen...</option>
                         <!-- Populated via JS ideally, but for now flat list or grouped -->
                         {% for subject in subjects %}
-                            <optgroup label="{{ subject.name }}">
+                            <optgroup label="{{ subject.name }} ({{ subject.year }}. Kl)">
                                 {% for topic in subject.topics %}
                                     <option value="{{ topic.id }}">{{ topic.year }}. Kl: {{ topic.name }}</option>
                                 {% endfor %}

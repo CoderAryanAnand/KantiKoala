@@ -328,6 +328,7 @@ class CurriculumSubject(db.Model):
     """
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
+    year = db.Column(db.Integer, nullable=False, default=1) # Subject belongs to a specific year
     icon = db.Column(db.String(10), default="📖")
     color = db.Column(db.String(20), default="#3B82F6")
     topics = db.relationship("CurriculumTopic", backref="subject", lazy=True, cascade="all, delete-orphan")

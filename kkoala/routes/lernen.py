@@ -8,6 +8,7 @@ from ..utils import login_required
 from ..models import CurriculumSubject, CurriculumTopic, CurriculumSubTopic
 from ..extensions import db
 from ..converters import docx_to_html, pdf_to_html, plastex_to_html
+from ..consts import YEAR_SUBJECT_TEMPLATES
 
 lernen_bp = Blueprint(
     "lernen", __name__, template_folder="../templates", static_folder="../static"
@@ -37,39 +38,35 @@ def get_subjects(year_id):
     API endpoint to get subjects for a specific year.
     Returns JSON list of subjects with their topics.
     """
-    # Get all topics for this year
-    topics = CurriculumTopic.query.filter_by(year=year_id).all()
+    subjects = CurriculumSubject.query.filter_by(year=year_id).all()
     
-    # Group topics by subject
-    subjects_map = {}
+    subjects_list = []
     
-    for topic in topics:
-        subj = topic.subject
-        if subj.id not in subjects_map:
-            subjects_map[subj.id] = {
-                "id": str(subj.id),
-                "name": subj.name,
-                "icon": subj.icon,
-                "color": subj.color,
-                "topics": []
-            }
-        
-        # Subtopics for this topic
-        subtopics_list = []
-        for sub in topic.subtopics:
-            subtopics_list.append({
-                "id": str(sub.id),
-                "name": sub.name,
-                "difficulty": sub.difficulty
+    for subj in subjects:
+        topics_list = []
+        for topic in subj.topics:
+            subtopics_list = []
+            for sub in topic.subtopics:
+                subtopics_list.append({
+                    "id": str(sub.id),
+                    "name": sub.name,
+                    "difficulty": sub.difficulty
+                })
+            topics_list.append({
+                "id": str(topic.id),
+                "name": topic.name,
+                "subtopics": subtopics_list
             })
-
-        subjects_map[subj.id]["topics"].append({
-            "id": str(topic.id),
-            "name": topic.name,
-            "subtopics": subtopics_list
+            
+        subjects_list.append({
+            "id": str(subj.id),
+            "name": subj.name,
+            "icon": subj.icon,
+            "color": subj.color,
+            "topics": topics_list
         })
     
-    return jsonify(list(subjects_map.values()))
+    return jsonify(subjects_list)
 
 
 @lernen_bp.route("/api/theory/<subtopic_id>")
@@ -111,6 +108,16 @@ def lernen_year(year_id):
     if year_id < 1 or year_id > 4:
         abort(404)
         
+    # Check if subjects exist for this year
+    subjects_count = CurriculumSubject.query.filter_by(year=year_id).count()
+    if subjects_count == 0:
+        # Populate defaults
+        default_names = YEAR_SUBJECT_TEMPLATES.get(year_id, [])
+        for name in default_names:
+            db.session.add(CurriculumSubject(name=name, year=year_id))
+        if default_names:
+            db.session.commit()
+
     years = [
         {"id": 1, "name": "1. Klasse", "description": "Grundlagenfächer"},
         {"id": 2, "name": "2. Klasse", "description": "Vertiefung"},
@@ -119,21 +126,17 @@ def lernen_year(year_id):
     ]
     year_info = next((y for y in years if y["id"] == year_id), None)
 
-    topics = CurriculumTopic.query.filter_by(year=year_id).all()
-    subjects_map = {}
-    for topic in topics:
-        if topic.subject.id not in subjects_map:
-            subjects_map[topic.subject.id] = {
-                "id": str(topic.subject.id), 
-                "name": topic.subject.name,
-                "icon": topic.subject.icon,
-                "color": topic.subject.color,
-                "topics": [] 
-            }
-            
-        subjects_map[topic.subject.id]["topics"].append(topic)
-
-    subjects_list = list(subjects_map.values())
+    subjects = CurriculumSubject.query.filter_by(year=year_id).all()
+    subjects_list = []
+    
+    for subj in subjects:
+        subjects_list.append({
+            "id": subj.id,
+            "name": subj.name,
+            "icon": subj.icon,
+            "color": subj.color,
+            "topics": subj.topics
+        })
 
     return render_template(
         "lernen_year.html",
@@ -162,7 +165,7 @@ def lernen_subject(year_id, subject_id):
     ]
     year = next((y for y in years if y["id"] == year_id), None)
     
-    topics = CurriculumTopic.query.filter_by(subject_id=subject.id, year=year_id).all()
+    topics = CurriculumTopic.query.filter_by(subject_id=subject.id).all()
     
     subject_info = {
         "id": subject.id,
@@ -259,10 +262,13 @@ def manage(user):
         if action == "add_subject":
             name = request.form.get("name")
             color = request.form.get("color")
-            if name:
-                db.session.add(CurriculumSubject(name=name, color=color))
+            year = request.form.get("year")
+            if name and year:
+                db.session.add(CurriculumSubject(name=name, color=color, year=year))
                 db.session.commit()
                 flash("Fach erstellt", "success")
+            elif not year:
+                flash("Jahrgang fehlt", "error")
 
         elif action == "add_topic":
             name = request.form.get("name")

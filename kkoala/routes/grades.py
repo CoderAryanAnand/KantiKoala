@@ -7,6 +7,7 @@ import os
 from ..models import Subject, Grade, User, Semester
 from ..utils import login_required, csrf_protect
 from ..extensions import db, limiter
+from ..consts import SEMESTER_TEMPLATES
 
 # Define the blueprint for grades-related API routes
 grades_bp = Blueprint(
@@ -21,49 +22,7 @@ def limit_grades_api():
 
 
 # --- Constants for default semester/subject setup ---
-# Templates available for users to import when creating a semester
-SEMESTER_TEMPLATES = [
-    {
-        "id": 1,
-        "name": "1. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
-    },
-    {
-        "id": 2,
-        "name": "2. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
-    },
-    {
-        "id": 3,
-        "name": "3. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
-    },
-    {
-        "id": 4,
-        "name": "4. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
-    },
-    {
-        "id": 5,
-        "name": "5. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Sport", "Englisch", "Französisch", "Geschichte"]
-    },
-    {
-        "id": 6,
-        "name": "6. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Sport", "Englisch", "Französisch", "Geschichte"]
-    },
-    {
-        "id": 7,
-        "name": "7. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Sport", "Physik", "Englisch", "Französisch", "Geschichte"]
-    },
-    {
-        "id": 8,
-        "name": "8. Semester",
-        "subjects": ["Deutsch", "Mathematik", "Sport", "Physik", "Englisch", "Französisch", "Geschichte"]
-    }
-]
+# Templates imported from consts.py
 
 
 # --- Helper Functions for Calculations ---
