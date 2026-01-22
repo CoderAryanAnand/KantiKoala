@@ -57,3 +57,25 @@ def toggle_role(current_user, user_id):
     db.session.commit()
     flash(f"Berechtigungen für {user_to_edit.username} aktualisiert.", "success")
     return redirect(url_for("admin.users", q=request.form.get('q', '')))
+
+@admin_bp.route("/users/<int:user_id>/delete", methods=["POST"])
+@login_required
+def delete_user(current_user, user_id):
+    """
+    Delete a user account.
+    Restricted to admins.
+    """
+    if not current_user.is_admin:
+        abort(403)
+        
+    user_to_delete = User.query.get_or_404(user_id)
+    
+    if user_to_delete.id == current_user.id:
+        flash("Du kannst dich nicht selbst löschen.", "danger")
+        return redirect(url_for("admin.users"))
+
+    db.session.delete(user_to_delete)
+    db.session.commit()
+    
+    flash(f"Benutzer {user_to_delete.username} wurde gelöscht.", "success")
+    return redirect(url_for("admin.users", q=request.args.get('q', '')))

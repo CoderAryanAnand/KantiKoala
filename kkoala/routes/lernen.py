@@ -4,10 +4,13 @@ Allows users to browse and study theory content by year, subject, and topic.
 Using Database models defined in kkoala.models.
 """
 from flask import Blueprint, render_template, session, jsonify, abort, request, flash, redirect, url_for
+import json
+from io import BytesIO
 from ..utils import login_required
-from ..models import CurriculumSubject, CurriculumTopic, CurriculumSubTopic
+from ..models import CurriculumSubject, CurriculumTopic, CurriculumSubTopic, Exercise
 from ..extensions import db
 from ..converters import docx_to_html, pdf_to_html, plastex_to_html
+from ..parsers import parse_exercises_from_html, parse_exercises_from_latex
 from ..consts import YEAR_SUBJECT_TEMPLATES
 
 lernen_bp = Blueprint(
@@ -156,6 +159,10 @@ def lernen_subject(year_id, subject_id):
         
     if not subject:
         abort(404)
+
+    # Ensure the subject belongs to the requested year
+    if subject.year != year_id:
+        return redirect(url_for('lernen.lernen_subject', year_id=subject.year, subject_id=subject.id))
         
     years = [
         {"id": 1, "name": "1. Klasse"},
@@ -165,7 +172,8 @@ def lernen_subject(year_id, subject_id):
     ]
     year = next((y for y in years if y["id"] == year_id), None)
     
-    topics = CurriculumTopic.query.filter_by(subject_id=subject.id).all()
+    # Fetch topics sorted by name
+    topics = CurriculumTopic.query.filter_by(subject_id=subject.id).order_by(CurriculumTopic.name).all()
     
     subject_info = {
         "id": subject.id,
@@ -176,7 +184,10 @@ def lernen_subject(year_id, subject_id):
     }
     
     for t in topics:
-        subtopics = [{"id": str(s.id), "name": s.name, "difficulty": s.difficulty} for s in t.subtopics]
+        # Sort subtopics by name or ID
+        sorted_subtopics = sorted(t.subtopics, key=lambda x: x.name)
+        subtopics = [{"id": str(s.id), "name": s.name, "difficulty": s.difficulty} for s in sorted_subtopics]
+        
         subject_info["topics"].append({
             "id": str(t.id),
             "name": t.name,
@@ -212,6 +223,19 @@ def lernen_topic(year_id, subject_id, subtopic_id):
         "key_points": [],
         "html_content": subtopic.content_html 
     }
+    
+    # Add exercises
+    exercises_list = []
+    if subtopic.exercises:
+        for ex in subtopic.exercises:
+            exercises_list.append({
+                "type": ex.type,
+                "question": ex.question,
+                "answer": ex.correct_answer,
+                "explanation": ex.explanation,
+                "options": ex.options_list
+            })
+    content_data['exercises'] = exercises_list
     
     # Wrap in 'content' key to match template structure (content.content.sections)
     content = {
@@ -273,11 +297,16 @@ def manage(user):
         elif action == "add_topic":
             name = request.form.get("name")
             subject_id = request.form.get("subject_id")
-            year = request.form.get("year")
+            # Year is now inherited from the subject
+            
             if name and subject_id:
-                db.session.add(CurriculumTopic(name=name, subject_id=subject_id, year=year))
-                db.session.commit()
-                flash("Thema erstellt", "success")
+                subject = CurriculumSubject.query.get(subject_id)
+                if subject:
+                    db.session.add(CurriculumTopic(name=name, subject_id=subject_id, year=subject.year))
+                    db.session.commit()
+                    flash("Thema erstellt", "success")
+                else:
+                    flash("Fehler: Fach nicht gefunden", "error")
 
         elif action == "add_subtopic":
             name = request.form.get("name")
@@ -286,19 +315,48 @@ def manage(user):
             
             content_html = ""
             file = request.files.get("docx_file")
+            exercises_data = []
             
             if file:
                 if file.filename.endswith('.docx'):
-                    content_html = docx_to_html(file)
+                    # Convert to HTML, then parse for exercises
+                    raw_html = docx_to_html(file)
+                    exercises_data, content_html = parse_exercises_from_html(raw_html)
                 elif file.filename.endswith('.tex'):
-                    content_html = plastex_to_html(file, file.filename)
+                    # Read raw content to parse exercises
+                    file.stream.seek(0)
+                    raw_latex = file.stream.read().decode('utf-8', errors='ignore')
+                    
+                    exercises_data, cleaned_latex = parse_exercises_from_latex(raw_latex)
+                    
+                    # Create a stream from cleaned latex for conversion
+                    cleaned_stream = BytesIO(cleaned_latex.encode('utf-8'))
+                    content_html = plastex_to_html(cleaned_stream, file.filename)
                 elif file.filename.endswith('.pdf'):
                     content_html = pdf_to_html(file)
 
             if name and topic_id:
-                db.session.add(CurriculumSubTopic(name=name, topic_id=topic_id, difficulty=difficulty, content_html=content_html))
+                subtopic = CurriculumSubTopic(name=name, topic_id=topic_id, difficulty=difficulty, content_html=content_html)
+                db.session.add(subtopic)
                 db.session.commit()
-                flash("Lerninhalt erstellt", "success")
+                
+                # Add extracted exercises
+                for ex in exercises_data:
+                    new_ex = Exercise(
+                        subtopic_id=subtopic.id,
+                        type=ex['type'],
+                        question=ex['question'],
+                        options=json.dumps(ex['options']) if ex['options'] else None,
+                        correct_answer=ex['correct_answer'],
+                        explanation=ex['explanation']
+                    )
+                    db.session.add(new_ex)
+
+                if exercises_data:
+                    db.session.commit()
+                    flash(f"Lerninhalt und {len(exercises_data)} Übungen erstellt", "success")
+                else:
+                    flash("Lerninhalt erstellt", "success")
             else:
                  flash("Fehler: Name und Thema erforderlich", "error")
 
@@ -359,17 +417,41 @@ def manage(user):
                 # Update content file if provided
                 file = request.files.get("docx_file")
                 if file and file.filename:
+                    exercises_data = []
+                    
+                    # Clear existing exercises when replacing content
+                    for old_ex in subtopic.exercises:
+                        db.session.delete(old_ex)
+
                     if file.filename.endswith('.docx'):
-                        subtopic.content_html = docx_to_html(file)
-                        flash("Inhalt und Datei aktualisiert (Word)", "success")
+                        raw_html = docx_to_html(file)
+                        exercises_data, subtopic.content_html = parse_exercises_from_html(raw_html)
+                        flash(f"Inhalt und {len(exercises_data)} Übungen aktualisiert (Word)", "success")
                     elif file.filename.endswith('.tex'):
-                        subtopic.content_html = plastex_to_html(file, file.filename)
-                        flash("Inhalt und Datei aktualisiert (LaTeX)", "success")
+                        file.stream.seek(0)
+                        raw_latex = file.stream.read().decode('utf-8', errors='ignore')
+                        exercises_data, cleaned_latex = parse_exercises_from_latex(raw_latex)
+                        
+                        cleaned_stream = BytesIO(cleaned_latex.encode('utf-8'))
+                        subtopic.content_html = plastex_to_html(cleaned_stream, file.filename)
+                        flash(f"Inhalt und {len(exercises_data)} Übungen aktualisiert (LaTeX)", "success")
                     elif file.filename.endswith('.pdf'):
                         subtopic.content_html = pdf_to_html(file)
                         flash("Inhalt und Datei aktualisiert (PDF)", "success")
                     else:
                         flash("Ungültiges Dateiformat. Nur .docx, .tex oder .pdf", "error")
+                    
+                    # Add extracted exercises
+                    for ex in exercises_data:
+                        new_ex = Exercise(
+                            subtopic_id=subtopic.id,
+                            type=ex['type'],
+                            question=ex['question'],
+                            options=json.dumps(ex['options']) if ex['options'] else None,
+                            correct_answer=ex['correct_answer'],
+                            explanation=ex['explanation']
+                        )
+                        db.session.add(new_ex)
                 else:
                     flash("Metadaten aktualisiert", "success")
                 

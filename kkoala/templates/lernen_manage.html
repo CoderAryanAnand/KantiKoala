@@ -49,22 +49,14 @@
                 
                 <select name="subject_id" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
                     <option value="">Fach wählen...</option>
-                    {% for subject in subjects %}
-                    <option value="{{ subject.id }}">{{ subject.name }} ({{ subject.year }}. Kl)</option>
+                    {% for subject in subjects|sort(attribute='year') %}
+                    <option value="{{ subject.id }}">{{ subject.year }}. Kl: {{ subject.name }}</option>
                     {% endfor %}
                 </select>
 
-                <select name="year" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
-                    <option value="">Jahrgang wählen...</option>
-                    <option value="1">1. Klasse</option>
-                    <option value="2">2. Klasse</option>
-                    <option value="3">3. Klasse</option>
-                    <option value="4">4. Klasse</option>
-                </select>
-
-                <input type="text" name="name" placeholder="Thema (z.B. Algebra)" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white col-span-2">
+                <input type="text" name="name" placeholder="Thema (z.B. Algebra)" required class="p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
                 
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-2">Thema hinzufügen</button>
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 col-span-2 md:col-span-2">Thema hinzufügen</button>
             </form>
         </section>
 
@@ -97,6 +89,17 @@
 
                 <input type="text" name="name" placeholder="Titel des Inhalts (z.B. Quadratische Gleichungen)" required class="w-full p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
                 
+                <div class="mb-4 p-4 bg-zinc-50 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700">
+                    <p class="text-sm font-semibold mb-2 text-zinc-800 dark:text-zinc-200">ℹ️ Interaktive Übungen erstellen</p>
+                    <p class="text-sm text-zinc-600 dark:text-zinc-400 mb-2">
+                        KantiKoala kann Multiple-Choice und Text-Übungen direkt aus deinen Dokumenten importieren.
+                    </p>
+                    <div class="text-xs text-zinc-500 space-y-1 mt-2">
+                        <p><strong>Word (.docx):</strong> <a href="{{ url_for('static', filename='templates/exercise_template_word.txt') }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">Anleitung ansehen</a>. Erstelle eine Tabelle mit "Question", "Option" und "Answer".</p>
+                        <p><strong>LaTeX (.tex):</strong> <a href="{{ url_for('static', filename='templates/exercise_template.tex') }}" download class="text-blue-600 dark:text-blue-400 hover:underline">Vorlage herunterladen</a>. Verwende <code class="bg-zinc-200 dark:bg-zinc-700 px-1 rounded">\begin{question}{multiple-choice}{Correct Answer}</code>.</p>
+                    </div>
+                </div>
+
                 <div class="border-2 border-dashed border-zinc-300 dark:border-zinc-600 rounded-lg p-6 text-center">
                     <label class="cursor-pointer block">
                         <span class="text-zinc-500 dark:text-zinc-400">Datei hier ablegen oder klicken (.docx, .tex)</span>
@@ -117,117 +120,129 @@
             <h2 class="text-xl font-semibold text-zinc-900 dark:text-white mb-4">4. Inhalte verwalten & bearbeiten</h2>
             
             <div class="space-y-4">
-                {% for subject in subjects %}
-                <div class="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
-                    <!-- Subject Header -->
-                    <div class="bg-zinc-50 dark:bg-zinc-800 p-3 flex justify-between items-center">
-                        <button onclick="document.getElementById('subject-content-{{ subject.id }}').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')" class="font-bold text-lg flex items-center gap-2 text-left w-full" style="color: {{ subject.color }}">
-                            <svg class="chevron w-6 h-6 transform transition-transform text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                            <span>{{ subject.icon }} {{ subject.name }}</span>
-                        </button>
-                        <div class="flex items-center gap-2">
-                            <button onclick="document.getElementById('edit-subject-{{ subject.id }}').classList.toggle('hidden')" class="text-blue-500 hover:text-blue-700 text-sm whitespace-nowrap">Bearbeiten</button>
-                            <button onclick="openDeleteModal('delete_subject', '{{ subject.id }}', '{{ subject.name }}')" class="text-red-500 hover:text-red-700 text-sm whitespace-nowrap">Löschen</button>
-                        </div>
-                    </div>
-
-                    <!-- Subject Edit Form -->
-                    <div id="edit-subject-{{ subject.id }}" class="hidden p-3 bg-zinc-50 dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700">
-                        <form method="POST" class="flex flex-col md:flex-row gap-3 items-center">
-                            <input type="hidden" name="action" value="edit_subject">
-                            <input type="hidden" name="subject_id" value="{{ subject.id }}">
-                            <input type="text" name="name" value="{{ subject.name }}" class="flex-1 p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" required>
-                             <div>
-                                {{ color_picker('color', 'edit_subject_color_' ~ subject.id, subject.color) }}
+                {% for year, year_subjects in subjects|groupby('year')|sort %}
+                <div class="rounded-xl border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+                    <button onclick="document.getElementById('year-content-{{ year }}').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')" 
+                            class="w-full bg-zinc-100 dark:bg-zinc-800 p-4 flex justify-between items-center text-left hover:bg-zinc-200 dark:hover:bg-zinc-750 transition-colors">
+                        <span class="font-bold text-lg text-zinc-900 dark:text-white">{{ year }}. Klasse</span>
+                        <svg class="chevron w-6 h-6 transform transition-transform text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    
+                    <div id="year-content-{{ year }}" class="hidden p-4 bg-white dark:bg-zinc-900 space-y-4">
+                        {% for subject in year_subjects %}
+                        <div class="border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+                            <!-- Subject Header -->
+                            <div class="bg-zinc-50 dark:bg-zinc-800 p-3 flex justify-between items-center">
+                                <button onclick="document.getElementById('subject-content-{{ subject.id }}').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')" class="font-bold text-lg flex items-center gap-2 text-left w-full" style="color: {{ subject.color }}">
+                                    <svg class="chevron w-6 h-6 transform transition-transform text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    <span>{{ subject.icon }} {{ subject.name }}</span>
+                                </button>
+                                <div class="flex items-center gap-2">
+                                    <button onclick="document.getElementById('edit-subject-{{ subject.id }}').classList.toggle('hidden')" class="text-blue-500 hover:text-blue-700 text-sm whitespace-nowrap">Bearbeiten</button>
+                                    <button onclick="openDeleteModal('delete_subject', '{{ subject.id }}', '{{ subject.name }}')" class="text-red-500 hover:text-red-700 text-sm whitespace-nowrap">Löschen</button>
+                                </div>
                             </div>
-                            <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Speichern</button>
-                        </form>
-                    </div>
 
-                    <!-- Subject Content (Hidden by default) -->
-                    <div id="subject-content-{{ subject.id }}" class="hidden p-3 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700">
-                        {% if subject.topics %}
-                            <ul class="space-y-4">
-                            {% for topic in subject.topics %}
-                                <li class="pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
-                                    <div class="flex justify-between items-center mb-2">
-                                        <button onclick="document.getElementById('topic-content-{{ topic.id }}').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')" class="text-zinc-800 dark:text-zinc-200 font-medium flex items-center gap-2 text-left">
-                                            <svg class="chevron w-5 h-5 transform transition-transform text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                            <span>{{ topic.year }}. Kl: {{ topic.name }}</span>
-                                        </button>
-                                        <div class="flex items-center gap-2">
-                                            <button onclick="document.getElementById('edit-topic-{{ topic.id }}').classList.toggle('hidden')" class="text-xs text-blue-500 hover:text-blue-700 whitespace-nowrap">Bearbeiten</button>
-                                            <button onclick="openDeleteModal('delete_topic', '{{ topic.id }}', '{{ topic.name }}')" class="text-xs text-red-400 hover:text-red-600 whitespace-nowrap">Löschen</button>
-                                        </div>
+                            <!-- Subject Edit Form -->
+                            <div id="edit-subject-{{ subject.id }}" class="hidden p-3 bg-zinc-50 dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700">
+                                <form method="POST" class="flex flex-col md:flex-row gap-3 items-center">
+                                    <input type="hidden" name="action" value="edit_subject">
+                                    <input type="hidden" name="subject_id" value="{{ subject.id }}">
+                                    <input type="text" name="name" value="{{ subject.name }}" class="flex-1 p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" required>
+                                     <div>
+                                        {{ color_picker('color', 'edit_subject_color_' ~ subject.id, subject.color) }}
                                     </div>
+                                    <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">Speichern</button>
+                                </form>
+                            </div>
 
-                                    <!-- Topic Edit Form -->
-                                    <div id="edit-topic-{{ topic.id }}" class="hidden mb-3 p-2 bg-zinc-50 dark:bg-zinc-800 rounded">
-                                        <form method="POST" class="flex gap-2">
-                                            <input type="hidden" name="action" value="edit_topic">
-                                            <input type="hidden" name="topic_id" value="{{ topic.id }}">
-                                            <input type="text" name="name" value="{{ topic.name }}" class="flex-1 p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" required>
-                                            <button type="submit" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">Speichern</button>
-                                        </form>
-                                    </div>
-
-                                    <!-- Subtopics (Hidden by default) -->
-                                    <div id="topic-content-{{ topic.id }}" class="hidden">
-                                    {% if topic.subtopics %}
-                                        <div class="ml-4 space-y-2">
-                                        {% for sub in topic.subtopics %}
-                                            <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded border border-zinc-100 dark:border-zinc-800">
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ sub.name }} <span class="text-xs opacity-50">({{ sub.difficulty }})</span></span>
-                                                    <div class="flex gap-2 items-center">
-                                                        <!-- Toggle Edit Form -->
-                                                        <button onclick="document.getElementById('edit-{{ sub.id }}').classList.toggle('hidden')" class="text-xs text-blue-500 hover:text-blue-700">Bearbeiten</button>
-                                                        <button onclick="openDeleteModal('delete_subtopic', '{{ sub.id }}', '{{ sub.name }}')" class="text-xs text-red-500 hover:text-red-700">Löschen</button>
-                                                    </div>
-                                                </div>
-
-                                                <!-- Edit Form (Hidden by default) -->
-                                                <div id="edit-{{ sub.id }}" class="hidden mt-3 p-3 bg-white dark:bg-zinc-800 rounded shadow-inner border border-zinc-200 dark:border-zinc-700">
-                                                    <form method="POST" enctype="multipart/form-data" class="space-y-3">
-                                                        <input type="hidden" name="action" value="edit_subtopic">
-                                                        <input type="hidden" name="subtopic_id" value="{{ sub.id }}">
-                                                        
-                                                        <div>
-                                                            <label class="block text-xs font-semibold mb-1 dark:text-zinc-300">Name</label>
-                                                            <input type="text" name="name" value="{{ sub.name }}" class="w-full p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
-                                                        </div>
-
-                                                        <div>
-                                                            <label class="block text-xs font-semibold mb-1 dark:text-zinc-300">Schwierigkeit</label>
-                                                            <select name="difficulty" class="w-full p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
-                                                                <option value="basic" {% if sub.difficulty == 'basic' %}selected{% endif %}>Grundlagen</option>
-                                                                <option value="intermediate" {% if sub.difficulty == 'intermediate' %}selected{% endif %}>Mittel</option>
-                                                                <option value="advanced" {% if sub.difficulty == 'advanced' %}selected{% endif %}>Fortgeschritten</option>
-                                                                <option value="expert" {% if sub.difficulty == 'expert' %}selected{% endif %}>Experte</option>
-                                                            </select>
-                                                        </div>
-
-                                                        <div>
-                                                            <label class="block text-xs font-semibold mb-1 dark:text-zinc-300">Datei ersetzen (optional)</label>
-                                                            <input type="file" name="docx_file" accept=".docx,.tex" class="w-full text-xs dark:text-zinc-300">
-                                                        </div>
-
-                                                        <button type="submit" class="w-full bg-blue-600 text-white py-1 px-3 rounded text-sm hover:bg-blue-700">Speichern</button>
-                                                    </form>
+                            <!-- Subject Content (Hidden by default) -->
+                            <div id="subject-content-{{ subject.id }}" class="hidden p-3 bg-white dark:bg-zinc-900 border-t border-zinc-200 dark:border-zinc-700">
+                                {% if subject.topics %}
+                                    <ul class="space-y-4">
+                                    {% for topic in subject.topics %}
+                                        <li class="pl-4 border-l-2 border-zinc-200 dark:border-zinc-700">
+                                            <div class="flex justify-between items-center mb-2">
+                                                <button onclick="document.getElementById('topic-content-{{ topic.id }}').classList.toggle('hidden'); this.querySelector('.chevron').classList.toggle('rotate-180')" class="text-zinc-800 dark:text-zinc-200 font-medium flex items-center gap-2 text-left">
+                                                    <svg class="chevron w-5 h-5 transform transition-transform text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                                    <span>{{ topic.name }}</span>
+                                                </button>
+                                                <div class="flex items-center gap-2">
+                                                    <button onclick="document.getElementById('edit-topic-{{ topic.id }}').classList.toggle('hidden')" class="text-xs text-blue-500 hover:text-blue-700 whitespace-nowrap">Bearbeiten</button>
+                                                    <button onclick="openDeleteModal('delete_topic', '{{ topic.id }}', '{{ topic.name }}')" class="text-xs text-red-400 hover:text-red-600 whitespace-nowrap">Löschen</button>
                                                 </div>
                                             </div>
-                                        {% endfor %}
-                                        </div>
-                                    {% else %}
-                                        <div class="ml-4 text-xs text-zinc-400 italic">Keine Inhalte</div>
-                                    {% endif %}
-                                    </div>
-                                </li>
-                            {% endfor %}
-                            </ul>
-                        {% else %}
-                            <p class="text-zinc-500 italic">Keine Themen vorhanden</p>
-                        {% endif %}
+
+                                            <!-- Topic Edit Form -->
+                                            <div id="edit-topic-{{ topic.id }}" class="hidden mb-3 p-2 bg-zinc-50 dark:bg-zinc-800 rounded">
+                                                <form method="POST" class="flex gap-2">
+                                                    <input type="hidden" name="action" value="edit_topic">
+                                                    <input type="hidden" name="topic_id" value="{{ topic.id }}">
+                                                    <input type="text" name="name" value="{{ topic.name }}" class="flex-1 p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white" required>
+                                                    <button type="submit" class="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700">Speichern</button>
+                                                </form>
+                                            </div>
+
+                                            <!-- Subtopics (Hidden by default) -->
+                                            <div id="topic-content-{{ topic.id }}" class="hidden">
+                                            {% if topic.subtopics %}
+                                                <div class="ml-4 space-y-2">
+                                                {% for sub in topic.subtopics %}
+                                                    <div class="bg-zinc-50 dark:bg-zinc-800/50 p-2 rounded border border-zinc-100 dark:border-zinc-800">
+                                                        <div class="flex justify-between items-center">
+                                                            <span class="text-sm text-zinc-600 dark:text-zinc-400">{{ sub.name }} <span class="text-xs opacity-50">({{ sub.difficulty }})</span></span>
+                                                            <div class="flex gap-2 items-center">
+                                                                <!-- Toggle Edit Form -->
+                                                                <button onclick="document.getElementById('edit-{{ sub.id }}').classList.toggle('hidden')" class="text-xs text-blue-500 hover:text-blue-700">Bearbeiten</button>
+                                                                <button onclick="openDeleteModal('delete_subtopic', '{{ sub.id }}', '{{ sub.name }}')" class="text-xs text-red-500 hover:text-red-700">Löschen</button>
+                                                            </div>
+                                                        </div>
+
+                                                        <!-- Edit Form (Hidden by default) -->
+                                                        <div id="edit-{{ sub.id }}" class="hidden mt-3 p-3 bg-white dark:bg-zinc-800 rounded shadow-inner border border-zinc-200 dark:border-zinc-700">
+                                                            <form method="POST" enctype="multipart/form-data" class="space-y-3">
+                                                                <input type="hidden" name="action" value="edit_subtopic">
+                                                                <input type="hidden" name="subtopic_id" value="{{ sub.id }}">
+                                                                
+                                                                <div>
+                                                                    <label class="block text-xs font-semibold mb-1 dark:text-zinc-300">Name</label>
+                                                                    <input type="text" name="name" value="{{ sub.name }}" class="w-full p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="block text-xs font-semibold mb-1 dark:text-zinc-300">Schwierigkeit</label>
+                                                                    <select name="difficulty" class="w-full p-1 text-sm border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
+                                                                        <option value="basic" {% if sub.difficulty == 'basic' %}selected{% endif %}>Grundlagen</option>
+                                                                        <option value="intermediate" {% if sub.difficulty == 'intermediate' %}selected{% endif %}>Mittel</option>
+                                                                        <option value="advanced" {% if sub.difficulty == 'advanced' %}selected{% endif %}>Fortgeschritten</option>
+                                                                        <option value="expert" {% if sub.difficulty == 'expert' %}selected{% endif %}>Experte</option>
+                                                                    </select>
+                                                                </div>
+
+                                                                <div>
+                                                                    <label class="block text-xs font-semibold mb-1 dark:text-zinc-300">Datei ersetzen (optional)</label>
+                                                                    <input type="file" name="docx_file" accept=".docx,.tex" class="w-full text-xs dark:text-zinc-300">
+                                                                </div>
+
+                                                                <button type="submit" class="w-full bg-blue-600 text-white py-1 px-3 rounded text-sm hover:bg-blue-700">Speichern</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <div class="ml-4 text-xs text-zinc-400 italic">Keine Inhalte</div>
+                                            {% endif %}
+                                            </div>
+                                        </li>
+                                    {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p class="text-zinc-500 italic">Keine Themen vorhanden</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
                     </div>
                 </div>
                 {% endfor %}

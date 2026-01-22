@@ -36,7 +36,8 @@ def create_app(config_class="config.ProdConfig"):
         'script-src': [
             "'self'",
             "'unsafe-inline'",  # Required for inline scripts
-            'https://cdn.jsdelivr.net',  # FullCalendar CDN
+            "'unsafe-eval'",    # Required for Alpine.js
+            'https://cdn.jsdelivr.net',  # FullCalendar/Alpine CDN
             'https://cdnjs.cloudflare.com', # PDF.js CDN
         ],
         'style-src': [

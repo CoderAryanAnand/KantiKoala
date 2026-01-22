@@ -1,0 +1,43 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+% Dies ist ein Template für KantiKoala Übungen.
+% Verwende die 'question' Umgebung für Aufgaben.
+
+% Format:
+% \begin{question}{DATENTYP}{LÖSUNG}
+%    Fragetext...
+%    \item A) Option 1 (nur bei Multiple Choice)
+%    \item B) Option 2
+%    \explanation{Erklärung für die Lösung...}
+% \end{question}
+
+\newenvironment{question}[2]{
+    \textbf{Frage (#1):} 
+    % Im PDF wird dies als normaler Text angezeigt.
+    % KantiKoala wird diesen Block extrahieren und interaktiv machen.
+}{}
+
+\newcommand{\explanation}[1]{\textit{#1}}
+
+\begin{document}
+
+\section*{Übungen zu Thema X}
+
+% Beispiel 1: Multiple Choice
+\begin{question}{multiple-choice}{B}
+    Was ist die Hauptstadt von Frankreich?
+    \item A) London
+    \item B) Paris
+    \item C) Berlin
+    \explanation{Paris ist seit Jahrhunderten das politische Zentrum.}
+\end{question}
+
+% Beispiel 2: Textaufgabe
+\begin{question}{text}{12}
+    Berechne: $3 \times 4$
+    \explanation{Einmaleins!}
+\end{question}
+
+\end{document}

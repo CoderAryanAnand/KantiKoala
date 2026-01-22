@@ -77,8 +77,8 @@ SEMESTER_TEMPLATES = [
 
 YEAR_SUBJECT_TEMPLATES = {
     1: SEMESTER_TEMPLATES[1]["subjects"],
-    2: SEMESTER_TEMPLATES[2]["subjects"],
-    3: SEMESTER_TEMPLATES[4]["subjects"],
-    4: SEMESTER_TEMPLATES[6]["subjects"]
+    2: SEMESTER_TEMPLATES[3]["subjects"],
+    3: SEMESTER_TEMPLATES[5]["subjects"],
+    4: SEMESTER_TEMPLATES[7]["subjects"]
 }
 

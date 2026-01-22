@@ -354,3 +354,33 @@ class CurriculumSubTopic(db.Model):
     difficulty = db.Column(db.String(20), default="intermediate")
     content_html = db.Column(db.Text, nullable=True) # HTML content from uploaded file
     estimated_time = db.Column(db.String(50), default="45 Minuten")
+    
+    # Exercises related to this subtopic
+    exercises = db.relationship("Exercise", backref="subtopic", lazy=True, cascade="all, delete-orphan")
+
+
+class Exercise(db.Model):
+    """
+    Represents a structured exercise for a subtopic.
+    Can be multiple choice, text input, or true/false.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    subtopic_id = db.Column(db.Integer, db.ForeignKey('curriculum_sub_topic.id'), nullable=False)
+    type = db.Column(db.String(20), nullable=False) # 'multiple-choice', 'text', 'true-false'
+    question = db.Column(db.Text, nullable=False)
+    options = db.Column(db.Text, nullable=True) # JSON string for MC options (or pipe separated)
+    correct_answer = db.Column(db.Text, nullable=False)
+    explanation = db.Column(db.Text, nullable=True)
+    order = db.Column(db.Integer, default=0)
+
+    @property
+    def options_list(self):
+        import json
+        if self.options:
+            try:
+                return json.loads(self.options)
+            except:
+                return []
+        return []
+
+
