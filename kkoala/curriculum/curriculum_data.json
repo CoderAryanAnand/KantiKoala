@@ -1,0 +1,1009 @@
+{
+  "years": [
+    {
+      "id": 1,
+      "name": "1. Klasse",
+      "description": "Grundlagenfächer und Einführung ins Gymnasium"
+    },
+    {
+      "id": 2,
+      "name": "2. Klasse",
+      "description": "Vertiefung der Grundlagen"
+    },
+    {
+      "id": 3,
+      "name": "3. Klasse",
+      "description": "Schwerpunktfächer und Spezialisierung"
+    },
+    {
+      "id": 4,
+      "name": "4. Klasse",
+      "description": "Maturavorbereitung"
+    }
+  ],
+  "subjects": {
+    "1": [
+      {
+        "id": "deutsch_1",
+        "name": "Deutsch",
+        "icon": "📖",
+        "color": "#3B82F6",
+        "topics": [
+          {
+            "id": "grammatik_grundlagen",
+            "name": "Grammatik Grundlagen",
+            "subtopics": [
+              {"id": "wortarten", "name": "Wortarten", "difficulty": "basic"},
+              {"id": "satzglieder", "name": "Satzglieder", "difficulty": "basic"},
+              {"id": "nebensaetze", "name": "Nebensätze", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "textanalyse",
+            "name": "Textanalyse",
+            "subtopics": [
+              {"id": "erzaehlperspektive", "name": "Erzählperspektive", "difficulty": "basic"},
+              {"id": "stilmittel", "name": "Stilmittel", "difficulty": "intermediate"},
+              {"id": "interpretation", "name": "Interpretation", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "aufsatz",
+            "name": "Aufsatz schreiben",
+            "subtopics": [
+              {"id": "eroerterung", "name": "Erörterung", "difficulty": "intermediate"},
+              {"id": "zusammenfassung", "name": "Zusammenfassung", "difficulty": "basic"},
+              {"id": "textgebuendene_eroerterung", "name": "Textgebundene Erörterung", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mathematik_1",
+        "name": "Mathematik",
+        "icon": "📐",
+        "color": "#EF4444",
+        "topics": [
+          {
+            "id": "algebra_1",
+            "name": "Algebra",
+            "subtopics": [
+              {"id": "terme", "name": "Terme und Termumformungen", "difficulty": "basic"},
+              {"id": "gleichungen_1", "name": "Lineare Gleichungen", "difficulty": "basic"},
+              {"id": "ungleichungen", "name": "Ungleichungen", "difficulty": "intermediate"},
+              {"id": "bruchgleichungen", "name": "Bruchgleichungen", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "geometrie_1",
+            "name": "Geometrie",
+            "subtopics": [
+              {"id": "dreiecke", "name": "Dreiecke und Kongruenz", "difficulty": "basic"},
+              {"id": "vierecke", "name": "Vierecke", "difficulty": "basic"},
+              {"id": "kreis", "name": "Kreis und Kreisberechnung", "difficulty": "intermediate"},
+              {"id": "pythagoras", "name": "Satz des Pythagoras", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "funktionen_1",
+            "name": "Funktionen",
+            "subtopics": [
+              {"id": "lineare_funktionen", "name": "Lineare Funktionen", "difficulty": "basic"},
+              {"id": "koordinatensystem", "name": "Koordinatensystem", "difficulty": "basic"},
+              {"id": "steigung", "name": "Steigung und Achsenabschnitt", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "biologie_1",
+        "name": "Biologie",
+        "icon": "🧬",
+        "color": "#22C55E",
+        "topics": [
+          {
+            "id": "zellbiologie",
+            "name": "Zellbiologie",
+            "subtopics": [
+              {"id": "zellaufbau", "name": "Aufbau der Zelle", "difficulty": "basic"},
+              {"id": "zellorganellen", "name": "Zellorganellen", "difficulty": "intermediate"},
+              {"id": "zellteilung", "name": "Zellteilung (Mitose)", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "humanbiologie_1",
+            "name": "Humanbiologie",
+            "subtopics": [
+              {"id": "verdauung", "name": "Verdauungssystem", "difficulty": "basic"},
+              {"id": "atmung", "name": "Atmungssystem", "difficulty": "basic"},
+              {"id": "herz_kreislauf", "name": "Herz-Kreislauf-System", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemie_1",
+        "name": "Chemie",
+        "icon": "⚗️",
+        "color": "#A855F7",
+        "topics": [
+          {
+            "id": "atombau",
+            "name": "Atombau",
+            "subtopics": [
+              {"id": "atomaufbau", "name": "Aufbau des Atoms", "difficulty": "basic"},
+              {"id": "periodensystem", "name": "Periodensystem", "difficulty": "basic"},
+              {"id": "elektronenkonfiguration", "name": "Elektronenkonfiguration", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "chemische_bindungen",
+            "name": "Chemische Bindungen",
+            "subtopics": [
+              {"id": "ionenbindung", "name": "Ionenbindung", "difficulty": "intermediate"},
+              {"id": "kovalente_bindung", "name": "Kovalente Bindung", "difficulty": "intermediate"},
+              {"id": "metallbindung", "name": "Metallbindung", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "englisch_1",
+        "name": "Englisch",
+        "icon": "🇬🇧",
+        "color": "#F59E0B",
+        "topics": [
+          {
+            "id": "grammar_1",
+            "name": "Grammar",
+            "subtopics": [
+              {"id": "tenses_present", "name": "Present Tenses", "difficulty": "basic"},
+              {"id": "tenses_past", "name": "Past Tenses", "difficulty": "basic"},
+              {"id": "conditionals_1", "name": "Conditionals I & II", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "vocabulary_1",
+            "name": "Vocabulary",
+            "subtopics": [
+              {"id": "everyday_life", "name": "Everyday Life", "difficulty": "basic"},
+              {"id": "school_education", "name": "School & Education", "difficulty": "basic"},
+              {"id": "media_technology", "name": "Media & Technology", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "franzoesisch_1",
+        "name": "Französisch",
+        "icon": "🇫🇷",
+        "color": "#EC4899",
+        "topics": [
+          {
+            "id": "grammaire_1",
+            "name": "Grammaire",
+            "subtopics": [
+              {"id": "present", "name": "Le Présent", "difficulty": "basic"},
+              {"id": "passe_compose", "name": "Le Passé Composé", "difficulty": "basic"},
+              {"id": "imparfait", "name": "L'Imparfait", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "vocabulaire_1",
+            "name": "Vocabulaire",
+            "subtopics": [
+              {"id": "vie_quotidienne", "name": "La Vie Quotidienne", "difficulty": "basic"},
+              {"id": "ecole", "name": "L'École", "difficulty": "basic"},
+              {"id": "voyages", "name": "Les Voyages", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geschichte_1",
+        "name": "Geschichte",
+        "icon": "🏛️",
+        "color": "#78716C",
+        "topics": [
+          {
+            "id": "antike",
+            "name": "Antike",
+            "subtopics": [
+              {"id": "griechenland", "name": "Das antike Griechenland", "difficulty": "basic"},
+              {"id": "rom", "name": "Das Römische Reich", "difficulty": "basic"},
+              {"id": "demokratie_athen", "name": "Demokratie in Athen", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "mittelalter",
+            "name": "Mittelalter",
+            "subtopics": [
+              {"id": "feudalismus", "name": "Feudalismus", "difficulty": "basic"},
+              {"id": "staendegesellschaft", "name": "Ständegesellschaft", "difficulty": "basic"},
+              {"id": "kreuzzuege", "name": "Kreuzzüge", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geografie_1",
+        "name": "Geografie",
+        "icon": "🌍",
+        "color": "#06B6D4",
+        "topics": [
+          {
+            "id": "schweiz",
+            "name": "Schweiz",
+            "subtopics": [
+              {"id": "topografie_schweiz", "name": "Topografie der Schweiz", "difficulty": "basic"},
+              {"id": "klima_schweiz", "name": "Klima der Schweiz", "difficulty": "basic"},
+              {"id": "wirtschaft_schweiz", "name": "Wirtschaft der Schweiz", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "europa",
+            "name": "Europa",
+            "subtopics": [
+              {"id": "laender_europa", "name": "Länder Europas", "difficulty": "basic"},
+              {"id": "eu", "name": "Europäische Union", "difficulty": "intermediate"},
+              {"id": "klimazonen", "name": "Klimazonen Europas", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      }
+    ],
+    "2": [
+      {
+        "id": "deutsch_2",
+        "name": "Deutsch",
+        "icon": "📖",
+        "color": "#3B82F6",
+        "topics": [
+          {
+            "id": "literatur_2",
+            "name": "Literatur",
+            "subtopics": [
+              {"id": "epik", "name": "Epik - Erzählende Texte", "difficulty": "intermediate"},
+              {"id": "lyrik", "name": "Lyrik - Gedichtanalyse", "difficulty": "intermediate"},
+              {"id": "drama", "name": "Drama - Dramenanalyse", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "rhetorik",
+            "name": "Rhetorik",
+            "subtopics": [
+              {"id": "argumentation", "name": "Argumentation", "difficulty": "intermediate"},
+              {"id": "rede_aufbau", "name": "Aufbau einer Rede", "difficulty": "intermediate"},
+              {"id": "ueberzeugungstechniken", "name": "Überzeugungstechniken", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mathematik_2",
+        "name": "Mathematik",
+        "icon": "📐",
+        "color": "#EF4444",
+        "topics": [
+          {
+            "id": "quadratische_funktionen",
+            "name": "Quadratische Funktionen",
+            "subtopics": [
+              {"id": "parabeln", "name": "Parabeln", "difficulty": "intermediate"},
+              {"id": "quadratische_gleichungen", "name": "Quadratische Gleichungen", "difficulty": "intermediate"},
+              {"id": "scheitelpunkt", "name": "Scheitelpunktform", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "potenzen_wurzeln",
+            "name": "Potenzen und Wurzeln",
+            "subtopics": [
+              {"id": "potenzgesetze", "name": "Potenzgesetze", "difficulty": "intermediate"},
+              {"id": "wurzeln", "name": "Wurzeln und Wurzelgesetze", "difficulty": "intermediate"},
+              {"id": "exponentialfunktionen", "name": "Exponentialfunktionen", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "trigonometrie",
+            "name": "Trigonometrie",
+            "subtopics": [
+              {"id": "sin_cos_tan", "name": "Sinus, Kosinus, Tangens", "difficulty": "intermediate"},
+              {"id": "dreiecksberechnungen", "name": "Dreiecksberechnungen", "difficulty": "intermediate"},
+              {"id": "sinussatz_kosinussatz", "name": "Sinus- und Kosinussatz", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "biologie_2",
+        "name": "Biologie",
+        "icon": "🧬",
+        "color": "#22C55E",
+        "topics": [
+          {
+            "id": "genetik_grundlagen",
+            "name": "Genetik Grundlagen",
+            "subtopics": [
+              {"id": "dna_aufbau", "name": "Aufbau der DNA", "difficulty": "intermediate"},
+              {"id": "replikation", "name": "DNA-Replikation", "difficulty": "intermediate"},
+              {"id": "meiose", "name": "Meiose", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "oekologie",
+            "name": "Ökologie",
+            "subtopics": [
+              {"id": "oekosysteme", "name": "Ökosysteme", "difficulty": "basic"},
+              {"id": "nahrungsketten", "name": "Nahrungsketten und -netze", "difficulty": "intermediate"},
+              {"id": "stoffkreislaeufe", "name": "Stoffkreisläufe", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemie_2",
+        "name": "Chemie",
+        "icon": "⚗️",
+        "color": "#A855F7",
+        "topics": [
+          {
+            "id": "stoechometrie",
+            "name": "Stöchiometrie",
+            "subtopics": [
+              {"id": "mol", "name": "Das Mol", "difficulty": "intermediate"},
+              {"id": "reaktionsgleichungen", "name": "Reaktionsgleichungen", "difficulty": "intermediate"},
+              {"id": "massenberechnungen", "name": "Massenberechnungen", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "saeuren_basen",
+            "name": "Säuren und Basen",
+            "subtopics": [
+              {"id": "ph_wert", "name": "pH-Wert", "difficulty": "intermediate"},
+              {"id": "neutralisation", "name": "Neutralisation", "difficulty": "intermediate"},
+              {"id": "indikatoren", "name": "Indikatoren", "difficulty": "basic"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "physik_2",
+        "name": "Physik",
+        "icon": "⚛️",
+        "color": "#6366F1",
+        "topics": [
+          {
+            "id": "mechanik",
+            "name": "Mechanik",
+            "subtopics": [
+              {"id": "kinematik", "name": "Kinematik", "difficulty": "intermediate"},
+              {"id": "dynamik", "name": "Dynamik (Newtonsche Gesetze)", "difficulty": "intermediate"},
+              {"id": "arbeit_energie", "name": "Arbeit und Energie", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "waermelehre",
+            "name": "Wärmelehre",
+            "subtopics": [
+              {"id": "temperatur", "name": "Temperatur und Wärme", "difficulty": "basic"},
+              {"id": "waermekapazitaet", "name": "Wärmekapazität", "difficulty": "intermediate"},
+              {"id": "aggregatzustaende", "name": "Aggregatzustände", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "englisch_2",
+        "name": "Englisch",
+        "icon": "🇬🇧",
+        "color": "#F59E0B",
+        "topics": [
+          {
+            "id": "grammar_2",
+            "name": "Grammar",
+            "subtopics": [
+              {"id": "passive_voice", "name": "Passive Voice", "difficulty": "intermediate"},
+              {"id": "reported_speech", "name": "Reported Speech", "difficulty": "intermediate"},
+              {"id": "gerund_infinitive", "name": "Gerund vs. Infinitive", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "literature_intro",
+            "name": "Introduction to Literature",
+            "subtopics": [
+              {"id": "short_stories", "name": "Short Stories", "difficulty": "intermediate"},
+              {"id": "novel_study", "name": "Young Adult Novel", "difficulty": "intermediate"},
+              {"id": "character_analysis", "name": "Character Analysis", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "franzoesisch_2",
+        "name": "Französisch",
+        "icon": "🇫🇷",
+        "color": "#EC4899",
+        "topics": [
+          {
+            "id": "grammaire_2",
+            "name": "Grammaire Avancée",
+            "subtopics": [
+              {"id": "subjonctif_intro", "name": "Introduction au Subjonctif", "difficulty": "intermediate"},
+              {"id": "pronoms_relatifs", "name": "Pronoms Relatifs", "difficulty": "intermediate"},
+              {"id": "conditionnel", "name": "Le Conditionnel", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "culture_2",
+            "name": "Culture et Civilisation",
+            "subtopics": [
+              {"id": "paris", "name": "Paris et ses monuments", "difficulty": "basic"},
+              {"id": "regions_france", "name": "Les Régions de France", "difficulty": "intermediate"},
+              {"id": "chanson_francaise", "name": "Chanson Française", "difficulty": "basic"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geschichte_2",
+        "name": "Geschichte",
+        "icon": "🏛️",
+        "color": "#78716C",
+        "topics": [
+          {
+            "id": "neuzeit",
+            "name": "Frühe Neuzeit",
+            "subtopics": [
+              {"id": "renaissance", "name": "Renaissance & Humanismus", "difficulty": "intermediate"},
+              {"id": "reformation", "name": "Reformation", "difficulty": "intermediate"},
+              {"id": "absolutismus", "name": "Absolutismus", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "revolutionen",
+            "name": "Zeitalter der Revolutionen",
+            "subtopics": [
+              {"id": "franzoesische_revolution", "name": "Französische Revolution", "difficulty": "advanced"},
+              {"id": "industrialisierung", "name": "Industrialisierung", "difficulty": "intermediate"},
+              {"id": "soziale_frage", "name": "Die Soziale Frage", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geografie_2",
+        "name": "Geografie",
+        "icon": "🌍",
+        "color": "#06B6D4",
+        "topics": [
+          {
+            "id": "physische_geo",
+            "name": "Physische Geografie",
+            "subtopics": [
+              {"id": "klimatologie", "name": "Klimatologie", "difficulty": "intermediate"},
+              {"id": "wetter", "name": "Wettergeschehen", "difficulty": "intermediate"},
+              {"id": "hydrologie", "name": "Hydrologie (Wasser)", "difficulty": "basic"}
+            ]
+          },
+          {
+            "id": "bevoelkerung",
+            "name": "Bevölkerungsgeografie",
+            "subtopics": [
+              {"id": "demografie", "name": "Demografischer Übergang", "difficulty": "intermediate"},
+              {"id": "migration", "name": "Migration", "difficulty": "intermediate"},
+              {"id": "urbanisierung", "name": "Verstädterung", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      }
+    ],
+    "3": [
+      {
+        "id": "deutsch_3",
+        "name": "Deutsch",
+        "icon": "📖",
+        "color": "#3B82F6",
+        "topics": [
+          {
+            "id": "literaturepochen",
+            "name": "Literaturepochen",
+            "subtopics": [
+              {"id": "aufklaerung", "name": "Aufklärung", "difficulty": "intermediate"},
+              {"id": "sturm_und_drang", "name": "Sturm und Drang", "difficulty": "intermediate"},
+              {"id": "klassik", "name": "Weimarer Klassik", "difficulty": "advanced"},
+              {"id": "romantik", "name": "Romantik", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "wissenschaftliches_schreiben",
+            "name": "Wissenschaftliches Schreiben",
+            "subtopics": [
+              {"id": "zitieren", "name": "Richtiges Zitieren", "difficulty": "intermediate"},
+              {"id": "quellenarbeit", "name": "Quellenarbeit", "difficulty": "intermediate"},
+              {"id": "maturaarbeit_vorbereitung", "name": "Vorbereitung Maturaarbeit", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mathematik_3",
+        "name": "Mathematik",
+        "icon": "📐",
+        "color": "#EF4444",
+        "topics": [
+          {
+            "id": "analysis",
+            "name": "Analysis",
+            "subtopics": [
+              {"id": "grenzwerte", "name": "Grenzwerte", "difficulty": "advanced"},
+              {"id": "ableitungen", "name": "Ableitungen", "difficulty": "advanced"},
+              {"id": "ableitungsregeln", "name": "Ableitungsregeln", "difficulty": "advanced"},
+              {"id": "kurvendiskussion", "name": "Kurvendiskussion", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "vektorgeometrie",
+            "name": "Vektorgeometrie",
+            "subtopics": [
+              {"id": "vektoren_grundlagen", "name": "Vektoren Grundlagen", "difficulty": "intermediate"},
+              {"id": "skalarprodukt", "name": "Skalarprodukt", "difficulty": "advanced"},
+              {"id": "geraden_ebenen", "name": "Geraden und Ebenen", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "biologie_3",
+        "name": "Biologie",
+        "icon": "🧬",
+        "color": "#22C55E",
+        "topics": [
+          {
+            "id": "genetik_advanced",
+            "name": "Genetik Vertiefung",
+            "subtopics": [
+              {"id": "genexpression", "name": "Genexpression", "difficulty": "advanced"},
+              {"id": "mutation", "name": "Mutationen", "difficulty": "advanced"},
+              {"id": "gentechnik", "name": "Gentechnik", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "evolution",
+            "name": "Evolution",
+            "subtopics": [
+              {"id": "evolutionstheorie", "name": "Evolutionstheorie", "difficulty": "intermediate"},
+              {"id": "selektion", "name": "Selektion", "difficulty": "intermediate"},
+              {"id": "artbildung", "name": "Artbildung", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemie_3",
+        "name": "Chemie",
+        "icon": "⚗️",
+        "color": "#A855F7",
+        "topics": [
+          {
+            "id": "organische_chemie",
+            "name": "Organische Chemie",
+            "subtopics": [
+              {"id": "kohlenwasserstoffe", "name": "Kohlenwasserstoffe (Alkane, Alkene)", "difficulty": "intermediate"},
+              {"id": "funktionelle_gruppen", "name": "Funktionelle Gruppen", "difficulty": "advanced"},
+              {"id": "alkohole", "name": "Alkohole und Oxidation", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "reaktionskinetik",
+            "name": "Reaktionskinetik",
+            "subtopics": [
+              {"id": "reaktionsgeschwindigkeit", "name": "Reaktionsgeschwindigkeit", "difficulty": "intermediate"},
+              {"id": "katalyse", "name": "Katalyse", "difficulty": "intermediate"},
+              {"id": "gleichgewicht", "name": "Chemisches Gleichgewicht", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "physik_3",
+        "name": "Physik",
+        "icon": "⚛️",
+        "color": "#6366F1",
+        "topics": [
+          {
+            "id": "elektrizitaet",
+            "name": "Elektrizität",
+            "subtopics": [
+              {"id": "elektrisches_feld", "name": "Elektrisches Feld", "difficulty": "advanced"},
+              {"id": "stromkreise", "name": "Stromkreise", "difficulty": "intermediate"},
+              {"id": "magnetismus", "name": "Magnetismus", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "wellen",
+            "name": "Wellen",
+            "subtopics": [
+              {"id": "welleneigenschaften", "name": "Welleneigenschaften", "difficulty": "intermediate"},
+              {"id": "schall", "name": "Schallwellen", "difficulty": "intermediate"},
+              {"id": "licht", "name": "Lichtwellen", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "englisch_3",
+        "name": "Englisch",
+        "icon": "🇬🇧",
+        "color": "#F59E0B",
+        "topics": [
+          {
+            "id": "literary_analysis",
+            "name": "Literary Analysis",
+            "subtopics": [
+              {"id": "drama_study", "name": "Drama (Shakespeare)", "difficulty": "advanced"},
+              {"id": "poetry_analysis", "name": "Poetry Analysis", "difficulty": "advanced"},
+              {"id": "themes_symbols", "name": "Themes and Symbols", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "advanced_writing",
+            "name": "Advanced Writing",
+            "subtopics": [
+              {"id": "essay_writing", "name": "Argumentative Essay", "difficulty": "advanced"},
+              {"id": "text_analysis", "name": "Text Analysis", "difficulty": "advanced"},
+              {"id": "academic_vocab", "name": "Academic Vocabulary", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "franzoesisch_3",
+        "name": "Französisch",
+        "icon": "🇫🇷",
+        "color": "#EC4899",
+        "topics": [
+          {
+            "id": "litterature_fr",
+            "name": "Littérature",
+            "subtopics": [
+              {"id": "lecture_oeuvre", "name": "Lecture d'une oeuvre intégrale", "difficulty": "advanced"},
+              {"id": "analyse_texte", "name": "Analyse de texte", "difficulty": "advanced"},
+              {"id": "courants_litteraires", "name": "Courants littéraires", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "grammaire_3",
+            "name": "Grammaire et Style",
+            "subtopics": [
+              {"id": "subjonctif_usage", "name": "L'usage du Subjonctif", "difficulty": "advanced"},
+              {"id": "connecteurs", "name": "Connecteurs Logiques", "difficulty": "intermediate"},
+              {"id": "style_indirect", "name": "Style Indirect", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geschichte_3",
+        "name": "Geschichte",
+        "icon": "🏛️",
+        "color": "#78716C",
+        "topics": [
+          {
+            "id": "imperialismus_weltkriege",
+            "name": "Imperialismus & Weltkriege",
+            "subtopics": [
+              {"id": "imperialismus", "name": "Imperialismus", "difficulty": "intermediate"},
+              {"id": "erster_weltkrieg", "name": "Erster Weltkrieg", "difficulty": "advanced"},
+              {"id": "zweiter_weltkrieg", "name": "Zweiter Weltkrieg", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "zwischenkriegszeit",
+            "name": "Zwischenkriegszeit",
+            "subtopics": [
+              {"id": "weimarer_republik", "name": "Weimarer Republik", "difficulty": "advanced"},
+              {"id": "nationalsozialismus", "name": "Nationalsozialismus", "difficulty": "advanced"},
+              {"id": "holocaust", "name": "Holocaust / Shoah", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geografie_3",
+        "name": "Geografie",
+        "icon": "🌍",
+        "color": "#06B6D4",
+        "topics": [
+          {
+            "id": "wirtschaftsgeo",
+            "name": "Wirtschaftsgeografie",
+            "subtopics": [
+              {"id": "globalisierung", "name": "Globalisierung", "difficulty": "advanced"},
+              {"id": "entwicklungslaender", "name": "Entwicklungsländer", "difficulty": "intermediate"},
+              {"id": "welthandel", "name": "Welthandel", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "geologie",
+            "name": "Geologie",
+            "subtopics": [
+              {"id": "plattentektonik", "name": "Plattentektonik", "difficulty": "intermediate"},
+              {"id": "vulkanismus", "name": "Vulkanismus", "difficulty": "intermediate"},
+              {"id": "gesteinskunde", "name": "Gesteinskunde", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "wirtschaft_recht_3",
+        "name": "Wirtschaft & Recht",
+        "icon": "⚖️",
+        "color": "#14B8A6",
+        "topics": [
+          {
+            "id": "grundlagen_bwl",
+            "name": "Betriebswirtschaft",
+            "subtopics": [
+              {"id": "unternehmensmodell", "name": "St. Galler Management-Modell", "difficulty": "basic"},
+              {"id": "marketing", "name": "Marketing-Mix", "difficulty": "basic"},
+              {"id": "rechtsformen", "name": "Rechtsformen", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "recht_basics",
+            "name": "Recht",
+            "subtopics": [
+              {"id": "personenrecht", "name": "Personenrecht", "difficulty": "basic"},
+              {"id": "familienrecht", "name": "Familienrecht", "difficulty": "intermediate"},
+              {"id": "vertragsrecht", "name": "Vertragsrecht (OR)", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      }
+    ],
+    "4": [
+      {
+        "id": "deutsch_4",
+        "name": "Deutsch",
+        "icon": "📖",
+        "color": "#3B82F6",
+        "topics": [
+          {
+            "id": "literatur_moderne",
+            "name": "Literatur der Moderne",
+            "subtopics": [
+              {"id": "expressionismus", "name": "Expressionismus", "difficulty": "advanced"},
+              {"id": "nachkriegsliteratur", "name": "Nachkriegsliteratur", "difficulty": "advanced"},
+              {"id": "gegenwartsliteratur", "name": "Gegenwartsliteratur", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "matura_vorbereitung_de",
+            "name": "Maturavorbereitung",
+            "subtopics": [
+              {"id": "textanalyse_vertieft", "name": "Vertiefte Textanalyse", "difficulty": "advanced"},
+              {"id": "muendliche_matura", "name": "Mündliche Matura", "difficulty": "advanced"},
+              {"id": "schriftliche_matura", "name": "Schriftliche Matura", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "mathematik_4",
+        "name": "Mathematik",
+        "icon": "📐",
+        "color": "#EF4444",
+        "topics": [
+          {
+            "id": "integralrechnung",
+            "name": "Integralrechnung",
+            "subtopics": [
+              {"id": "stammfunktionen", "name": "Stammfunktionen", "difficulty": "advanced"},
+              {"id": "bestimmtes_integral", "name": "Bestimmtes Integral", "difficulty": "advanced"},
+              {"id": "flaechenberechnung", "name": "Flächenberechnung", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "stochastik",
+            "name": "Stochastik",
+            "subtopics": [
+              {"id": "wahrscheinlichkeit", "name": "Wahrscheinlichkeit", "difficulty": "intermediate"},
+              {"id": "kombinatorik", "name": "Kombinatorik", "difficulty": "advanced"},
+              {"id": "verteilungen", "name": "Verteilungen", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "matura_vorbereitung_ma",
+            "name": "Maturavorbereitung",
+            "subtopics": [
+              {"id": "pruefungsaufgaben", "name": "Prüfungsaufgaben", "difficulty": "advanced"},
+              {"id": "zusammenfassung", "name": "Gesamtzusammenfassung", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "biologie_4",
+        "name": "Biologie",
+        "icon": "🧬",
+        "color": "#22C55E",
+        "topics": [
+          {
+            "id": "neurobiologie",
+            "name": "Neurobiologie",
+            "subtopics": [
+              {"id": "nervenzelle", "name": "Nervenzelle und Aktionspotenzial", "difficulty": "advanced"},
+              {"id": "synapse", "name": "Synapse und Erregungsübertragung", "difficulty": "advanced"},
+              {"id": "gehirn", "name": "Aufbau des Gehirns", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "verhaltensbiologie",
+            "name": "Verhaltensbiologie",
+            "subtopics": [
+              {"id": "angeboren_erlernt", "name": "Angeborenes vs. Erlerntes Verhalten", "difficulty": "intermediate"},
+              {"id": "sozialverhalten", "name": "Sozialverhalten", "difficulty": "intermediate"},
+              {"id": "kommunikation", "name": "Kommunikation im Tierreich", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "chemie_4",
+        "name": "Chemie",
+        "icon": "⚗️",
+        "color": "#A855F7",
+        "topics": [
+          {
+            "id": "biochemie",
+            "name": "Biochemie",
+            "subtopics": [
+              {"id": "kohlenhydrate", "name": "Kohlenhydrate", "difficulty": "advanced"},
+              {"id": "proteine", "name": "Aminosäuren und Proteine", "difficulty": "advanced"},
+              {"id": "fette", "name": "Lipide und Fette", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "kunststoffe",
+            "name": "Kunststoffe",
+            "subtopics": [
+              {"id": "polymerisation", "name": "Polymerisation", "difficulty": "intermediate"},
+              {"id": "kunststoffarten", "name": "Arten von Kunststoffen", "difficulty": "basic"},
+              {"id": "recycling", "name": "Recycling und Umwelt", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "physik_4",
+        "name": "Physik",
+        "icon": "⚛️",
+        "color": "#6366F1",
+        "topics": [
+          {
+            "id": "moderne_physik",
+            "name": "Moderne Physik",
+            "subtopics": [
+              {"id": "quantenmechanik", "name": "Quantenmechanik Grundlagen", "difficulty": "advanced"},
+              {"id": "atomphysik", "name": "Atomphysik", "difficulty": "advanced"},
+              {"id": "kernphysik", "name": "Kernphysik und Radioaktivität", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "astrophysik",
+            "name": "Astrophysik",
+            "subtopics": [
+              {"id": "sonnensystem", "name": "Unser Sonnensystem", "difficulty": "basic"},
+              {"id": "sterne_entwicklung", "name": "Sternenentwicklung", "difficulty": "intermediate"},
+              {"id": "kosmologie", "name": "Kosmologie (Urknall)", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "englisch_4",
+        "name": "Englisch",
+        "icon": "🇬🇧",
+        "color": "#F59E0B",
+        "topics": [
+          {
+            "id": "global_issues",
+            "name": "Global Issues",
+            "subtopics": [
+              {"id": "environment", "name": "Environment & Sustainability", "difficulty": "advanced"},
+              {"id": "technology_society", "name": "Technology and Society", "difficulty": "advanced"},
+              {"id": "human_rights", "name": "Human Rights", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "matura_prep_en",
+            "name": "Exam Preparation",
+            "subtopics": [
+              {"id": "oral_exam", "name": "Oral Exam Practice", "difficulty": "advanced"},
+              {"id": "listening_comp", "name": "Listening Comprehension", "difficulty": "advanced"},
+              {"id": "advanced_grammar", "name": "C1/C2 Grammar Review", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "franzoesisch_4",
+        "name": "Französisch",
+        "icon": "🇫🇷",
+        "color": "#EC4899",
+        "topics": [
+          {
+            "id": "actualites",
+            "name": "Actualités",
+            "subtopics": [
+              {"id": "medias_francophones", "name": "Les médias francophones", "difficulty": "advanced"},
+              {"id": "debat", "name": "Débattre d'un sujet d'actualité", "difficulty": "advanced"},
+              {"id": "politique_fr", "name": "Système politique français", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "matura_prep_fr",
+            "name": "Préparation Maturité",
+            "subtopics": [
+              {"id": "oral_matura", "name": "Examen Oral", "difficulty": "advanced"},
+              {"id": "ecrit_matura", "name": "Examen Écrit", "difficulty": "advanced"},
+              {"id": "litterature_resume", "name": "Révisions Littéraires", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geschichte_4",
+        "name": "Geschichte",
+        "icon": "🏛️",
+        "color": "#78716C",
+        "topics": [
+          {
+            "id": "zeitgeschichte",
+            "name": "Zeitgeschichte",
+            "subtopics": [
+              {"id": "kalter_krieg", "name": "Der Kalte Krieg", "difficulty": "advanced"},
+              {"id": "nahostkonflikt", "name": "Nahostkonflikt", "difficulty": "advanced"},
+              {"id": "dekolonisation", "name": "Dekolonisation", "difficulty": "intermediate"}
+            ]
+          },
+          {
+            "id": "schweiz_20jh",
+            "name": "Schweiz im 20. Jh.",
+            "subtopics": [
+              {"id": "schweiz_weltkriege", "name": "Schweiz in den Weltkriegen", "difficulty": "intermediate"},
+              {"id": "frauenstimmrecht", "name": "Frauenstimmrecht", "difficulty": "basic"},
+              {"id": "integration_europa", "name": "Schweiz und Europa", "difficulty": "advanced"}
+            ]
+          }
+        ]
+      },
+      {
+        "id": "geografie_4",
+        "name": "Geografie",
+        "icon": "🌍",
+        "color": "#06B6D4",
+        "topics": [
+          {
+            "id": "globale_herausforderungen",
+            "name": "Globale Herausforderungen",
+            "subtopics": [
+              {"id": "klimawandel", "name": "Klimawandel Folgen", "difficulty": "advanced"},
+              {"id": "ressourcen", "name": "Ressourcenknappheit", "difficulty": "intermediate"},
+              {"id": "nachhaltigkeit", "name": "Nachhaltigkeit", "difficulty": "advanced"}
+            ]
+          },
+          {
+            "id": "matura_prep_geo",
+            "name": "Maturavorbereitung",
+            "subtopics": [
+              {"id": "vernretes_denken", "name": "Vernetztes Denken", "difficulty": "advanced"},
+              {"id": "fallstudien", "name": "Fallstudien bearbeiten", "difficulty": "advanced"},
+              {"id": "kartenanalyse", "name": "Kartenanalyse Vertiefung", "difficulty": "intermediate"}
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

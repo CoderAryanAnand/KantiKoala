@@ -30,3 +30,55 @@ DEFAULT_SETTINGS = {
 }
 
 DEFAULT_IMPORT_COLOR = "#6C757D"  # Bootstrap's secondary gray - neutral, professional, standard
+
+# Templates available for users to import when creating a semester
+SEMESTER_TEMPLATES = [
+    {
+        "id": 1,
+        "name": "1. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Geschichte"]
+    },
+    {
+        "id": 2,
+        "name": "2. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
+    },
+    {
+        "id": 3,
+        "name": "3. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
+    },
+    {
+        "id": 4,
+        "name": "4. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Geografie", "Sport", "Englisch", "Französisch", "Informatik", "Wirtschaft und Recht", "Geschichte"]
+    },
+    {
+        "id": 5,
+        "name": "5. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Sport", "Englisch", "Französisch", "Geschichte"]
+    },
+    {
+        "id": 6,
+        "name": "6. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Biologie", "Chemie", "Sport", "Englisch", "Französisch", "Geschichte"]
+    },
+    {
+        "id": 7,
+        "name": "7. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Sport", "Physik", "Englisch", "Französisch", "Geschichte"]
+    },
+    {
+        "id": 8,
+        "name": "8. Semester",
+        "subjects": ["Deutsch", "Mathematik", "Sport", "Physik", "Englisch", "Französisch", "Geschichte"]
+    }
+]
+
+YEAR_SUBJECT_TEMPLATES = {
+    1: SEMESTER_TEMPLATES[1]["subjects"],
+    2: SEMESTER_TEMPLATES[3]["subjects"],
+    3: SEMESTER_TEMPLATES[5]["subjects"],
+    4: SEMESTER_TEMPLATES[7]["subjects"]
+}
+

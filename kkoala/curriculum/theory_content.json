@@ -1,0 +1,292 @@
+{
+  "quadratische_funktionen_gleichungen": {
+    "title": "Quadratische Funktionen und Gleichungen",
+    "subject": "Mathematik",
+    "year": 1,
+    "difficulty": "intermediate",
+    "estimated_time": "60 Minuten",
+    "content": {
+      "introduction": "Quadratische Funktionen und ihre Graphen (Parabeln) sind ein zentrales Thema der Algebra. Sie erlauben die Modellierung von krummlinigen Verläufen.",
+      "sections": [
+        {
+          "title": "Quadratische Funktionen",
+          "content": "Eine quadratische Funktion wird durch die Gleichung $f(x) = ax^2 + bx + c$ beschrieben[cite: 9]. [cite_start]Ihr Graph ist eine Parabel.\n\n**Eigenschaften:**\n* **Scheitelpunkt:** Der tiefste oder höchste Punkt der Parabel [cite: 9][cite_start].\n* **Form:** Ist $a > 0$, ist die Parabel nach oben geöffnet; bei $a < 0$ nach unten.\n* **Verschiebung:** Die Gleichung kann verschobene, gestreckte und gespiegelte Parabeln beschreiben[cite: 9].\n\n"
+        },
+        {
+          "title": "Lösen quadratischer Gleichungen",
+          "content": "Eine quadratische Gleichung hat die Form $ax^2 + bx + c = 0$[cite: 12].\n\n**Lösungsmethoden:**\n1.  [cite_start]**Faktorzerlegung:** Zerlegung des Terms in Linearfaktoren (z.B. $(x-x_1)(x-x_2) = 0$)[cite: 12].\n2.  [cite_start]**Auflösungsformel (Mitternachtsformel):**\n    $$x_{1,2} = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$$\n    Diese Methode wird oft mit der Faktorzerlegung in Bezug auf Effizienz verglichen [cite: 12][cite_start].\n\n**Anzahl der Lösungen:**\nDie Diskriminante $D = b^2 - 4ac$ bestimmt die Anzahl der Lösungen[cite: 14]:\n* $D > 0$: Zwei Lösungen\n* $D = 0$: Eine Lösung\n* $D < 0$: Keine reelle Lösung"
+        },
+        {
+          "title": "Zusammenhang Funktion und Gleichung",
+          "content": "Die Lösungen der quadratischen Gleichung $f(x) = 0$ entsprechen den **Nullstellen** der zugehörigen quadratischen Funktion[cite: 14]. Dies ist der Schnittpunkt der Parabel mit der x-Achse."
+        }
+      ],
+      "key_points": [
+        "Der Graph einer quadratischen Funktion ist eine Parabel[cite: 9].",
+        "Quadratische Gleichungen können mittels Faktorzerlegung oder Auflösungsformel gelöst werden[cite: 12].",
+        "Die Lösungen der Gleichung sind die Nullstellen der Funktion[cite: 14]."
+      ],
+      "examples": [
+        {
+          "example": "Bestimme den Scheitelpunkt von $f(x) = (x-2)^2 + 3$.",
+          "explanation": "Dies ist die Scheitelpunktform. Der Scheitelpunkt liegt bei $S(2|3)$."
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Löse die Gleichung $x^2 - 5x + 6 = 0$ durch Faktorzerlegung.",
+          "answer": "$(x-2)(x-3)=0$, also sind die Lösungen $x_1=2$ und $x_2=3$."
+        }
+      ]
+    }
+  },
+  "exponential_logarithmus": {
+    "title": "Exponential- und Logarithmusfunktionen",
+    "subject": "Mathematik",
+    "year": 2,
+    "difficulty": "advanced",
+    "estimated_time": "50 Minuten",
+    "content": {
+      "introduction": "Wachstums- und Zerfallsprozesse werden durch Exponentialfunktionen beschrieben. Der Logarithmus ist deren Umkehroperation.",
+      "sections": [
+        {
+          "title": "Potenzgesetze und rationale Exponenten",
+          "content": "Grundlage für Exponentialfunktionen ist das Verständnis von Potenzen. [cite_start]Schüler lernen, die Wirkung von rationalen Exponenten (z.B. $x^{1/2} = \\sqrt{x}$) zu erklären und Potenzgesetze zur Termumformung anzuwenden[cite: 22]."
+        },
+        {
+          "title": "Exponentialfunktionen",
+          "content": "Funktionen der Form $f(x) = c \\cdot a^x$ modellieren exponentielle Wachstums- und Zerfallsprozesse (z.B. Kapitalentwicklung mit Zinseszins) [cite: 24][cite_start].\n\n**Besonderheit:** Die Schüler lernen die Bedeutung der Euler'schen Zahl $e$ kennen[cite: 24].\n\n"
+        },
+        {
+          "title": "Logarithmus als Umkehrfunktion",
+          "content": "Der Logarithmus ist als Umkehrung der Exponentialfunktion definiert. [cite_start]Eine Logarithmusfunktion wird als Umkehrfunktion einer Exponentialfunktion erkannt [cite: 39][cite_start].\n\n**Definition:** $y = \\log_a(x) \\iff a^y = x$ [cite: 22][cite_start].\n\nEs gelten die Logarithmusgesetze, die in einfachen Beispielen angewendet werden[cite: 22]."
+        },
+        {
+          "title": "Gleichungen lösen",
+          "content": "Exponentialgleichungen können oft durch Logarithmieren gelöst werden[cite: 33].\n\n**Beispiel:**\n$$2^x = 10 \\Rightarrow x = \\log_2(10) = \\frac{\\ln(10)}{\\ln(2)}$$"
+        }
+      ],
+      "key_points": [
+        "Exponentialfunktionen modellieren Wachstumsprozesse[cite: 24].",
+        "Der Logarithmus ist die Umkehrfunktion der Exponentialfunktion[cite: 39].",
+        "Logarithmusgesetze helfen beim Lösen von Exponentialgleichungen[cite: 33]."
+      ],
+      "examples": [
+        {
+          "example": "Schreibe als Logarithmus: $2^3 = 8$",
+          "explanation": "$\\log_2(8) = 3$"
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Löse nach x auf: $e^{2x} = 5$",
+          "answer": "$2x = \\ln(5) \\Rightarrow x = \\frac{1}{2}\\ln(5)$"
+        }
+      ]
+    }
+  },
+  "differentialrechnung": {
+    "title": "Differentialrechnung (Analysis)",
+    "subject": "Mathematik",
+    "year": 3,
+    "difficulty": "advanced",
+    "estimated_time": "70 Minuten",
+    "content": {
+      "introduction": "Die Differentialrechnung beschäftigt sich mit dem Änderungsverhalten von Funktionen. Zentral ist der Begriff der Ableitung.",
+      "sections": [
+        {
+          "title": "Grenzwerte und Stetigkeit",
+          "content": "Bevor abgeleitet wird, muss das Konzept des Grenzwertes verstanden werden. [cite_start]Schüler lernen, Grenzwerte von Zahlenfolgen und Funktionen zu berechnen und stetige Funktionen zu erkennen[cite: 49, 51]."
+        },
+        {
+          "title": "Der Begriff der Ableitung",
+          "content": "Die Ableitung $f'(x)$ wird auf zwei Arten interpretiert:\n1.  [cite_start]Als **momentane Änderungsrate**[cite: 51].\n2.  [cite_start]Als **Tangentensteigung**, definiert als Grenzwert von Sekantensteigungen (Differentialquotient)[cite: 53].\n\n"
+        },
+        {
+          "title": "Ableitungsregeln",
+          "content": "Um Funktionen effizient abzuleiten, werden Regeln angewendet [cite: 53][cite_start]:\n* **Elementare Funktionen:** $x^n, e^x, \\ln(x), \\sin(x), \\cos(x)$.\n* **Rechenregeln:** Summen-, Faktor-, Produkt-, Quotienten- und Kettenregel.\n\nBeispiel Kettenregel: Die Funktion $a^x = e^{\\ln(a)x}$ wird mit der Kettenregel abgeleitet[cite: 53]."
+        },
+        {
+          "title": "Kurvendiskussion und Extremwertprobleme",
+          "content": "Die Ableitung wird genutzt, um Funktionsgraphen zu untersuchen:\n* Bestimmung von **Extrema** (Hoch-/Tiefpunkte) und Wendepunkten [cite: 53][cite_start].\n* Analyse des Monotonieverhaltens (steigend/fallend) [cite: 53][cite_start].\n* Lösen von Optimierungsaufgaben (Extremwertprobleme) in Anwendungen[cite: 53]."
+        }
+      ],
+      "key_points": [
+        "Die Ableitung entspricht der Tangentensteigung[cite: 53].",
+        "Wichtige Regeln sind Produkt-, Quotienten- und Kettenregel[cite: 53].",
+        "Notwendige Bedingung für Extrema ist $f'(x) = 0$[cite: 53]."
+      ],
+      "examples": [
+        {
+          "example": "Leite ab: $f(x) = x^2 \\cdot \\sin(x)$",
+          "explanation": "Mit Produktregel ($u'v + uv'$): $f'(x) = 2x \\cdot \\sin(x) + x^2 \\cdot \\cos(x)$"
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Bestimme die Steigung der Funktion $f(x) = x^2$ an der Stelle $x=3$.",
+          "answer": "$f'(x)=2x$, also $f'(3) = 2 \\cdot 3 = 6$."
+        }
+      ]
+    }
+  },
+  "integralrechnung_stochastik": {
+    "title": "Integralrechnung und Stochastik",
+    "subject": "Mathematik",
+    "year": 4,
+    "difficulty": "expert",
+    "estimated_time": "75 Minuten",
+    "content": {
+      "introduction": "Im Abschlussjahr stehen die Umkehrung der Differentiation (Integralrechnung) sowie die Wahrscheinlichkeitsrechnung im Fokus.",
+      "sections": [
+        {
+          "title": "Integralrechnung",
+          "content": "Das Integral hat zwei Hauptaspekte:\n1.  [cite_start]**Das bestimmte Integral:** Definiert als Grenzwert einer Summe, zur Berechnung von Flächeninhalten[cite: 59].\n2.  [cite_start]**Das unbestimmte Integral:** Die Menge aller Stammfunktionen [cite: 60][cite_start].\n\n**Hauptsatz der Analysis:**\nDer Hauptsatz verbindet Differenzieren und Integrieren und erlaubt die Berechnung bestimmter Integrale mittels Stammfunktionen [cite: 60, 62][cite_start].\n\n**Anwendungen:**\n* Flächen unter Graphen [cite: 66][cite_start].\n* Volumen von Rotationskörpern[cite: 67].\n\n"
+        },
+        {
+          "title": "Kombinatorik",
+          "content": "Hier geht es um das Zählen von Möglichkeiten. [cite_start]Wichtige Werkzeuge sind die Additions- und Multiplikationsregel sowie die Fakultät[cite: 69, 70]. [cite_start]Es wird unterschieden, ob die Reihenfolge wichtig ist und ob Wiederholungen erlaubt sind[cite: 70]."
+        },
+        {
+          "title": "Wahrscheinlichkeitsrechnung",
+          "content": "Wahrscheinlichkeiten werden oft über relative Häufigkeiten definiert [cite: 74][cite_start].\n\n**Wichtige Konzepte:**\n* **Bedingte Wahrscheinlichkeit** und Unabhängigkeit von Ereignissen[cite: 76].\n* **Verteilungen:** Die Binomialverteilung wird erklärt und angewendet. [cite_start]Zudem wird die Normalverteilung (Gausssche Glockenkurve) beschrieben[cite: 78].\n\n"
+        }
+      ],
+      "key_points": [
+        "Das Integral berechnet Flächen und rekonstruiert Bestände aus Änderungsraten[cite: 66, 67].",
+        "Der Hauptsatz der Analysis ist zentral für die Berechnung[cite: 60].",
+        "Die Stochastik behandelt Wahrscheinlichkeiten und Verteilungen wie die Binomial- und Normalverteilung[cite: 78]."
+      ],
+      "examples": [
+        {
+          "example": "Berechne $\\int x^2 dx$",
+          "explanation": "Die Stammfunktion ist $\\frac{1}{3}x^3 + C$."
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Was besagt der Hauptsatz der Differential- und Integralrechnung?",
+          "answer": "Er stellt den Zusammenhang zwischen Integrieren und Differenzieren her und ermöglicht die Berechnung von Integralen mittels Stammfunktionen[cite: 62]."
+        }
+      ]
+    }
+  },
+  "wahrscheinlichkeit": {
+    "title": "Wahrscheinlichkeit",
+    "subject": "Mathematik",
+    "year": 4,
+    "difficulty": "intermediate",
+    "estimated_time": "45 Minuten",
+    "content": {
+      "introduction": "Die Wahrscheinlichkeitstheorie modelliert zufällige Ereignisse mathematisch. Kernkonzepte sind der Wahrscheinlichkeitsraum und das Rechnen mit Wahrscheinlichkeiten.",
+      "sections": [
+        {
+          "title": "Grundlagen (Laplace)",
+          "content": "Für ein Laplace-Experiment (alle Ergebnisse gleich wahrscheinlich) gilt:\n$$P(E) = \\frac{\\text{Anzahl günstiger Ergebnisse}}{\\text{Anzahl möglicher Ergebnisse}}$$\n\n**Beispiel Würfel:** $P(\\text{gerade Zahl}) = \\frac{3}{6} = 0.5$."
+        },
+        {
+          "title": "Rechenregeln",
+          "content": "* **Gegenereignis:** $P(\\bar{E}) = 1 - P(E)$\n* **Additionssatz:** $P(A \\cup B) = P(A) + P(B) - P(A \\cap B)$\n* **Stochastische Unabhängigkeit:** $P(A \\cap B) = P(A) \\cdot P(B)$"
+        },
+        {
+          "title": "Bedingte Wahrscheinlichkeit",
+          "content": "Die Wahrscheinlichkeit von Ereignis $A$, wenn $B$ bekannt ist:\n$$P(A|B) = \\frac{P(A \\cap B)}{P(B)}$$\n\n**Satz von Bayes:**\n$$P(B|A) = \\frac{P(A|B) \\cdot P(B)}{P(A)}$$"
+        }
+      ],
+      "key_points": [
+        "Laplace-Formel als Basis.",
+        "Unabhängigkeit vereinfacht Schnittmengenberechnung.",
+        "Satz von Bayes kehrt Bedingung um."
+      ],
+      "examples": [
+        {
+          "example": "Ein Test ist 99% sicher positiv bei Kranken, aber auch 1% falsch positiv bei Gesunden. Wie hoch ist die Wahrscheinlichkeit krank zu sein, wenn der Test positiv ist (Prävalenz 0.1%)?",
+          "explanation": "Bayes anwenden. Das Ergebnis ist oft überraschend niedrig (~9%)."
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Zwei ideale Würfel werden geworfen. Wie hoch ist die Wahrscheinlichkeit für die Augensumme 7?",
+          "answer": "Günstige Paare: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1). Insgesamt 36 Paare. $P = 6/36 = 1/6$."
+        }
+      ]
+    }
+  },
+  "kombinatorik": {
+    "title": "Kombinatorik",
+    "subject": "Mathematik",
+    "year": 4,
+    "difficulty": "advanced",
+    "estimated_time": "45 Minuten",
+    "content": {
+      "introduction": "Die Kombinatorik ist die Kunst des Zählens komplexer Mengen. Sie unterscheidet Situationen nach Reihenfolge und Wiederholung.",
+      "sections": [
+        {
+          "title": "Permutation (Reihenfolge wichtig)",
+          "content": "Anordnung von $n$ unterscheidbaren Objekten:\n$$N = n! = n \\cdot (n-1) \\cdot ... \\cdot 1$$\n\nBeispiel: Anordnung von 4 Büchern im Regal = $4! = 24$."
+        },
+        {
+          "title": "Variation (Auswahl mit Reihenfolge)",
+          "content": "Auswahl von $k$ Objekten aus $n$ mit Beachtung der Reihenfolge (Siegertreppchen).\nFormel: $\\frac{n!}{(n-k)!}$"
+        },
+        {
+          "title": "Kombination (Auswahl ohne Reihenfolge)",
+          "content": "Die klassische 'Lotto-Formel'. Auswahl von $k$ aus $n$ Objekten, Reihenfolge egal.\nBinomialkoeffizient:\n$$\\binom{n}{k} = \\frac{n!}{k!(n-k)!}$$"
+        }
+      ],
+      "key_points": [
+        "Permutation: Alles anordnen ($n!$).",
+        "Kombination: Teilmenge auswählen ($\\binom{n}{k}$)."
+      ],
+      "examples": [
+        {
+          "example": "Lotto '6 aus 45'",
+          "explanation": "$\\binom{45}{6} = 8'145'060$ Möglichkeiten."
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Wie viele Möglichkeiten gibt es, ein 3-köpfiges Komitee aus 10 Personen zu bilden?",
+          "answer": "$\\binom{10}{3} = \\frac{10 \\cdot 9 \\cdot 8}{6} = 120$."
+        }
+      ]
+    }
+  },
+  "verteilungen": {
+    "title": "Verteilungen",
+    "subject": "Mathematik",
+    "year": 4,
+    "difficulty": "advanced",
+    "estimated_time": "60 Minuten",
+    "content": {
+      "introduction": "Wahrscheinlichkeitsverteilungen beschreiben das Verhalten von Zufallsvariablen. Man unterscheidet diskrete und stetige Verteilungen.",
+      "sections": [
+        {
+          "title": "Binomialverteilung (Diskret)",
+          "content": "Bernoulli-Kette: Experiment mit 2 Ausgängen (Erfolg/Misserfolg), $n$-mal wiederholt.\nWahrscheinlichkeit für genau $k$ Treffer:\n$$P(X=k) = \\binom{n}{k} p^k (1-p)^{n-k}$$\n\nErwartungswert: $E(X) = n \\cdot p$\nVarianz: $V(X) = n \\cdot p \\cdot (1-p)$"
+        },
+        {
+          "title": "Normalverteilung (Stetig)",
+          "content": "Gausssche Glockenkurve. Viele natürliche Merkmale (Körpergrösse, Messfehler) sind normalverteilt.\nBestimmt durch:\n* **Erwartungswert $\\mu$** (Lage des Maximums)\n* **Standardabweichung $\\sigma$** (Breite der Kurve)\n\nSigma-Regeln:\n* ca. 68% liegen im Bereich $\\mu \\pm \\sigma$\n* ca. 95% liegen im Bereich $\\mu \\pm 2\\sigma$"
+        }
+      ],
+      "key_points": [
+        "Binomialverteilung für Zählen von Erfolgen (Ziehen mit Zurücklegen).",
+        "Normalverteilung als wichtigste stetige Verteilung.",
+        "Sigma-Umgebungen zur Abschätzung."
+      ],
+      "examples": [
+        {
+          "example": "Münzwurf 100 mal. Wie viele 'Kopf' werden erwartet?",
+          "explanation": "$E(X) = n \\cdot p = 100 \\cdot 0.5 = 50$."
+        }
+      ],
+      "exercises": [
+        {
+          "question": "Ein Medikament wirkt bei 80% der Patienten. Es werden 10 Patienten behandelt. Wie wahrscheinlich werden genau 8 geheilt?",
+          "answer": "$P(X=8) = \\binom{10}{8} 0.8^8 0.2^2 \\approx 0.302$ (30.2%)"
+        }
+      ]
+    }
+  }
+}

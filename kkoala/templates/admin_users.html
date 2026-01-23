@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+
+{% block title %}Benutzerverwaltung - KantiKoala Admin{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto p-6">
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">👥 Benutzerverwaltung</h1>
+            <p class="text-zinc-600 dark:text-zinc-400">Rollen und Berechtigungen verwalten</p>
+        </div>
+        
+        <!-- Search -->
+        <form action="{{ url_for('admin.users') }}" method="GET" class="flex items-center">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Suchen..." 
+                   class="p-2 border border-zinc-300 dark:border-zinc-700 rounded-l-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-r-lg font-medium transition-colors">
+                Suche
+            </button>
+            {% if search_query %}
+            <a href="{{ url_for('admin.users') }}" class="ml-2 text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-200">
+                Löschen
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 p-4 rounded-lg {% if category == 'success' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300{% else %}bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Users Table -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-md border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="bg-zinc-50 dark:bg-zinc-700/50 text-zinc-700 dark:text-zinc-300">
+                    <tr>
+                        <th class="p-4 font-semibold">Username</th>
+                        <th class="p-4 font-semibold">Email</th>
+                        <th class="p-4 font-semibold text-center">Registriert</th>
+                        <th class="p-4 font-semibold text-center">Admin</th>
+                        <th class="p-4 font-semibold text-center">Lehrer</th>
+                        <th class="p-4 font-semibold text-center">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-zinc-100 dark:divide-zinc-700">
+                    {% for user in users %}
+                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700/50 transition-colors">
+                        <td class="p-4 font-medium text-zinc-900 dark:text-white">
+                            {{ user.username }}
+                            {% if user.id == current_user.id %}
+                            <span class="ml-2 px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full dark:bg-blue-900 dark:text-blue-200">(Du)</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-zinc-600 dark:text-zinc-400">{{ user.email }}</td>
+                        <!-- Assuming User model might maintain created_at or we skip it if not present. 
+                             Checking models.py, it doesn't seem to have created_at. Let's check models.py again in memory. 
+                             Wait, previous `read_file` of models.py showed `created_at` in docstring but truncated the class definition.
+                             Checking lines 1-20 again... "Attributes: ... created_at".
+                             But I didn't see the column definition. I'll omit it or assume it's not there to be safe.
+                             Actually, let's just show email and ID if no date. -->
+                        <td class="p-4 text-center text-zinc-500 dark:text-zinc-400 text-sm">
+                            #{{ user.id }}
+                        </td>
+                        
+                        <!-- Toggle Admin -->
+                        <td class="p-4 text-center">
+                            <form action="{{ url_for('admin.toggle_role', user_id=user.id) }}" method="POST" class="inline-block">
+                                <input type="hidden" name="role" value="admin">
+                                <input type="hidden" name="q" value="{{ search_query }}">
+                                <button type="submit" class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                    {% if user.is_admin %}
+                                        bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/50 dark:text-purple-300 dark:hover:bg-purple-900
+                                    {% else %}
+                                        bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600
+                                    {% endif %}">
+                                    {{ 'JA' if user.is_admin else 'NEIN' }}
+                                </button>
+                            </form>
+                        </td>
+
+                        <!-- Toggle Teacher -->
+                        <td class="p-4 text-center">
+                            <form action="{{ url_for('admin.toggle_role', user_id=user.id) }}" method="POST" class="inline-block">
+                                <input type="hidden" name="role" value="teacher">
+                                <input type="hidden" name="q" value="{{ search_query }}">
+                                <button type="submit" class="px-3 py-1 rounded-full text-xs font-bold transition-colors
+                                    {% if user.is_teacher %}
+                                        bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/50 dark:text-green-300 dark:hover:bg-green-900
+                                    {% else %}
+                                        bg-zinc-100 text-zinc-500 hover:bg-zinc-200 dark:bg-zinc-700 dark:text-zinc-400 dark:hover:bg-zinc-600
+                                    {% endif %}">
+                                    {{ 'JA' if user.is_teacher else 'NEIN' }}
+                                </button>
+                            </form>
+                        </td>
+
+                        <!-- Actions -->
+                        <td class="p-4 text-center">
+                            {% if user.id != current_user.id %}
+                            <form action="{{ url_for('admin.delete_user', user_id=user.id) }}" method="POST" 
+                                  onsubmit="return confirm('Möchtest du den Benutzer {{ user.username }} wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden.');" 
+                                  class="inline-block">
+                                <input type="hidden" name="q" value="{{ search_query }}">
+                                <button type="submit" class="text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-300 transition-colors p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-900/20" title="Benutzer löschen">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-zinc-500 dark:text-zinc-400">
+                            Keine Benutzer gefunden.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

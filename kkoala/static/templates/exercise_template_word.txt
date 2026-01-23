@@ -1,0 +1,27 @@
+Template für Word (.docx) Import
+================================
+
+Um Übungen aus Word zu importieren, erstelle bitte eine Tabelle mit folgendem Aufbau. 
+KantiKoala erkennt die Tabelle automatisch an den Schlüsselwörtern in der ersten Spalte.
+
+Tabelle 1 (Multiple Choice):
+-----------------------------------------------------------
+| Question       | Was ist 2 + 2?                         |
+| Option A       | 3                                      |
+| Option B       | 4                                      |
+| Option C       | 5                                      |
+| Correct Answer | 4                                      |
+| Explanation    | Einfache Addition.                     |
+-----------------------------------------------------------
+
+Tabelle 2 (Textaufgabe):
+-----------------------------------------------------------
+| Question       | Wie heißt unser Planet?                |
+| Correct Answer | Erde                                   |
+| Explanation    | Der dritte Planet im Sonnensystem.     |
+-----------------------------------------------------------
+
+Wichtig: 
+- Die erste Spalte muss die Schlüsselwörter "Question", "Option...", "Answer"/"Correct Answer" enthalten.
+- Groß-/Kleinschreibung ist nicht wichtig.
+- Du kannst Formatierungen (Fett, Kursiv, Formeln) in der zweiten Spalte verwenden.

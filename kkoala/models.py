@@ -1,9 +1,5 @@
 from .extensions import db
 from datetime import datetime
-import secrets
-
-def generate_token():
-    return secrets.token_urlsafe(12)
 
 # -------------------------------
 # User authentication and profile
@@ -27,6 +23,8 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)  # Hashed password
     email = db.Column(db.String(100), unique=True, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False)
+    is_teacher = db.Column(db.Boolean, default=False)
 
     # Relationships
     events = db.relationship(
@@ -227,11 +225,7 @@ class ToDoCategory(db.Model):
 
     # To-do items in this category
     items = db.relationship(
-        "ToDoItem", 
-        backref="category", 
-        lazy=True, 
-        cascade="all, delete-orphan",
-        order_by="ToDoItem.position"
+        "ToDoItem", backref="category", lazy=True, cascade="all, delete-orphan"
     )
 
 class ToDoItem(db.Model):
@@ -291,7 +285,7 @@ class Citation(db.Model):
     source_type = db.Column(db.String(50), nullable=False)  # book, website, article, etc.
     style = db.Column(db.String(50), nullable=False)  # APA, MLA, Chicago, etc.
     data = db.Column(db.Text, nullable=False)  # JSON string with source details
-    formatted_citation = db.Column(db.Text, nullable=False)  # The generated formatted citation text
+    formatted_citation = db.Column(db.Text, nullable=True)
 
 
 # -------------------------------
@@ -306,8 +300,6 @@ class FlashcardSet(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     title = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(255), nullable=True)
-    is_public = db.Column(db.Boolean, default=False)
-    share_token = db.Column(db.String(32), unique=True, nullable=False, default=generate_token)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Relationship to cards
@@ -324,12 +316,71 @@ class Flashcard(db.Model):
     term = db.Column(db.Text, nullable=False)
     definition = db.Column(db.Text, nullable=False)
     rank = db.Column(db.Integer, default=0)  # For ordering
-    # starred is deprecated in favor of UserFlashcardStar, but kept for migration/compatibility if needed
     starred = db.Column(db.Boolean, default=False)
 
-class UserFlashcardStar(db.Model):
+# -------------------------------
+# Curriculum and Learning Content
+# -------------------------------
+
+class CurriculumSubject(db.Model):
     """
-    Tracks which user has starred which flashcard.
+    Represents a school subject (e.g., Math, German).
     """
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'), primary_key=True)
-    flashcard_id = db.Column(db.Integer, db.ForeignKey('flashcard.id', ondelete='CASCADE'), primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    year = db.Column(db.Integer, nullable=False, default=1) # Subject belongs to a specific year
+    icon = db.Column(db.String(10), default="📖")
+    color = db.Column(db.String(20), default="#3B82F6")
+    topics = db.relationship("CurriculumTopic", backref="subject", lazy=True, cascade="all, delete-orphan")
+
+class CurriculumTopic(db.Model):
+    """
+    Represents a main topic within a subject (e.g., Algebra).
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    subject_id = db.Column(db.Integer, db.ForeignKey('curriculum_subject.id'), nullable=False)
+    year = db.Column(db.Integer, nullable=False) # 1, 2, 3, 4
+    subtopics = db.relationship("CurriculumSubTopic", backref="topic", lazy=True, cascade="all, delete-orphan")
+
+class CurriculumSubTopic(db.Model):
+    """
+    Represents a specific learning module/subtopic (e.g., Quadratic Equations).
+    Storage for the actual theory content.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    topic_id = db.Column(db.Integer, db.ForeignKey('curriculum_topic.id'), nullable=False)
+    difficulty = db.Column(db.String(20), default="intermediate")
+    content_html = db.Column(db.Text, nullable=True) # HTML content from uploaded file
+    estimated_time = db.Column(db.String(50), default="45 Minuten")
+    
+    # Exercises related to this subtopic
+    exercises = db.relationship("Exercise", backref="subtopic", lazy=True, cascade="all, delete-orphan")
+
+
+class Exercise(db.Model):
+    """
+    Represents a structured exercise for a subtopic.
+    Can be multiple choice, text input, or true/false.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    subtopic_id = db.Column(db.Integer, db.ForeignKey('curriculum_sub_topic.id'), nullable=False)
+    type = db.Column(db.String(20), nullable=False) # 'multiple-choice', 'text', 'true-false'
+    question = db.Column(db.Text, nullable=False)
+    options = db.Column(db.Text, nullable=True) # JSON string for MC options (or pipe separated)
+    correct_answer = db.Column(db.Text, nullable=False)
+    explanation = db.Column(db.Text, nullable=True)
+    order = db.Column(db.Integer, default=0)
+
+    @property
+    def options_list(self):
+        import json
+        if self.options:
+            try:
+                return json.loads(self.options)
+            except:
+                return []
+        return []
+
+

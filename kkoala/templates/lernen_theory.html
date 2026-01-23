@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.name }} - {{ subject.name }} - KantiKoala{% endblock %}
+{% block description %}Lerne {{ topic.name }} für {{ subject.name }}. Verständliche Theorie mit Beispielen.{% endblock %}
+
+{% block extra_css %}
+<!-- KaTeX for math rendering -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js" crossorigin="anonymous"></script>
+<style>
+    /* Prose styling for theory content */
+    .theory-content h1, .theory-content h2, .theory-content h3, .theory-content h4 {
+        font-weight: 700;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: inherit;
+    }
+    .theory-content h1 { font-size: 1.75rem; }
+    .theory-content h2 { font-size: 1.5rem; border-bottom: 1px solid #e4e4e7; padding-bottom: 0.5rem; }
+    /* dark mode border */
+    :is(.dark .theory-content h2) { border-color: #3f3f46; }
+    
+    .theory-content h3 { font-size: 1.25rem; }
+    .theory-content h4 { font-size: 1.1rem; }
+
+    .theory-content p {
+        margin-bottom: 1rem;
+        line-height: 1.75;
+    }
+    .theory-content strong {
+        font-weight: 600;
+        color: inherit;
+    }
+    /* Theory Content Styling now handled via Tailwind Typography */
+    
+    /* Tables from Docx */
+    /* Handled by prose, minor fix for borders if needed */
+    .prose table { width: 100%; border-collapse: collapse; }
+
+    /* Theory Content Styling now handled via Tailwind Typography */
+    .prose u { text-decoration-color: currentColor; text-underline-offset: 4px; }
+    
+    /* Math display adjustment */
+    .katex-display {
+        margin: 1.5rem 0;
+        overflow-x: auto;
+    }
+    
+    /* Alpine.js cloak to hide elements before JS loads */
+    [x-cloak] { display: none !important; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+        <ol class="flex items-center flex-wrap gap-2 text-zinc-500 dark:text-zinc-400">
+            <li><a href="{{ url_for('lernen.lernen_index') }}" class="hover:text-blue-600 dark:hover:text-blue-400">Lernen</a></li>
+            <li><span>/</span></li>
+            <li><a href="{{ url_for('lernen.lernen_year', year_id=year.id) }}" class="hover:text-blue-600 dark:hover:text-blue-400">{{ year.name }}</a></li>
+            <li><span>/</span></li>
+            <li><a href="{{ url_for('lernen.lernen_subject', year_id=year.id, subject_id=subject.id) }}" class="hover:text-blue-600 dark:hover:text-blue-400">{{ subject.name }}</a></li>
+            <li><span>/</span></li>
+            <li class="text-zinc-900 dark:text-white font-medium">{{ topic.name }}</li>
+        </ol>
+    </nav>
+
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center space-x-3 mb-4">
+            <span class="text-3xl">{{ subject.icon }}</span>
+            <div>
+                <p class="text-sm text-zinc-500 dark:text-zinc-400">{{ topic.parent_topic }}</p>
+                <h1 class="text-3xl font-bold text-zinc-900 dark:text-white">{{ topic.name }}</h1>
+            </div>
+        </div>
+        
+        <!-- Meta Info -->
+        <div class="flex flex-wrap gap-4 text-sm">
+            <span class="inline-flex items-center px-3 py-1 rounded-full 
+                {% if topic.difficulty == 'basic' %}bg-green-100 text-green-800 dark:bg-green-800 dark:text-green-100
+                {% elif topic.difficulty == 'intermediate' %}bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100
+                {% else %}bg-red-100 text-red-800 dark:bg-red-800 dark:text-red-100{% endif %}">
+                {% if topic.difficulty == 'basic' %}🟢 Grundlagen
+                {% elif topic.difficulty == 'intermediate' %}🟡 Mittelstufe
+                {% else %}🔴 Fortgeschritten{% endif %}
+            </span>
+            {% if content.get('estimated_time') %}
+            <span class="inline-flex items-center px-3 py-1 rounded-full bg-zinc-100 text-zinc-700 dark:bg-zinc-700 dark:text-zinc-300">
+                ⏱️ {{ content.estimated_time }}
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <div class="bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-700 overflow-hidden">
+        
+        {% if content and content.get('content') %}
+        <!-- Introduction -->
+        {% if content.content.get('introduction') %}
+        <div class="p-6 bg-blue-50 dark:bg-blue-900/20 border-b border-zinc-200 dark:border-zinc-700">
+            <p class="text-lg text-blue-900 dark:text-blue-100">
+                {{ content.content.introduction }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Theory Sections -->
+        <div class="p-6 text-zinc-700 dark:text-zinc-300">
+            {% for section in content.content.get('sections', []) %}
+            <div class="mb-8 last:mb-0">
+                <h3 class="text-xl font-bold text-zinc-900 dark:text-white flex items-center mb-4">
+                    <span class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center text-sm font-bold mr-3">{{ loop.index }}</span>
+                    {{ section.title }}
+                </h3>
+                
+                <div class="ml-11 prose prose-blue dark:prose-invert max-w-none
+                            prose-headings:font-bold prose-a:text-blue-600 dark:prose-a:text-blue-400
+                            prose-img:rounded-xl prose-img:shadow-lg prose-img:mx-auto">
+                    {{ section.content | safe }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Key Points -->
+        {% if content.content.get('key_points') %}
+        <div class="p-6 bg-green-50 dark:bg-green-900/20 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 class="text-lg font-bold text-green-900 dark:text-green-100 mb-4 flex items-center">
+                <span class="mr-2">🎯</span> Wichtige Punkte
+            </h3>
+            <ul class="space-y-2">
+                {% for point in content.content.key_points %}
+                <li class="flex items-start text-green-800 dark:text-green-200">
+                    <svg class="w-5 h-5 mr-2 mt-0.5 text-green-600 dark:text-green-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                    {{ point }}
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Examples -->
+        {% if content.content.get('examples') and content.content.examples|length > 0 %}
+        <div class="p-6 bg-amber-50 dark:bg-amber-900/20 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 class="text-lg font-bold text-amber-900 dark:text-amber-100 mb-4 flex items-center">
+                <span class="mr-2">💡</span> Beispiele
+            </h3>
+            <div class="space-y-4">
+                {% for example in content.content.examples %}
+                <div class="bg-white dark:bg-zinc-800 rounded-lg p-4 border border-amber-200 dark:border-amber-800">
+                    <p class="font-medium text-amber-900 dark:text-amber-100 mb-2 example-text">{{ example.example }}</p>
+                    <p class="text-sm text-amber-700 dark:text-amber-300 example-explanation">→ {{ example.explanation }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Exercises -->
+        {% if content.content.get('exercises') and content.content.exercises|length > 0 %}
+        <div class="p-6 bg-purple-50 dark:bg-purple-900/20 border-t border-zinc-200 dark:border-zinc-700">
+            <h3 class="text-lg font-bold text-purple-900 dark:text-purple-100 mb-4 flex items-center">
+                <span class="mr-2">✏️</span> Übungen
+            </h3>
+            <div class="space-y-4">
+                {% for exercise in content.content.exercises %}
+                <div x-data='{ 
+                        showAnswer: false, 
+                        selected: null, 
+                        solved: false, 
+                        isCorrect: false,
+                        correctAnswer: {{ exercise.answer | tojson }}
+                     }' 
+                     class="bg-white dark:bg-zinc-800 rounded-lg border border-purple-200 dark:border-purple-800 overflow-hidden p-6">
+                    
+                    <div class="mb-4">
+                        <span class="text-xs uppercase font-bold text-purple-600 dark:text-purple-400 mb-1 block">
+                            {% if exercise.type == 'multiple-choice' %}Multiple Choice{% else %}Aufgabe{% endif %}
+                        </span>
+                        <div class="font-medium text-zinc-900 dark:text-white exercise-question text-lg">
+                            {{ exercise.question | safe }}
+                        </div>
+                    </div>
+
+                    {% if exercise.type == 'multiple-choice' and exercise.options %}
+                    <div class="space-y-2 mb-4">
+                        {% for option in exercise.options %}
+                        <button 
+                            @click='selected = {{ option | tojson }}; 
+                                    solved = true; 
+                                    isCorrect = (selected === correctAnswer);
+                                    showAnswer = true'
+                            :class='{
+                                "bg-green-100 border-green-500 text-green-900 dark:bg-green-900/30 dark:text-green-100": solved && ({{ option | tojson }} === correctAnswer), 
+                                "bg-red-100 border-red-500 text-red-900 dark:bg-red-900/30 dark:text-red-100": solved && selected === {{ option | tojson }} && !isCorrect,
+                                "hover:bg-zinc-100 dark:hover:bg-zinc-700": !solved
+                            }'
+                            :disabled="solved"
+                            class="w-full text-left p-3 rounded border border-zinc-200 dark:border-zinc-700 transition-colors exercise-answer text-zinc-900 dark:text-white">
+                            {{ option }}
+                        </button>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <div class="mb-4">
+                        <button @click="showAnswer = !showAnswer" 
+                                class="text-purple-600 dark:text-purple-400 font-medium hover:underline focus:outline-none">
+                            <span x-text="showAnswer ? 'Lösung verbergen' : 'Lösung anzeigen'"></span>
+                        </button>
+                    </div>
+                    {% endif %}
+
+                    <div x-show="showAnswer" x-cloak x-transition class="mt-4 p-4 bg-purple-50 dark:bg-purple-900/30 rounded border border-purple-100 dark:border-purple-800">
+                        <p class="font-bold text-purple-900 dark:text-purple-200 mb-1">Lösung:</p>
+                        <div class="text-purple-800 dark:text-purple-300 exercise-answer">
+                            {{ exercise.answer }}
+                        </div>
+                        {% if exercise.explanation %}
+                        <div class="mt-3 pt-3 border-t border-purple-200 dark:border-purple-800 text-sm text-purple-700 dark:text-purple-400">
+                            <strong>Erklärung:</strong> {{ exercise.explanation }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <!-- Placeholder content -->
+        <div class="p-8 text-center">
+            <div class="text-6xl mb-4">🚧</div>
+            <h3 class="text-xl font-bold text-zinc-900 dark:text-white mb-2">Inhalt in Bearbeitung</h3>
+            <p class="text-zinc-600 dark:text-zinc-400 max-w-md mx-auto">
+                Die Theorie zu diesem Thema wird gerade erstellt. Schau bald wieder vorbei!
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Navigation -->
+    <div class="mt-8 flex justify-between">
+        <a href="{{ url_for('lernen.lernen_subject', year_id=year.id, subject_id=subject.id) }}" 
+           class="inline-flex items-center px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Zurück zu {{ subject.name }}
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Alpine.js for interactive exercises -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer nonce="{{ csp_nonce() }}"></script>
+
+<!-- KaTeX for math rendering -->
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+<!-- PDF.js for rendering embedded PDFs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script nonce="{{ csp_nonce() }}">
+    // Initialize PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+
+<script nonce="{{ csp_nonce() }}">
+document.addEventListener("DOMContentLoaded", function() {
+    // 1. Render Math (KaTeX)
+    const contentElements = document.querySelectorAll('.theory-section-content, .example-text, .example-explanation, .exercise-question, .exercise-answer');
+    
+    contentElements.forEach(function(element) {
+        // First, convert markdown-style formatting
+        let html = element.innerHTML;
+        
+        // Convert **bold** to <strong>
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        
+        // Convert newlines to <br> for proper display
+        html = html.replace(/\n/g, '<br>');
+        
+        element.innerHTML = html;
+        
+        // Then render LaTeX math
+        renderMathInElement(element, {
+            delimiters: [
+                {left: '$$', right: '$$', display: true},
+                {left: '$', right: '$', display: false}
+            ],
+            throwOnError: false
+        });
+    });
+
+    // 2. Render PDF figures via PDF.js (for TikZ graphics)
+    const pdfGraphics = document.querySelectorAll('.latex-graphic');
+    
+    if (pdfGraphics.length > 0) {
+        pdfGraphics.forEach(function(container) {
+            const b64Data = container.dataset.pdf;
+            if (!b64Data) return;
+            
+            // Decode Base64
+            const pdfData = atob(b64Data);
+            
+            // Allow PDF.js to load the document
+            const loadingTask = pdfjsLib.getDocument({data: pdfData});
+            
+            loadingTask.promise.then(function(pdf) {
+                // Get page 1 (assuming snippets are 1 page)
+                pdf.getPage(1).then(function(page) {
+                    const scale = 2.0; // Higher scale for crisp graphics
+                    const viewport = page.getViewport({scale: scale});
+                    
+                    const canvas = document.createElement('canvas');
+                    canvas.className = 'shadow-md rounded bg-white mx-auto';
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    
+                    // Responsive styling
+                    canvas.style.maxWidth = '100%';
+                    canvas.style.height = 'auto';
+                    
+                    container.innerHTML = '';
+                    container.appendChild(canvas);
+                    
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport
+                    };
+                    page.render(renderContext);
+                });
+            }).catch(function (reason) {
+                console.error(reason);
+                container.innerHTML = '<span class="text-xs text-red-400">Error rendering graphic</span>';
+            });
+        });
+    }
+});
+
+// Initialize KaTeX
+document.addEventListener("DOMContentLoaded", function() {
+    renderMathInElement(document.body, {
+        delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '\\[', right: '\\]', display: true},
+            {left: '\\(', right: '\\)', display: false},
+            {left: '$', right: '$', display: false},
+            {left: "\\begin{equation}", right: "\\end{equation}", display: true},
+            {left: "\\begin{align}", right: "\\end{align}", display: true},
+            {left: "\\begin{alignat}", right: "\\end{alignat}", display: true},
+            {left: "\\begin{gather}", right: "\\end{gather}", display: true},
+            {left: "\\begin{CD}", right: "\\end{CD}", display: true},
+            {left: "\\begin{equation*}", right: "\\end{equation*}", display: true},
+            {left: "\\begin{align*}", right: "\\end{align*}", display: true}
+        ],
+        throwOnError : false
+    });
+});
+</script>
+{% endblock %}

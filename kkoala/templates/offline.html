@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Offline - KantiKoala{% endblock %}
+
+{% block content %}
+<div class="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
+    <div class="mb-8">
+        <!-- SVG Icon for Offline State -->
+        <svg class="w-24 h-24 text-zinc-400 dark:text-zinc-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243 2.829a4.978 4.978 0 01-1.414-2.83m-1.414 5.658a9 9 0 01-2.167-9.238m7.824 2.167a1 1 0 111.414 1.414m-1.414-1.414L3 3m8.293 8.293l1.414 1.414"></path>
+        </svg>
+        <h1 class="text-3xl font-bold text-zinc-800 dark:text-white mb-2">Du bist offline</h1>
+        <p class="text-lg text-zinc-600 dark:text-zinc-300">
+            Es scheint, als hättest du keine Internetverbindung.
+            <br>
+            Einige Funktionen von KantiKoala sind offline leider nicht verfügbar.
+        </p>
+    </div>
+    
+    <button onclick="window.location.reload()" class="px-6 py-3 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+        Erneut versuchen
+    </button>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // If the user manually navigates to /offline but has internet, redirect home.
+    // We check pathname to ensure we don't loop-redirect when this page is shown as a fallback for other routes.
+    if (window.location.pathname === '/offline' && navigator.onLine) {
+        window.location.replace("{{ url_for('main.index') }}");
+    }
+
+    // Auto-reload the page when connection is restored
+    window.addEventListener('online', () => {
+        window.location.reload();
+    });
+</script>
+{% endblock %}

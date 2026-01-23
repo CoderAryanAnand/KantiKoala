@@ -36,7 +36,9 @@ def create_app(config_class="config.ProdConfig"):
         'script-src': [
             "'self'",
             "'unsafe-inline'",  # Required for inline scripts
-            'https://cdn.jsdelivr.net',  # FullCalendar CDN
+            "'unsafe-eval'",    # Required for Alpine.js
+            'https://cdn.jsdelivr.net',  # FullCalendar/Alpine CDN
+            'https://cdnjs.cloudflare.com', # PDF.js CDN
         ],
         'style-src': [
             "'self'",
@@ -45,7 +47,8 @@ def create_app(config_class="config.ProdConfig"):
         ],
         'img-src': ["'self'", 'data:', 'blob:'],  # Allow data URIs for favicon inversion
         'font-src': ["'self'", 'https://cdn.jsdelivr.net', 'data:'],
-        'connect-src': "'self'",
+        'connect-src': ["'self'", 'https://cdnjs.cloudflare.com'], # Allow fetching PDF.js worker code
+        'worker-src': ["'self'", 'blob:'], # Allow PDF.js workers
         'frame-ancestors': "'none'",
     }
     
@@ -169,3 +172,4 @@ def create_app(config_class="config.ProdConfig"):
 
     # Return the configured Flask app instance
     return app
+#-_-
