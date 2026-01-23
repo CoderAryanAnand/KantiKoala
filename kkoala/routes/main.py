@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, session, current_app, abort
+from flask import Blueprint, render_template, session, current_app, abort, send_from_directory
 from datetime import datetime, timedelta
 import os, json
 
@@ -8,6 +8,19 @@ from ..utils import login_required
 main_bp = Blueprint(
     "main", __name__, template_folder="../templates", static_folder="../static"
 )
+
+
+@main_bp.route('/service-worker.js')
+def service_worker():
+    return send_from_directory(current_app.static_folder, 'js/service-worker.js', mimetype='application/javascript')
+
+
+@main_bp.route("/offline")
+def offline():
+    """
+    Offline route: Displayed when the user has no internet connection.
+    """
+    return render_template("offline.html")
 
 
 @main_bp.route("/")
@@ -26,10 +39,10 @@ def index():
     try:
         tips_file_path = os.path.join(current_app.root_path, "tips", "daily_tips.txt")
         with open(tips_file_path, "r", encoding="utf-8") as file:
-            tips = file.readlines()
+            tips = [line.strip() for line in file.readlines() if line.strip()]
     except FileNotFoundError:
         tips = ["Keine Tipps verfügbar."]
-    tip_of_the_day = tips[datetime.now().timetuple().tm_yday % len(tips)].strip()
+    tip_of_the_day = tips[datetime.now().timetuple().tm_yday % len(tips)]
 
     # --- Logged In Dashboard Logic ---
     if "username" in session:

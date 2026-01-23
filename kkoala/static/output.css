@@ -1459,6 +1459,10 @@ video {
   min-height: 100vh;
 }
 
+.min-h-\[60vh\] {
+  min-height: 60vh;
+}
+
 .w-10 {
   width: 2.5rem;
 }
@@ -1521,6 +1525,10 @@ video {
 
 .w-full {
   width: 100%;
+}
+
+.w-24 {
+  width: 6rem;
 }
 
 .min-w-0 {
@@ -3470,6 +3478,11 @@ video {
 .dark\:text-zinc-500:is(.dark *) {
   --tw-text-opacity: 1;
   color: rgb(113 113 122 / var(--tw-text-opacity, 1));
+}
+
+.dark\:text-zinc-600:is(.dark *) {
+  --tw-text-opacity: 1;
+  color: rgb(82 82 91 / var(--tw-text-opacity, 1));
 }
 
 .dark\:shadow-none:is(.dark *) {
