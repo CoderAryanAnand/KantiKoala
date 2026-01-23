@@ -17,6 +17,17 @@ lernen_bp = Blueprint(
     "lernen", __name__, template_folder="../templates", static_folder="../static"
 )
 
+@lernen_bp.before_request
+def restrict_lernen_access():
+    """
+    Restrict access to purely admin/teacher for now.
+    """
+    # Allow static files if needed, though they usually bypass this.
+    # Check session flags. Flags are set in auth.py login.
+    if not (session.get("is_admin") or session.get("is_teacher")):
+        flash("Dieser Bereich ist nur für Lehrpersonen zugänglich.", "error")
+        return redirect(url_for("main.index"))
+
 
 @lernen_bp.route("/")
 def lernen_index():
