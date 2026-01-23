@@ -22,3 +22,18 @@
     </button>
 </div>
 {% endblock %}
+
+{% block scripts %}
+<script>
+    // If the user manually navigates to /offline but has internet, redirect home.
+    // We check pathname to ensure we don't loop-redirect when this page is shown as a fallback for other routes.
+    if (window.location.pathname === '/offline' && navigator.onLine) {
+        window.location.replace("{{ url_for('main.index') }}");
+    }
+
+    // Auto-reload the page when connection is restored
+    window.addEventListener('online', () => {
+        window.location.reload();
+    });
+</script>
+{% endblock %}
