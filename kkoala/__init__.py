@@ -172,3 +172,4 @@ def create_app(config_class="config.ProdConfig"):
 
     # Return the configured Flask app instance
     return app
+#-_-
