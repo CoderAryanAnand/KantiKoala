@@ -14,7 +14,7 @@ from .commands import register_commands
 load_dotenv()
 
 
-def create_app(config_class="config.ProdConfig"):
+def create_app(config_class="kkoala.config.ProdConfig"):
     """
     Application factory function for creating and configuring the Flask app.
     This pattern allows flexible configuration and easier testing.

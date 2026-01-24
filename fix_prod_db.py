@@ -3,7 +3,8 @@ from flask_migrate import stamp
 import sys
 
 # Create the app (using production config by default or whatever is set)
-app = create_app()
+# Explicitly pass the full path to the config class
+app = create_app("kkoala.config.ProdConfig")
 
 with app.app_context():
     print("Attempting to fix database migration version...")
