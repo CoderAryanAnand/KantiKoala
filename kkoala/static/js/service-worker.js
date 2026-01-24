@@ -9,11 +9,17 @@ const ASSETS_TO_CACHE = [
 
 // Install event: Cache critical assets
 self.addEventListener('install', (event) => {
+    self.skipWaiting(); // Force new service worker to activate immediately
     event.waitUntil(
         caches.open(CACHE_NAME).then((cache) => {
             return cache.addAll(ASSETS_TO_CACHE);
         })
     );
+});
+
+// Activate event: Claim clients immediately
+self.addEventListener('activate', event => {
+    event.waitUntil(clients.claim());
 });
 
 // Fetch event: Serve from cache, network, or offline page
@@ -33,5 +39,40 @@ self.addEventListener('fetch', (event) => {
                 }
             });
         })
+    );
+});
+
+// Push Notification Event
+self.addEventListener('push', function(event) {
+    if (event.data) {
+        let data = {};
+        try {
+            data = event.data.json();
+        } catch (e) {
+            data = { title: "KantiKoala", body: event.data.text() };
+        }
+
+        const options = {
+            body: data.body,
+            icon: '/static/img/KantiKoalaLogoVar2.png',
+            badge: '/static/img/KantiKoalaLogoVar2.png',
+            vibrate: [100, 50, 100],
+            data: {
+                dateOfArrival: Date.now(),
+                url: data.url || '/'
+            }
+        };
+
+        event.waitUntil(
+            self.registration.showNotification(data.title, options)
+        );
+    }
+});
+
+// Notification Click Event
+self.addEventListener('notificationclick', function(event) {
+    event.notification.close();
+    event.waitUntil(
+        clients.openWindow(event.notification.data.url)
     );
 });

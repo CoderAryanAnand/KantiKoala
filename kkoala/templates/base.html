@@ -78,11 +78,15 @@
     <!-- Common scripts (e.g. dark mode toggle) -->
     <script src="{{ url_for('static', filename='js/darkmode.js') }}" nonce="{{ csp_nonce() }}"></script>
     <script src="{{ url_for('static', filename='js/color_picker.js') }}" nonce="{{ csp_nonce() }}"></script>
+    <script src="{{ url_for('static', filename='js/notifications.js') }}" nonce="{{ csp_nonce() }}"></script>
     
     <!-- Page-specific scripts (optional) -->
     {% block scripts %}{% endblock %}
 
     <script>
+        // VAPID Public Key for Push Notifications
+        window.VAPID_PUBLIC_KEY = "BKFpBSA2lpFkN0Hh50ojQNgj_FaSjjPNN-QKbW0xKMfcnbLAwVS7izl2-1pb6ectF_jnnKoUMJNE67HAhb3fFAg";
+
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/service-worker.js')

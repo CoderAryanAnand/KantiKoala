@@ -50,6 +50,16 @@ class User(db.Model):
         "FlashcardSet", backref="user", lazy=True, cascade="all, delete-orphan"
     )
 
+class PushSubscription(db.Model):
+    """
+    Stores Web Push subscriptions for users to receive notifications.
+    """
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    endpoint = db.Column(db.String(500), nullable=False)
+    p256dh = db.Column(db.String(200), nullable=False)
+    auth = db.Column(db.String(200), nullable=False)
+
 # -------------------------------
 # User settings and priorities
 # -------------------------------
