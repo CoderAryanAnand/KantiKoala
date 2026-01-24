@@ -236,3 +236,6 @@ report/main.bbl-SAVE-ERROR
 report/main.bcf-SAVE-ERROR
 
 node_modules/
+
+# Security keys
+*.pem
