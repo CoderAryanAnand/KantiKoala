@@ -9,6 +9,7 @@ import resend
 from .routes import register_blueprints
 from .extensions import db, bcrypt, migrate, limiter
 from .utils import make_csrf_token
+from .commands import register_commands
 
 load_dotenv()
 
@@ -28,6 +29,9 @@ def create_app(config_class="config.ProdConfig"):
     bcrypt.init_app(app)
     migrate.init_app(app, db)
     limiter.init_app(app)
+    
+    # Register CLI commands
+    register_commands(app)
 
     # Configure Flask-Talisman for security headers
     # CSP allows inline styles/scripts (needed for Tailwind and FullCalendar)
@@ -39,15 +43,19 @@ def create_app(config_class="config.ProdConfig"):
             "'unsafe-eval'",    # Required for Alpine.js
             'https://cdn.jsdelivr.net',  # FullCalendar/Alpine CDN
             'https://cdnjs.cloudflare.com', # PDF.js CDN
+            'https://unpkg.com',
         ],
         'style-src': [
             "'self'",
             "'unsafe-inline'",  # Required for Tailwind and inline styles
             'https://cdn.jsdelivr.net',
+            'https://cdnjs.cloudflare.com',
+            'https://unpkg.com',
+            'https://fonts.googleapis.com',
         ],
         'img-src': ["'self'", 'data:', 'blob:'],  # Allow data URIs for favicon inversion
-        'font-src': ["'self'", 'https://cdn.jsdelivr.net', 'data:'],
-        'connect-src': ["'self'", 'https://cdnjs.cloudflare.com'], # Allow fetching PDF.js worker code
+        'font-src': ["'self'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com', 'https://fonts.gstatic.com', 'data:'],
+        'connect-src': ["'self'", 'https://cdnjs.cloudflare.com', 'https://cdn.jsdelivr.net'], # Allow fetching PDF.js worker code
         'worker-src': ["'self'", 'blob:'], # Allow PDF.js workers
         'frame-ancestors': "'none'",
     }

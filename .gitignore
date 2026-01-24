@@ -234,3 +234,5 @@ report/main.synctex(busy)
 report/build/
 report/main.bbl-SAVE-ERROR
 report/main.bcf-SAVE-ERROR
+
+node_modules/

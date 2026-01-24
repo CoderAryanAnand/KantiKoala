@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, session, jsonify, abort, request, 
 import json
 from io import BytesIO
 from ..utils import login_required
-from ..models import CurriculumSubject, CurriculumTopic, CurriculumSubTopic, Exercise
+from ..models import CurriculumSubject, CurriculumTopic, CurriculumSubTopic, Exercise, User
 from ..extensions import db
 from ..converters import docx_to_html, pdf_to_html, plastex_to_html
 from ..parsers import parse_exercises_from_html, parse_exercises_from_latex
@@ -16,6 +16,25 @@ from ..consts import YEAR_SUBJECT_TEMPLATES
 lernen_bp = Blueprint(
     "lernen", __name__, template_folder="../templates", static_folder="../static"
 )
+
+
+@lernen_bp.before_request
+def restrict_lernen_access():
+    """
+    Restrict access to the Lernen blueprint to admins and teachers.
+    """
+    username = session.get("username")
+    if not username:
+        if request.path.startswith("/lernen/api"):
+            return jsonify({"error": "Unauthorized"}), 401
+        flash("Bitte loggen Sie sich ein, um auf den Lernbereich zuzugreifen.", "warning")
+        return redirect(url_for("auth.login"))
+
+    user = User.query.filter_by(username=username).first()
+    if not user or not (user.is_admin or user.is_teacher):
+        if request.path.startswith("/lernen/api"):
+            return jsonify({"error": "Forbidden"}), 403
+        return redirect(url_for("main.index"))
 
 
 @lernen_bp.route("/")

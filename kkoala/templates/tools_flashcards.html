@@ -3,6 +3,51 @@
 {% block title %}Lernsets - KantiKoala{% endblock %}
 
 {% block content %}
+<style>
+/* Custom Toggle Styles */
+.custom-toggle-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    margin: 0;
+    pointer-events: none;
+}
+.custom-toggle-track {
+    width: 2.75rem; /* w-11 */
+    height: 1.5rem; /* h-6 */
+    background-color: #e4e4e7; /* zinc-200 */
+    border-radius: 9999px;
+    position: relative;
+    transition: background-color 0.2s;
+    flex-shrink: 0;
+}
+html.dark .custom-toggle-track, .dark .custom-toggle-track {
+    background-color: #3f3f46; /* zinc-700 */
+}
+.custom-toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    background-color: white;
+    border-radius: 50%;
+    height: 1.25rem; /* h-5 */
+    width: 1.25rem; /* w-5 */
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+.custom-toggle-input:checked + .custom-toggle-track {
+    background-color: #2563eb; /* blue-600 */
+}
+.custom-toggle-input:checked + .custom-toggle-track::after {
+    transform: translateX(1.25rem); /* translate-x-full */
+    border-color: white;
+}
+.custom-toggle-input:focus + .custom-toggle-track {
+    box-shadow: 0 0 0 2px #bfdbfe; /* blue-200 ring */
+}
+</style>
 <div class="w-full mb-4">
     <a href="{{ url_for('tools.tools_index') }}" class="inline-flex items-center text-blue-600 dark:text-blue-400 hover:underline">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -52,10 +97,10 @@
         <h2 class="text-2xl font-bold text-zinc-800 dark:text-white mb-4">Neues Lernset</h2>
         <input type="text" id="new-set-title" placeholder="Titel" class="w-full mb-4 p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
         <textarea id="new-set-desc" placeholder="Beschreibung (optional)" class="w-full mb-4 p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white"></textarea>
-        <label class="relative inline-flex items-center cursor-pointer mb-4">
-            <input type="checkbox" id="new-set-public" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">Öffentlich (Teilbar per Link)</span>
+        <label class="relative inline-flex items-center cursor-pointer mb-6 group">
+            <input type="checkbox" id="new-set-public" class="custom-toggle-input">
+            <div class="custom-toggle-track"></div>
+            <span class="ml-4 text-sm font-medium text-zinc-700 dark:text-zinc-200 group-hover:text-zinc-900 dark:group-hover:text-white transition-colors">Öffentlich (Teilbar per Link)</span>
         </label>
         <div class="flex justify-end gap-2">
             <button onclick="closeCreateModal()" class="px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded">Abbrechen</button>

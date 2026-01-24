@@ -16,7 +16,7 @@
     FullCalendar library for interactive calendar UI.
     Loaded from CDN for convenience.
 -->
-<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.15/index.global.min.js'></script>
 {% endblock %}
 
 {% block extra_css %}
@@ -48,6 +48,7 @@
     #calendar {
         background-color: var(--fc-bg-color);
         color: var(--fc-text-color);
+        min-height: 600px; /* Ensure calendar has height even if empty */
     }
     .fc .fc-toolbar-title { color: var(--fc-title-text-color); }
     .fc .fc-button-primary { background-color: #2563eb; border-color: #2563eb; }
