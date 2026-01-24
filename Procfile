@@ -1,1 +1,1 @@
-web: python fix_prod_db.py && flask db upgrade && gunicorn wsgi:application
+web: flask db upgrade && gunicorn wsgi:application
