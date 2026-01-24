@@ -68,7 +68,8 @@ def reset_curriculum():
         count_subtopics = 0
         
         for sem_id in target_semesters:
-            json_year_key = str(sem_id // 2) # 2->1, 4->2, 6->3, 8->4
+            year_val = sem_id // 2 # 2->1, 4->2, 6->3, 8->4
+            json_year_key = str(year_val)
             
             # Get list of subjects for this semester from CONSTS
             consts_subjects = semester_templates_map.get(sem_id, [])
@@ -89,7 +90,7 @@ def reset_curriculum():
                 # Create Subject
                 subject = CurriculumSubject(
                     name=subj_name,
-                    year=sem_id, # Storing the Semester ID (2, 4, 6, 8) as the year
+                    year=year_val, # Using actual year (1-4) instead of Semester ID
                     icon=subj_data.get("icon", "📖"),
                     color=subj_data.get("color", "#3B82F6")
                 )
@@ -103,7 +104,7 @@ def reset_curriculum():
                     topic = CurriculumTopic(
                         name=topic_data["name"],
                         subject_id=subject.id,
-                        year=sem_id
+                        year=year_val
                     )
                     db.session.add(topic)
                     db.session.flush()
