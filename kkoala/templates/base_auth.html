@@ -22,7 +22,7 @@
     <!-- Page-specific CSS (optional) -->
     {% block extra_css %}{% endblock %}
 </head>
-<body class="bg-zinc-200 dark:bg-zinc-900 font-sans">
+<body class="bg-zinc-200 dark:bg-zinc-900 font-sans min-h-screen flex flex-col">
 
     <!-- Header Section with Logo -->
     <header class="w-full h-[10vh] flex items-center justify-center relative border-b border-zinc-300 dark:border-zinc-700">
@@ -32,7 +32,7 @@
     </header>
 
     <!-- Main Content - Centered Form Container -->
-    <main class="w-full h-[90vh] flex items-center justify-center p-4">
+    <main class="w-full flex-grow flex items-center justify-center p-4">
         
         <!-- Form Container -->
         <div class="w-full max-w-sm p-8 space-y-6 bg-white dark:bg-zinc-800 rounded-xl shadow-lg">

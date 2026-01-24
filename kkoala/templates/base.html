@@ -51,9 +51,9 @@
     <!-- Page-specific head content (optional) -->
     {% block head %}{% endblock %}
 </head>
-<body class="bg-zinc-100 dark:bg-zinc-900 font-sans">
+<body class="bg-zinc-100 dark:bg-zinc-900 font-sans min-h-screen flex flex-col">
     <!-- Main layout container: flex for sidebar + content on desktop -->
-    <div class="md:flex">
+    <div class="md:flex flex-grow">
         <!-- Sidebar navigation (included as a reusable component) -->
         {% include '_navbar.html' %}
 
