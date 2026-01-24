@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Lernkarten - KantiKoala{% endblock %}
+{% block title %}Lernsets - KantiKoala{% endblock %}
 
 {% block content %}
 <div class="w-full mb-4">
@@ -14,8 +14,8 @@
 
 <div class="flex justify-between items-center mb-8">
     <div>
-        <h1 class="text-4xl font-bold text-zinc-800 dark:text-white mb-2">Lernkarten</h1>
-        <p class="text-zinc-600 dark:text-zinc-400">Erstelle und lerne mit digitalen Karteikarten.</p>
+        <h1 class="text-4xl font-bold text-zinc-800 dark:text-white mb-2">Lernsets</h1>
+        <p class="text-zinc-600 dark:text-zinc-400">Erstelle und lerne mit digitalen Lernsets.</p>
     </div>
     <div class="flex gap-2">
         <button onclick="openImportModal()" class="px-4 py-2 bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white rounded-lg hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
@@ -31,7 +31,7 @@
 <!-- Sets Grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {% for set in sets %}
-    <a href="{{ url_for('tools.view_flashcard_set', set_id=set.id) }}" class="block p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-700">
+    <a href="{{ url_for('tools.view_flashcard_set', token_or_id=set.share_token) }}" class="block p-6 bg-white dark:bg-zinc-800 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-zinc-200 dark:border-zinc-700">
         <h3 class="text-xl font-bold text-zinc-800 dark:text-white mb-2">{{ set.title }}</h3>
         <p class="text-zinc-600 dark:text-zinc-400 text-sm mb-4 line-clamp-2">{{ set.description or 'Keine Beschreibung' }}</p>
         <div class="flex justify-between items-center text-sm text-zinc-500 dark:text-zinc-500">
@@ -52,10 +52,27 @@
         <h2 class="text-2xl font-bold text-zinc-800 dark:text-white mb-4">Neues Lernset</h2>
         <input type="text" id="new-set-title" placeholder="Titel" class="w-full mb-4 p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white">
         <textarea id="new-set-desc" placeholder="Beschreibung (optional)" class="w-full mb-4 p-2 border rounded dark:bg-zinc-700 dark:border-zinc-600 dark:text-white"></textarea>
+        <label class="relative inline-flex items-center cursor-pointer mb-4">
+            <input type="checkbox" id="new-set-public" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-white">Öffentlich (Teilbar per Link)</span>
+        </label>
         <div class="flex justify-end gap-2">
             <button onclick="closeCreateModal()" class="px-4 py-2 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded">Abbrechen</button>
             <button onclick="createSet()" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Erstellen</button>
         </div>
+    </div>
+</div>
+
+<!-- Notification/Error Modal -->
+<div id="notification-modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center z-50">
+    <div class="bg-white dark:bg-zinc-800 p-6 rounded-xl shadow-xl w-full max-w-md text-center">
+        <div id="notif-icon" class="mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full">
+            <!-- Icon will be inserted here -->
+        </div>
+        <h3 id="notif-title" class="text-xl font-bold text-zinc-800 dark:text-white mb-2"></h3>
+        <p id="notif-message" class="text-zinc-600 dark:text-zinc-400 mb-4"></p>
+        <button onclick="closeNotificationModal()" class="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">OK</button>
     </div>
 </div>
 
@@ -112,6 +129,37 @@ function closeImportModal() {
     document.getElementById('import-modal').classList.remove('flex');
 }
 
+function showNotification(title, message, type = 'info') {
+    const modal = document.getElementById('notification-modal');
+    const icon = document.getElementById('notif-icon');
+    const titleEl = document.getElementById('notif-title');
+    const messageEl = document.getElementById('notif-message');
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set icon based on type
+    if (type === 'error') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    } else if (type === 'success') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    } else {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+    }
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeNotificationModal() {
+    const modal = document.getElementById('notification-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
 let currentImportTab = 'file';
 function switchImportTab(tab) {
     currentImportTab = tab;
@@ -140,18 +188,19 @@ function switchImportTab(tab) {
 async function createSet() {
     const title = document.getElementById('new-set-title').value;
     const description = document.getElementById('new-set-desc').value;
+    const is_public = document.getElementById('new-set-public').checked;
     
-    if (!title) return alert('Titel ist erforderlich');
+    if (!title) return showNotification('Fehler', 'Titel ist erforderlich', 'error');
     
-    const response = await fetch('/tools/lernkarten/create', {
+    const response = await fetch('/tools/lernsets/create', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({title, description})
+        body: JSON.stringify({title, description, is_public})
     });
     
     if (response.ok) {
         const data = await response.json();
-        window.location.href = `/tools/lernkarten/${data.id}`;
+        window.location.href = `/tools/lernsets/${data.id}`;
     }
 }
 
@@ -159,31 +208,32 @@ async function submitImport() {
     if (currentImportTab === 'file') {
         const fileInput = document.getElementById('import-file-input');
         const file = fileInput.files[0];
-        if (!file) return alert('Bitte wähle eine Datei aus.');
+        if (!file) return showNotification('Fehler', 'Bitte wähle eine Datei aus.', 'error');
         
         const formData = new FormData();
         formData.append('file', file);
         
-        const response = await fetch('/tools/lernkarten/import', {
+        const response = await fetch('/tools/lernsets/import', {
             method: 'POST',
             body: formData
         });
         
         if (response.ok) {
-            window.location.reload();
+            const data = await response.json();
+            window.location.href = `/tools/lernsets/${data.id}`;
         } else {
             const data = await response.json();
-            alert(data.error || 'Fehler beim Importieren');
+            showNotification('Fehler', data.error || 'Fehler beim Importieren', 'error');
         }
     } else {
         const title = document.getElementById('import-text-title').value;
         const content = document.getElementById('import-text-content').value;
         const delimiter = document.getElementById('import-delimiter').value;
         
-        if (!title) return alert('Bitte gib einen Titel ein.');
-        if (!content) return alert('Bitte gib Begriffe ein.');
+        if (!title) return showNotification('Fehler', 'Bitte gib einen Titel ein.', 'error');
+        if (!content) return showNotification('Fehler', 'Bitte gib Begriffe ein.', 'error');
         
-        const response = await fetch('/tools/lernkarten/import', {
+        const response = await fetch('/tools/lernsets/import', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
@@ -194,10 +244,11 @@ async function submitImport() {
         });
         
         if (response.ok) {
-            window.location.reload();
+            const data = await response.json();
+            window.location.href = `/tools/lernsets/${data.id}`;
         } else {
             const data = await response.json();
-            alert(data.error || 'Fehler beim Importieren');
+            showNotification('Fehler', data.error || 'Fehler beim Importieren', 'error');
         }
     }
 }

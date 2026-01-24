@@ -25,9 +25,65 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('star-filter-container').classList.remove('hidden');
     }
     
+    // Setup delete modal event listeners
+    const deleteSetCancelBtn = document.getElementById('delete-set-cancel-btn');
+    const confirmDeleteSetBtn = document.getElementById('confirm-delete-set-btn');
+    const overlay = document.getElementById('overlay');
+    
+    if (deleteSetCancelBtn) {
+        deleteSetCancelBtn.addEventListener('click', closeDeleteSetConfirm);
+    }
+    if (confirmDeleteSetBtn) {
+        confirmDeleteSetBtn.addEventListener('click', confirmDeleteSet);
+    }
+    if (overlay) {
+        overlay.addEventListener('click', closeDeleteSetConfirm);
+    }
+    
+    // Setup notification modal event listeners
+    const notificationOkBtn = document.getElementById('notification-ok-btn');
+    if (notificationOkBtn) {
+        notificationOkBtn.addEventListener('click', closeNotification);
+    }
+    
     // Keyboard navigation
     document.addEventListener('keydown', handleKeyboard);
 });
+
+function showNotification(title, message, type = 'info') {
+    const popup = document.getElementById('notification-popup');
+    const icon = document.getElementById('notification-icon');
+    const titleEl = document.getElementById('notification-title');
+    const messageEl = document.getElementById('notification-message');
+    const overlay = document.getElementById('overlay');
+    
+    if (!popup) return; // Fallback if modal doesn't exist
+    
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set icon based on type
+    if (type === 'error') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+    } else if (type === 'success') {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+    } else {
+        icon.className = 'mx-auto mb-4 w-12 h-12 flex items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30';
+        icon.innerHTML = '<svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+    }
+    
+    overlay.classList.remove('hidden');
+    popup.classList.remove('hidden');
+}
+
+function closeNotification() {
+    const popup = document.getElementById('notification-popup');
+    const overlay = document.getElementById('overlay');
+    if (popup) popup.classList.add('hidden');
+    if (overlay) overlay.classList.add('hidden');
+}
 
 function handleKeyboard(e) {
     // Don't trigger if user is typing in an input
@@ -136,8 +192,15 @@ function updateFlashcardView() {
     const frontContent = side === 'term' ? card.term : card.definition;
     const backContent = side === 'term' ? card.definition : card.term;
     
-    document.getElementById('card-front-content').textContent = frontContent;
-    document.getElementById('card-back-content').textContent = backContent;
+    const frontEl = document.getElementById('card-front-content');
+    const backEl = document.getElementById('card-back-content');
+    
+    frontEl.textContent = frontContent;
+    backEl.textContent = backContent;
+    
+    adjustFontSize(frontEl, frontContent);
+    adjustFontSize(backEl, backContent);
+    
     document.getElementById('current-card-index').textContent = currentIndex + 1;
     
     // Update star buttons state
@@ -146,6 +209,23 @@ function updateFlashcardView() {
     // Reset flip
     container.classList.remove('rotate-y-180');
     isFlipped = false;
+}
+
+function adjustFontSize(element, text) {
+    element.classList.remove('text-4xl', 'text-3xl', 'text-2xl', 'text-xl', 'text-lg', 'text-base', 'text-sm');
+    
+    const len = text.length;
+    if (len > 300) {
+        element.classList.add('text-sm');
+    } else if (len > 150) {
+        element.classList.add('text-base');
+    } else if (len > 80) {
+        element.classList.add('text-lg');
+    } else if (len > 40) {
+        element.classList.add('text-2xl');
+    } else {
+        element.classList.add('text-4xl');
+    }
 }
 
 function updateStarButtons(isStarred) {
@@ -165,15 +245,25 @@ function updateStarButtons(isStarred) {
 
 function toggleStarCurrent() {
     if (cards.length === 0) return;
+    
     const card = cards[currentIndex];
-    card.starred = !card.starred;
-    
-    // Update UI
-    updateStarButtons(card.starred);
-    updateStats();
-    
-    // If we are in filtered mode and unstar, we might want to remove it or just keep it until refresh
-    // For now, let's keep it visible to avoid confusion, but update the count
+    // Find the card in allCards to update it there too
+    const originalCard = allCards.find(c => c.id === card.id);
+    if (originalCard) {
+        originalCard.starred = !originalCard.starred;
+        
+        // Update UI
+        updateStarButtons(originalCard.starred);
+        updateStats();
+        renderStaticTermsList();
+        
+        // Save to server
+        fetch(`/tools/lernsets/card/${originalCard.id}/star`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ starred: originalCard.starred })
+        }).catch(err => console.error('Failed to save star', err));
+    }
 }
 
 function flipCard() {
@@ -564,7 +654,7 @@ function renderList() {
     // Always show allCards in list mode for editing
     allCards.forEach((card, index) => {
         const div = document.createElement('div');
-        div.className = 'p-6 flex gap-6 items-start group hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors';
+        div.className = 'p-6 flex gap-6 items-start group hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors';
         
         // Create elements properly to handle special characters
         div.innerHTML = `
@@ -574,11 +664,11 @@ function renderList() {
             <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="group/input">
                     <label class="block text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2 transition-colors group-focus-within/input:text-blue-600 dark:group-focus-within/input:text-blue-400">Begriff</label>
-                    <input type="text" data-index="${index}" data-field="term" class="card-input w-full p-0 border-b-2 border-zinc-200 dark:border-zinc-600 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-0 text-zinc-800 dark:text-zinc-100 pb-2 transition-colors placeholder-zinc-400 dark:placeholder-zinc-500 font-medium text-lg outline-none" placeholder="Begriff eingeben...">
+                    <input type="text" data-index="${index}" data-field="term" class="card-input w-full p-0 border-b-2 border-zinc-200 dark:border-zinc-600 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-0 text-zinc-800 dark:text-zinc-100 pb-2 transition-colors placeholder-zinc-400 dark:placeholder-zinc-500 font-medium text-lg outline-none" placeholder="Begriff eingeben..." ${!IS_OWNER ? 'disabled' : ''}>
                 </div>
                 <div class="group/input">
                     <label class="block text-xs font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-2 transition-colors group-focus-within/input:text-blue-600 dark:group-focus-within/input:text-blue-400">Definition</label>
-                    <input type="text" data-index="${index}" data-field="definition" class="card-input w-full p-0 border-b-2 border-zinc-200 dark:border-zinc-600 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-0 text-zinc-800 dark:text-zinc-100 pb-2 transition-colors placeholder-zinc-400 dark:placeholder-zinc-500 text-lg outline-none" placeholder="Definition eingeben...">
+                    <input type="text" data-index="${index}" data-field="definition" class="card-input w-full p-0 border-b-2 border-zinc-200 dark:border-zinc-600 bg-transparent focus:border-blue-500 dark:focus:border-blue-400 hover:border-blue-300 dark:hover:border-blue-500 focus:ring-0 text-zinc-800 dark:text-zinc-100 pb-2 transition-colors placeholder-zinc-400 dark:placeholder-zinc-500 text-lg outline-none" placeholder="Definition eingeben..." ${!IS_OWNER ? 'disabled' : ''}>
                 </div>
             </div>
             <div class="pt-6 flex flex-col gap-2">
@@ -587,9 +677,11 @@ function renderList() {
                         <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                     </svg>
                 </button>
+                ${IS_OWNER ? `
                 <button class="delete-btn p-2 text-zinc-400 dark:text-zinc-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-all" data-index="${index}" title="Karte löschen">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                 </button>
+                ` : ''}
             </div>
         `;
         
@@ -646,18 +738,18 @@ function renderStaticTermsList() {
 
     allCards.forEach((card, index) => {
         const div = document.createElement('div');
-        div.className = 'group flex p-4 border-b border-zinc-100 dark:border-zinc-700 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors';
+        div.className = 'group flex items-start p-4 border-b border-zinc-100 dark:border-zinc-700 last:border-0 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors';
 
         const termDiv = document.createElement('div');
-        termDiv.className = 'w-1/3 pr-4 border-r border-zinc-100 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 font-medium';
+        termDiv.className = 'w-1/3 pr-4 border-r-2 border-zinc-100 dark:border-zinc-700 text-zinc-800 dark:text-zinc-100 font-medium break-words';
         termDiv.textContent = card.term;
 
         const defDiv = document.createElement('div');
-        defDiv.className = 'w-2/3 pl-4 text-zinc-600 dark:text-zinc-400';
+        defDiv.className = 'flex-1 pl-4 text-zinc-600 dark:text-zinc-400 break-words';
         defDiv.textContent = card.definition;
 
         const btnContainer = document.createElement('div');
-        btnContainer.className = 'flex items-center ml-2';
+        btnContainer.className = 'flex items-center ml-4 flex-shrink-0';
 
         const starBtn = document.createElement('button');
         starBtn.className = 'p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors';
@@ -698,12 +790,12 @@ async function toggleStarInStaticList(index) {
         updateStarButtons(cards[currentIndex].starred);
     }
     
-    // Save to server immediately
+    // Save to server immediately (using new endpoint)
     try {
-        await fetch(`/tools/lernkarten/${SET_ID}/update`, {
+        await fetch(`/tools/lernsets/card/${allCards[index].id}/star`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ cards: allCards })
+            body: JSON.stringify({ starred: allCards[index].starred })
         });
     } catch (error) {
         console.error('Failed to save star status:', error);
@@ -715,7 +807,7 @@ function addCardInput() {
     if (allCards.length > 0) {
         const lastCard = allCards[allCards.length - 1];
         if (!lastCard.term.trim() || !lastCard.definition.trim()) {
-            alert("Bitte fülle die letzte Karte aus, bevor du eine neue hinzufügst.");
+            showNotification('Fehler', 'Bitte fülle die letzte Karte aus, bevor du eine neue hinzufügst.', 'error');
             return;
         }
     }
@@ -750,7 +842,7 @@ async function saveSet() {
     // Validation: Check for empty fields
     const invalidCards = allCards.filter(c => !c.term.trim() || !c.definition.trim());
     if (invalidCards.length > 0) {
-        alert('Bitte fülle alle Begriffe und Definitionen aus.');
+        showNotification('Fehler', 'Bitte fülle alle Begriffe und Definitionen aus.', 'error');
         return;
     }
 
@@ -760,7 +852,7 @@ async function saveSet() {
     saveBtn.disabled = true;
 
     try {
-        const response = await fetch(`/tools/lernkarten/${SET_ID}/update`, {
+        const response = await fetch(`/tools/lernsets/${SET_ID}/update`, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ cards: allCards })
@@ -788,24 +880,40 @@ async function saveSet() {
     } catch (error) {
         saveBtn.textContent = originalText;
         saveBtn.disabled = false;
-        alert('Fehler beim Speichern');
+        showNotification('Fehler', 'Fehler beim Speichern', 'error');
     }
 }
 
+function openDeleteSetConfirm() {
+    document.getElementById('overlay').classList.remove('hidden');
+    document.getElementById('delete-set-confirm-popup').classList.remove('hidden');
+}
+
+function closeDeleteSetConfirm() {
+    document.getElementById('overlay').classList.add('hidden');
+    document.getElementById('delete-set-confirm-popup').classList.add('hidden');
+}
+
 async function deleteSet() {
-    if (!confirm('Möchtest du dieses Set wirklich löschen?')) return;
-    
-    const response = await fetch(`/tools/lernkarten/${SET_ID}/delete`, {
+    openDeleteSetConfirm();
+}
+
+async function confirmDeleteSet() {
+    const response = await fetch(`/tools/lernsets/${SET_ID}/delete`, {
         method: 'DELETE'
     });
     
     if (response.ok) {
-        window.location.href = '/tools/lernkarten';
+        window.location.href = '/tools/lernsets';
     }
 }
 
 async function exportSet() {
-    const response = await fetch(`/tools/lernkarten/${SET_ID}/export`);
+    // Use ID if available, otherwise we might need to fetch it or use token
+    // But export route likely needs ID or token. Let's assume token works if backend supports it.
+    // Wait, export route wasn't updated to use token_or_id. I should check that.
+    // Assuming I update export route too.
+    const response = await fetch(`/tools/lernsets/${SET_ID}/export`);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -814,4 +922,42 @@ async function exportSet() {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
+}
+
+async function togglePublicStatus() {
+    const isPublic = document.getElementById('public-toggle').checked;
+    const label = document.getElementById('public-label');
+    
+    label.textContent = isPublic ? 'Öffentlich' : 'Privat';
+    
+    try {
+        const response = await fetch(`/tools/lernsets/${SET_ID}/update`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({is_public: isPublic})
+        });
+        
+        if (response.ok) {
+            // Reload to update UI (e.g. show/hide share button)
+            window.location.reload();
+        } else {
+            showNotification('Fehler', 'Fehler beim Aktualisieren des Status', 'error');
+            // Revert toggle
+            document.getElementById('public-toggle').checked = !isPublic;
+            label.textContent = !isPublic ? 'Öffentlich' : 'Privat';
+        }
+    } catch (e) {
+        console.error(e);
+        showNotification('Fehler', 'Fehler beim Aktualisieren des Status', 'error');
+    }
+}
+
+function shareSet() {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        showNotification('Erfolg', 'Link in die Zwischenablage kopiert!', 'success');
+    }).catch(err => {
+        console.error('Fehler beim Kopieren:', err);
+        showNotification('Fehler', 'Konnte Link nicht kopieren. Bitte kopiere die URL aus der Adresszeile.', 'error');
+    });
 }

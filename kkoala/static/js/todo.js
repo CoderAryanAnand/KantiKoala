@@ -112,22 +112,27 @@ async function addTodoItem(categoryId) {
             // Create and append the new item element to the DOM
             const itemsContainer = document.getElementById(`items-${categoryId}`);
             const itemEl = document.createElement('div');
-            itemEl.className = 'flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group cursor-pointer';
-            itemEl.onclick = function(event) {
-                if (event.target.tagName !== 'INPUT') {
-                    this.querySelector('input[type=checkbox]').checked = true;
-                    completeAndDeleteTodoItem(data.item.id, this.querySelector('input[type=checkbox]'));
-                }
-            };
+            itemEl.className = 'flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group';
             itemEl.setAttribute('data-item-id', data.item.id);
+            itemEl.setAttribute('data-category-id', categoryId);
+            
             itemEl.innerHTML = `
+                <div class="cursor-move text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 mt-0.5 flex-shrink-0 drag-handle">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8h16M4 16h16" />
+                    </svg>
+                </div>
                 <input type="checkbox" 
                        onchange="completeAndDeleteTodoItem(${data.item.id}, this)"
                        class="h-5 w-5 mt-0.5 flex-shrink-0 rounded border-zinc-300 dark:border-zinc-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-0 cursor-pointer">
-                <span class="flex-1 text-zinc-800 dark:text-zinc-200 break-words min-w-0">
+                <span class="flex-1 text-zinc-800 dark:text-zinc-200 break-words min-w-0 cursor-pointer" onclick="this.previousElementSibling.click()">
                     ${escapeHtml(data.item.description)}
                 </span>
             `;
+            
+            // Attach drag listeners
+            // No need to attach listeners manually, SortableJS handles it
+            
             itemsContainer.appendChild(itemEl);
             updateItemCount(categoryId);
             input.value = '';
@@ -214,6 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             icon.classList.remove('rotated');
         }
     });
+    initSortable();
 });
 
 // Closes all popups when the Escape key is pressed
@@ -222,3 +228,60 @@ document.addEventListener('keydown', (e) => {
         closeAllPopups();
     }
 });
+
+// SortableJS Logic
+function initSortable() {
+    // Check if Sortable is loaded
+    if (typeof Sortable === 'undefined') {
+        console.warn('SortableJS not loaded yet, retrying in 100ms...');
+        setTimeout(initSortable, 100);
+        return;
+    }
+
+    const categories = document.querySelectorAll('[data-category-id]');
+    console.log(`Found ${categories.length} categories to initialize Sortable.`);
+
+    categories.forEach(cat => {
+        const categoryId = cat.getAttribute('data-category-id');
+        const itemsContainer = document.getElementById(`items-${categoryId}`);
+        
+        if (itemsContainer) {
+            // Check if Sortable is already initialized on this element
+            if (itemsContainer._sortable) {
+                itemsContainer._sortable.destroy();
+            }
+
+            itemsContainer._sortable = new Sortable(itemsContainer, {
+                animation: 150,
+                handle: '.drag-handle',
+                ghostClass: 'bg-zinc-100',
+                delay: 0, 
+                touchStartThreshold: 5, // Helps with touch devices
+                onEnd: function (evt) {
+                    console.log(`Moved item in category ${categoryId}`);
+                    saveOrder(categoryId);
+                }
+            });
+            console.log(`Sortable initialized for category ${categoryId}`);
+        }
+    });
+}
+
+async function saveOrder(categoryId) {
+    const container = document.getElementById(`items-${categoryId}`);
+    const items = container.querySelectorAll('[data-item-id]');
+    const itemIds = Array.from(items).map(item => item.dataset.itemId);
+    
+    try {
+        await fetch(`/api/todo/categories/${categoryId}/reorder`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': getCsrfToken()
+            },
+            body: JSON.stringify({ itemIds })
+        });
+    } catch (error) {
+        console.error('Error saving order:', error);
+    }
+}
