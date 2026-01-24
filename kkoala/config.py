@@ -36,6 +36,10 @@ class ProdConfig(BaseConfig):
         SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace(
             "postgres://", "postgresql://", 1
         )
+    
+    # Use Redis for rate limiting (DigitalOcean App Platform / Heroku)
+    # Ensure you have a Redis component attached and the REDIS_URL env var set
+    RATELIMIT_STORAGE_URI = os.getenv("REDIS_URL")
 
 
 class DevConfig(BaseConfig):
@@ -46,6 +50,10 @@ class DevConfig(BaseConfig):
     DEBUG = True
     CREATE_DB = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or "sqlite:///dev.db"
+    
+    # Use Redis if configured in .env, otherwise fallback to in-memory storage to suppress warnings
+    RATELIMIT_STORAGE_URI = os.getenv("REDIS_URL") or "memory://"
+
 
 
 class TestConfig(BaseConfig):
