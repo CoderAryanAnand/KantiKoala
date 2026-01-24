@@ -46,6 +46,9 @@ class User(db.Model):
     citation_groups = db.relationship(
         "CitationGroup", backref="user", lazy=True, cascade="all, delete-orphan"
     )
+    flashcard_sets = db.relationship(
+        "FlashcardSet", backref="user", lazy=True, cascade="all, delete-orphan"
+    )
 
 # -------------------------------
 # User settings and priorities
