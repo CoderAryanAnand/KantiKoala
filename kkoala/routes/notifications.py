@@ -65,8 +65,26 @@ def send_notification(title, description, user_id=None):
     # 3. Get VAPID Private Key
     vapid_private_key = os.getenv("VAPID_PRIVATE_KEY")
     
-    # Try to find the key file if env var is missing
-    if not vapid_private_key:
+    # Handle case where Env Var contains the ACTUAL key content (PEM format)
+    if vapid_private_key and "-----BEGIN PRIVATE KEY-----" in vapid_private_key:
+        # Save it to a temporary file because pywebpush expects a file path or a PEM string?
+        # Actually pywebpush's vapid_private_key arg can be a file path.
+        # But 'webpush' function logic inside the library handles paths.
+        # Let's write it to a temp file to be safe and compatible with current logic
+        try:
+            import tempfile
+            with tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.pem') as temp:
+                # DigitalOcean sometimes escapes newlines as \n string
+                if "\\n" in vapid_private_key:
+                    vapid_private_key = vapid_private_key.replace("\\n", "\n")
+                temp.write(vapid_private_key)
+                vapid_private_key = temp.name
+        except Exception as e:
+            print(f"Error creating temp key file: {e}")
+            return False
+
+    # Try to find the key file if env var is missing or assumes it's a path
+    elif not vapid_private_key:
         possible_paths = [
             "private_key.pem",
             os.path.join(os.getcwd(), "private_key.pem")

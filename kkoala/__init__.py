@@ -33,6 +33,13 @@ def create_app(config_class="kkoala.config.ProdConfig"):
     # Register CLI commands
     register_commands(app)
 
+    # Context processors
+    @app.context_processor
+    def inject_vapid_public_key():
+        # Default fallback key if env var is missing
+        default_key = "BKFpBSA2lpFkN0Hh50ojQNgj_FaSjjPNN-QKbW0xKMfcnbLAwVS7izl2-1pb6ectF_jnnKoUMJNE67HAhb3fFAg"
+        return dict(vapid_public_key=os.getenv("VAPID_PUBLIC_KEY", default_key))
+
     # Configure Flask-Talisman for security headers
     # CSP allows inline styles/scripts (needed for Tailwind and FullCalendar)
     csp = {

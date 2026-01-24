@@ -85,7 +85,7 @@
 
     <script>
         // VAPID Public Key for Push Notifications
-        window.VAPID_PUBLIC_KEY = "BKFpBSA2lpFkN0Hh50ojQNgj_FaSjjPNN-QKbW0xKMfcnbLAwVS7izl2-1pb6ectF_jnnKoUMJNE67HAhb3fFAg";
+        window.VAPID_PUBLIC_KEY = "{{ vapid_public_key }}";
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
