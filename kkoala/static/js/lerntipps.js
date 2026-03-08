@@ -4,16 +4,23 @@ document.addEventListener('DOMContentLoaded', () => {
         button.addEventListener('click', () => {
             // Get the content panel and the chevron icon inside the button
             const content = button.nextElementSibling;
-            const icon = button.querySelector('svg');
+            // Find the chevron icon (prefer class based selection, fallback to first svg for compatibility)
+            const icon = button.querySelector('.accordion-chevron') || button.querySelector('svg');
+
+            if (!icon) return; // Guard clause
 
             // Toggle visibility of the accordion content
             content.classList.toggle('hidden');
 
             // Rotate the chevron icon based on the content's visibility
             if (content.classList.contains('hidden')) {
-                icon.classList.remove('rotate-180');
+                icon.classList.remove('active');
+                icon.style.transform = 'rotate(0deg)';
+                button.setAttribute('aria-expanded', 'false');
             } else {
-                icon.classList.add('rotate-180');
+                icon.classList.add('active');
+                icon.style.transform = 'rotate(180deg)';
+                button.setAttribute('aria-expanded', 'true');
             }
         });
     });
