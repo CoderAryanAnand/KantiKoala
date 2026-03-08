@@ -112,7 +112,7 @@ async function addTodoItem(categoryId) {
             // Create and append the new item element to the DOM
             const itemsContainer = document.getElementById(`items-${categoryId}`);
             const itemEl = document.createElement('div');
-            itemEl.className = 'flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group';
+            itemEl.className = 'my-2 flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group';
             itemEl.setAttribute('data-item-id', data.item.id);
             itemEl.setAttribute('data-category-id', categoryId);
             

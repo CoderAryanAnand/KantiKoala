@@ -96,9 +96,9 @@
             <div class="category-collapse" id="category-{{ category.id }}">
                 <div class="p-4 pt-0 space-y-3">
                     <!-- Todo Items List -->
-                    <div class="space-y-2" id="items-{{ category.id }}">
+                    <div class="" id="items-{{ category.id }}">
                         {% for item in category.items %}
-                        <div class="flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group"
+                        <div class="my-2 flex items-start space-x-3 p-3 bg-zinc-50 dark:bg-zinc-700/50 rounded-lg hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors group"
                              data-item-id="{{ item.id }}"
                              data-category-id="{{ category.id }}">
                             <!-- Drag Handle -->
@@ -120,12 +120,12 @@
                     </div>
                     
                     <!-- Add Item Form -->
-                    <div class="flex flex-col sm:flex-row gap-2 mt-3">
+                    <div class="flex flex-col sm:flex-row gap-2 mt-3 sm:items-center">
                         <input type="text" 
                                id="new-item-{{ category.id }}"
                                placeholder="Neue Aufgabe hinzufügen..."
                                maxlength="100"
-                               class="flex-1 min-w-0 px-3 py-2 mb-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                               class="flex-1 min-w-0 px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-700 text-zinc-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                                onkeypress="if(event.key === 'Enter') addTodoItem({{ category.id }})">
                         <button onclick="addTodoItem({{ category.id }})" class="px-4 py-2 font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors text-sm whitespace-nowrap">
                             Hinzufügen

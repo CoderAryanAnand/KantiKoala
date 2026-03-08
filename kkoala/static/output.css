@@ -2823,6 +2823,10 @@ video {
   text-decoration-line: underline;
 }
 
+.line-through {
+  text-decoration-line: line-through;
+}
+
 .opacity-50 {
   opacity: 0.5;
 }
@@ -3952,6 +3956,10 @@ video {
 
   .sm\:flex-row {
     flex-direction: row;
+  }
+
+  .sm\:items-center {
+    align-items: center;
   }
 
   .sm\:p-8 {
