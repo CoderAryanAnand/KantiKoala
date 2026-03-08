@@ -1,4 +1,4 @@
-# Byte-compiled / optimized / DLL files
+﻿# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
@@ -228,9 +228,16 @@ report/*.vrb
 report/*.xdy
 report/*.xml
 report/*blx.bib
-report/.bak 
+report/.bak
 report/.mtc
 report/main.synctex(busy)
 report/build/
 report/main.bbl-SAVE-ERROR
 report/main.bcf-SAVE-ERROR
+
+node_modules/
+
+# Security keys
+*.pem
+private_key.pem
+public_key.pem
