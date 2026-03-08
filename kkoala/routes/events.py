@@ -337,8 +337,11 @@ def import_ics(user):
     if not ics_content:
         return jsonify({"message": "No .ics content provided"}), 400
 
+
     try:
         calendar = icalendar.Calendar.from_ical(ics_content)
+        prodid = str(calendar.get("prodid", "")).lower()
+        is_centerboard = "centerboard" in prodid
 
         for component in calendar.walk():
             if component.name == "VEVENT":
@@ -346,11 +349,25 @@ def import_ics(user):
                 start = component.get("dtstart").dt
                 end = component.get("dtend").dt if component.get("dtend") else None
                 is_all_day = not isinstance(start, datetime)
+                
+                # Check for Centerboard specific UID logic
+                uid = str(component.get("uid", ""))
+                is_exam = False
+                
+                if is_centerboard:
+                    # Filter out "termine"
+                    if "Termin" in uid:
+                        continue
+                    # Check for exams
+                    if "Pruefung" in uid:
+                        is_exam = True
+
                 # Read custom Kanti Koala tags if present
                 priority = component.get("X-KKOALA-PRIORITY")
                 color = component.get("X-KKOALA-COLOR")
-
+                
                 settings = Settings.query.filter_by(user_id=user.id).first()
+                lowest_priority = 4  # Default priority
 
                 if settings and settings.priority_settings:
                     all_priorities = [p.priority_level for p in settings.priority_settings]
@@ -360,10 +377,21 @@ def import_ics(user):
 
                 if priority is not None:
                     priority = int(priority)
+                elif is_exam:
+                     priority = 1
                 else:
                     priority = lowest_priority
+                
                 if color is None:
-                    color = DEFAULT_IMPORT_COLOR
+                    # Use color from PrioritySetting if it's an exam (priority 1)
+                    if is_exam and settings and settings.priority_settings:
+                        exam_prio_setting = next((p for p in settings.priority_settings if p.priority_level == 1), None)
+                        if exam_prio_setting:
+                            color = exam_prio_setting.color
+                        else:
+                            color = DEFAULT_IMPORT_COLOR
+                    else:
+                        color = DEFAULT_IMPORT_COLOR
 
                 new_event = Event(
                     title=title,
