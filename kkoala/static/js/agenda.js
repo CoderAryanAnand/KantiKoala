@@ -153,18 +153,23 @@ document.addEventListener('DOMContentLoaded', function () {
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
         },
         // Add this block to fix the arrow buttons
         buttonText: {
             today: 'Heute',
             month: 'Monat',
             week: 'Woche',
-            day: 'Tag'
+            day: 'Tag',
+            list: 'Liste'
         },
         locale: 'de',
         firstDay: 1,
         height: 'auto',
+        nowIndicator: true,      // Show current time line
+        scrollTime: '08:00:00',  // Scroll to 8 AM by default
+        dayMaxEvents: true,      // Show "more" link when too many events
+        navLinks: true,          // Allow clicking day/week names to navigate
         slotLabelFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
         eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
         events: '/api/events',

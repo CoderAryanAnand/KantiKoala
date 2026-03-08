@@ -8,7 +8,7 @@ import icalendar
 # Import application extensions and models
 from ..extensions import db, limiter
 from ..models import Event, User, Settings, PrioritySetting
-from ..utils import csrf_protect, login_required, str_to_bool
+from ..utils import csrf_protect, login_required, str_to_bool, get_text_color
 from ..algorithms import learning_time_algorithm
 from ..consts import DEFAULT_IMPORT_COLOR
 
@@ -39,6 +39,7 @@ def get_events(user):
             "start": event.start,
             "end": event.end,
             "color": event.color,
+            "textColor": get_text_color(event.color),
             "priority": event.priority,
             "recurrence": event.recurrence,
             "recurrence_id": event.recurrence_id,

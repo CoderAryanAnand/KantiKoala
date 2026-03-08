@@ -216,3 +216,38 @@ def free_slots(events, day):
         free_slots.append((current_start, day_end_dt))
 
     return free_slots
+
+
+def get_text_color(hex_color: str) -> str:
+    """
+    Determines the best text color (black or white) for a given background hex color.
+    
+    Args:
+        hex_color (str): The background color in hex format (e.g. '#ffffff').
+        
+    Returns:
+        str: '#000000' for light backgrounds, '#ffffff' for dark backgrounds.
+    """
+    if not hex_color or not str(hex_color).startswith('#'):
+        return '#000000'
+        
+    hex_color = hex_color.lstrip('#')
+    
+    # Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+    if len(hex_color) == 3:
+        hex_color = ''.join([c*2 for c in hex_color])
+        
+    if len(hex_color) != 6:
+        return '#000000'
+
+    try:
+        r = int(hex_color[0:2], 16)
+        g = int(hex_color[2:4], 16)
+        b = int(hex_color[4:6], 16)
+        
+        # Calculate luminance
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+        
+        return '#000000' if luminance > 0.5 else '#ffffff'
+    except ValueError:
+        return '#000000'

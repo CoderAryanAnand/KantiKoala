@@ -16,7 +16,7 @@
     FullCalendar library for interactive calendar UI.
     Loaded from CDN for convenience.
 -->
-<script src='https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.15/index.global.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js'></script>
 {% endblock %}
 
 {% block extra_css %}
@@ -26,39 +26,213 @@
     - Adjusts colors for calendar background, text, events, and borders.
 -->
 <style>
-    /* Light Mode Variables */
+    /* 
+       Agenda Modern Styling 
+       Overrides FullCalendar defaults for a sleek, cohesive look.
+    */
     :root {
+        /* Base Colors */
         --fc-bg-color: #ffffff;
-        --fc-border-color: #e2e8f0; /* zinc-200 */
-        --fc-text-color: #3f3f46;   /* zinc-700 */
+        --fc-page-bg-color: #ffffff;
+        --fc-border-color: #f4f4f5; /* zinc-100 - much lighter borders */
+        --fc-neutral-bg-color: #f4f4f5;
+        
+        /* Text Colors */
+        --fc-text-color: #52525b;   /* zinc-600 */
         --fc-title-text-color: #18181b; /* zinc-900 */
-        --fc-today-bg-color: rgba(37, 99, 235, 0.05); /* blue-600 with opacity */
+        --fc-small-font-size: 0.85em;
+
+        /* Button Styling (matching Tailwind blue-600) */
+        --fc-button-bg-color: transparent;
+        --fc-button-border-color: #e4e4e7; /* zinc-200 */
+        --fc-button-text-color: #3f3f46; /* zinc-700 */
+        --fc-button-hover-bg-color: #f4f4f5; /* zinc-100 */
+        --fc-button-hover-border-color: #e4e4e7;
+        
+        --fc-button-active-bg-color: #e4e4e7; /* zinc-200 */
+        --fc-button-active-border-color: #d4d4d8; /* zinc-300 */
+        
+        /* Primary actions typically keep color, but for toolbar we go minimal/ghost */
+        
+        /* Today Highlight */
+        --fc-today-bg-color: rgba(37, 99, 235, 0.03); /* very subtle blue */
+        --fc-now-indicator-color: #ef4444; /* red-500 */
+        
+        /* Event Defaults */
         --fc-event-bg-color: #3b82f6;
-        --fc-event-border-color: #2563eb;
+        --fc-event-border-color: transparent;
         --fc-event-text-color: #ffffff;
+        --fc-event-selected-overlay-color: rgba(0, 0, 0, 0.15);
     }
-    /* Dark Mode Variables */
+
     .dark {
         --fc-bg-color: #18181b; /* zinc-900 */
-        --fc-border-color: #3f3f46; /* zinc-700 */
-        --fc-text-color: #d4d4d8;   /* zinc-300 */
-        --fc-title-text-color: #ffffff; /* white */
-        --fc-today-bg-color: rgba(59, 130, 246, 0.1); /* blue-500 with opacity */
+        --fc-page-bg-color: #18181b;
+        --fc-border-color: #27272a; /* zinc-800 */
+        --fc-neutral-bg-color: #27272a;
+        
+        --fc-text-color: #a1a1aa;   /* zinc-400 */
+        --fc-title-text-color: #f4f4f5; /* zinc-100 */
+        
+        --fc-button-border-color: #3f3f46; /* zinc-700 */
+        --fc-button-text-color: #e4e4e7; /* zinc-200 */
+        --fc-button-hover-bg-color: #27272a; /* zinc-800 */
+        --fc-button-hover-border-color: #3f3f46;
+        
+        --fc-button-active-bg-color: #3f3f46; /* zinc-700 */
+        --fc-button-active-border-color: #52525b; /* zinc-600 */
+
+        --fc-today-bg-color: rgba(59, 130, 246, 0.1);
     }
+
     #calendar {
         background-color: var(--fc-bg-color);
-        color: var(--fc-text-color);
-        min-height: 600px; /* Ensure calendar has height even if empty */
+        font-family: inherit; /* Inherit Tailwind font stack */
     }
-    .fc .fc-toolbar-title { color: var(--fc-title-text-color); }
-    .fc .fc-button-primary { background-color: #2563eb; border-color: #2563eb; }
-    .fc .fc-button-primary:hover { background-color: #1d4ed8; border-color: #1d4ed8; }
-    .fc .fc-daygrid-day.fc-day-today { background-color: var(--fc-today-bg-color); }
-    .fc th, .fc td, .fc hr, .fc thead, .fc tbody, .fc-scrollgrid { border-color: var(--fc-border-color); }
-    /* Fix for day header and corner cell background color in dark mode */
-    .fc .fc-col-header-cell, .fc .fc-timegrid-axis { background-color: var(--fc-bg-color); }
-    /* Fix for day header text color in dark mode (Month and Week/Day views) */
-    .fc .fc-col-header-cell-cushion, .fc-col-header-cell > a { color: var(--fc-text-color); }
+
+    /* Toolbar Improvements */
+    .fc .fc-toolbar {
+        margin-bottom: 2rem !important;
+    }
+
+    .fc .fc-toolbar-title {
+        font-size: 1.5rem !important;
+        font-weight: 700;
+        letter-spacing: -0.025em;
+        color: var(--fc-title-text-color);
+    }
+
+    /* Minimalist Button Group */
+    .fc .fc-button-group > .fc-button {
+        border: 1px solid var(--fc-button-border-color);
+        background: transparent;
+        color: var(--fc-button-text-color);
+        font-weight: 500;
+        text-transform: capitalize;
+        box-shadow: none !important;
+        outline: none !important;
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
+        transition: all 0.2s;
+    }
+    
+    .fc .fc-button-group > .fc-button:hover {
+        background-color: var(--fc-button-hover-bg-color);
+        border-color: var(--fc-button-hover-border-color);
+    }
+    
+    .fc .fc-button-group > .fc-button:active,
+    .fc .fc-button-group > .fc-button.fc-button-active {
+        background-color: var(--fc-button-active-bg-color);
+        border-color: var(--fc-button-active-border-color);
+        color: var(--fc-title-text-color);
+    }
+
+    /* Primary/Today Button */
+    .fc .fc-today-button {
+        opacity: 0.9;
+        font-weight: 600 !important;
+    }
+
+    /* Grid & Cells Styling */
+    .fc-theme-standard .fc-scrollgrid {
+        border: none; /* Remove outer border */
+    }
+    
+    .fc-theme-standard td, .fc-theme-standard th {
+        border-color: var(--fc-border-color);
+    }
+
+    /* Header Cells (Mon, Tue, etc.) */
+    .fc .fc-col-header-cell-cushion {
+        padding: 12px 0;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--fc-text-color);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .fc .fc-col-header-cell {
+        background-color: var(--fc-bg-color);
+    }
+
+    /* Time Axis */
+    .fc .fc-timegrid-axis-cushion,
+    .fc .fc-timegrid-slot-label-cushion {
+        font-size: 0.75rem;
+        color: var(--fc-text-color);
+        font-weight: 500;
+    }
+
+    /* Events Styling currently in view */
+    .fc-v-event, .fc-h-event {
+        border: 1px solid transparent;
+        border-radius: 6px; /* modern rounded corners */
+        box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        transition: transform 0.1s ease-in-out;
+    }
+
+    .fc-v-event .fc-event-main, .fc-h-event .fc-event-main {
+        color: inherit;
+        padding: 2px 4px;
+        font-weight: 500;
+        font-size: 0.8rem;
+        line-height: 1.25;
+    }
+    
+    .fc-event:hover {
+        opacity: 0.95;
+    }
+
+    /* Now Indicator */
+    .fc .fc-now-indicator-line {
+        border-color: var(--fc-now-indicator-color);
+        border-width: 2px;
+        z-index: 10;
+    }
+    .fc .fc-now-indicator-arrow {
+        border-color: var(--fc-now-indicator-color);
+        border-width: 5px;
+        margin-top: -5px; /* centering */
+    }
+
+    /* Fix for dark mode month view header links */
+    .dark .fc-col-header-cell-cushion, 
+    .dark .fc-col-header-cell > a,
+    .dark .fc-daygrid-day-number {
+         color: var(--fc-text-color);
+         text-decoration: none;
+    }
+
+    /* List View Improvements */
+    .fc-theme-standard .fc-list {
+        border: none;
+    }
+    .fc .fc-list-day-cushion {
+        background-color: var(--fc-neutral-bg-color);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        font-size: 0.85rem;
+    }
+    .fc .fc-list-event:hover td {
+        background-color: var(--fc-button-hover-bg-color);
+        cursor: pointer;
+    }
+    .fc-list-event-title a {
+        color: var(--fc-text-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+    .fc-list-event-time {
+        color: var(--fc-neutral-text-color);
+        font-size: 0.9em;
+    }
+    .fc-list-event-dot {
+        border-width: 5px; /* bigger dots */
+        border-radius: 50%;
+    }
 </style>
 {% endblock %}
 
