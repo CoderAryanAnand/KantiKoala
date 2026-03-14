@@ -2,6 +2,7 @@
 module.exports = {
   content: [
     './kkoala/templates/**/*.{html,js}',
+    './kkoala/static/js/**/*.{js,ts}',
     './kkoala/components/**/*.{html,js}',
   ],
   darkMode: 'class',

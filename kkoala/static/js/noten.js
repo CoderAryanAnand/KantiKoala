@@ -1,5 +1,6 @@
 // Global state
 let semesterTemplates = [];
+let semestersData = {}; // Store semester data for lookups
 let currentSubjectIdForGrade = null;
 let currentGradeIdForEdit = null;
 let currentSubjectIdForDreamCalc = null;
@@ -9,6 +10,8 @@ let gradeIdToDelete = null;
 
 // Global state for popup editing (must be declared before functions that use them)
 let editingSubjectId = null;
+let currentSemesterIdForSubjectCreate = null; // New global for create mode
+let editingParentId = null; // Store parent ID for subject creation/editing
 let editingSemesterId = null;
 let currentSubjectIdForGradeDelete = null;
 
@@ -60,7 +63,11 @@ async function loadSemesters() {
             const semesters = await response.json();
             const container = document.getElementById("semesters");
             container.innerHTML = "";
-            semesters.forEach(sem => renderSemester(sem));
+            semestersData = {};
+            semesters.forEach(sem => {
+                semestersData[sem.id] = sem; // Cache
+                renderSemester(sem);
+            });
         }
     } catch (error) {
         console.error("Failed to load semesters:", error);
@@ -109,8 +116,10 @@ function renderSemester(sem) {
     subjectsContainer.className = "subjects-container space-y-4";
     subjectsContainer.id = `subjects-container-${sem.id}`;
     
-    sem.subjects.forEach(subject => {
-        subjectsContainer.appendChild(renderSubject(subject));
+    // Build tree and render top-level subjects
+    const rootSubjects = buildSubjectTree(sem.subjects);
+    rootSubjects.forEach(subject => {
+        subjectsContainer.appendChild(renderSubject(subject, sem.id, 0));
     });
 
     const actionsDiv = document.createElement("div");
@@ -147,7 +156,7 @@ function renderSemester(sem) {
         };
     }
 
-    actionsDiv.querySelector('.add-subject-btn').onclick = () => addSubjectPrompt(sem.id);
+    actionsDiv.querySelector('.add-subject-btn').onclick = () => openSubjectPopup(null, sem.id);
     actionsDiv.querySelector('.delete-semester-btn').onclick = () => openDeleteConfirm(sem.id, sem.name);
 
     // SortableJS
@@ -155,6 +164,7 @@ function renderSemester(sem) {
         new Sortable(subjectsContainer, {
             animation: 150,
             handle: '.drag-handle',
+            group: `semester-${sem.id}`,
             onEnd: function (evt) {
                 // Save the new order to the server
                 saveSubjectOrder(sem.id, subjectsContainer);
@@ -163,21 +173,28 @@ function renderSemester(sem) {
     }
 }
 
-function renderSubject(subject) {
+function renderSubject(subject, semesterId, level = 0) {
     const subjectDiv = document.createElement("div");
-    subjectDiv.className = "subject bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg";
+    // Indentation for children
+    if (level > 0) {
+        subjectDiv.style.marginLeft = "20px";
+        subjectDiv.style.borderLeft = "4px solid #3b82f6"; // Adding a visual indicator for nesting
+    }
+    
+    subjectDiv.className = "subject bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg mb-4";
     subjectDiv.dataset.id = subject.id;
     subjectDiv.dataset.countsAverage = subject.counts_average ? "true" : "false";
     subjectDiv.id = `subject-${subject.id}`;
 
     const avgText = subject.has_grades && subject.average !== null ? subject.average.toFixed(2) : "0";
     const countsText = subject.counts_average ? "" : " (zählt nicht)";
+    const weightText = subject.weight !== 1 ? ` (Gewicht: ${subject.weight})` : "";
 
     const header = document.createElement("div");
     header.className = "dropdown-header flex items-center justify-between p-4 cursor-pointer";
     header.innerHTML = `
         <div class="flex items-center space-x-3">
-            <span class="subject-title font-semibold text-lg text-zinc-800 dark:text-white">${subject.name}</span>
+            <span class="subject-title font-semibold text-lg text-zinc-800 dark:text-white">${subject.name}${weightText}</span>
             <span class="subject-average text-sm text-zinc-500 dark:text-zinc-400" id="subj-avg-${subject.id}">
                 Schnitt: ${avgText}${countsText}
             </span>
@@ -196,6 +213,18 @@ function renderSubject(subject) {
     const content = document.createElement("div");
     content.className = "dropdown-content hidden p-4 border-t border-zinc-200 dark:border-zinc-700";
     
+    // Render children first (sub-subjects)
+    const childrenContainer = document.createElement("div");
+    childrenContainer.className = "children-container space-y-4 mb-4";
+    childrenContainer.id = `children-container-${subject.id}`;
+    
+    if (subject.children && subject.children.length > 0) {
+        subject.children.forEach(child => {
+            childrenContainer.appendChild(renderSubject(child, semesterId, level + 1));
+        });
+    }
+    content.appendChild(childrenContainer);
+    
     const gradesList = document.createElement("div");
     gradesList.className = "grades-list space-y-2";
     gradesList.id = `grades-list-${subject.id}`;
@@ -208,6 +237,7 @@ function renderSubject(subject) {
     actionsDiv.className = "flex flex-wrap gap-2 mt-4";
     actionsDiv.innerHTML = `
         <button class="add-grade-btn text-sm px-3 py-2 font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">Note hinzufügen</button>
+        <button class="add-subsubject-btn text-sm px-3 py-2 font-semibold text-white bg-indigo-600 rounded-md hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors">Unterfach</button>
         <button class="dream-calc-btn text-sm px-3 py-2 font-semibold text-white bg-green-600 rounded-md hover:bg-green-700">Wunschnote</button>
         <button class="delete-subject-btn text-sm px-3 py-2 font-semibold text-white bg-red-600 rounded-md hover:bg-red-700">Fach löschen</button>
     `;
@@ -227,10 +257,11 @@ function renderSubject(subject) {
 
     header.querySelector('.edit-subject-btn').onclick = (e) => {
         e.stopPropagation();
-        openSubjectPopup(subject.id, subject.name, subject.counts_average);
+        openSubjectPopup(subject, semesterId);
     };
 
     actionsDiv.querySelector('.add-grade-btn').onclick = () => openGradePopup(subject.id);
+    actionsDiv.querySelector('.add-subsubject-btn').onclick = () => openSubjectPopup(null, semesterId, subject.id);
     actionsDiv.querySelector('.dream-calc-btn').onclick = () => openDreamCalcPopup(subject.id, subject.name);
     actionsDiv.querySelector('.delete-subject-btn').onclick = () => openDeleteSubjectConfirm(subject.id, subject.name);
 
@@ -347,26 +378,83 @@ async function setCurrentSemester(semesterId) {
 
 // --- API Actions ---
 
-async function addSubjectPrompt(semesterId) {
-    const name = prompt("Fachname eingeben:");
-    if (!name) return;
+async function saveOrUpdateSubject() {
+    const name = document.getElementById("subjectNameEdit").value.trim();
+    const countsAverage = document.getElementById("subjectCountsAverage").checked;
+    const weight = parseFloat(document.getElementById("subjectWeightEdit").value);
+    const parentId = editingParentId; // Use global variable set during open
+    
+    // Determine context
+    const isEdit = !!editingSubjectId;
+    const semesterIdRaw = isEdit ? 
+        // Need to find semesterId from DOM or cache?
+        // Easiest is to store semesterId in global when opening popup?
+        // Let's assume passed in openSubjectPopup correctly via closure or global
+        // Wait, editingSubjectId is only ID.
+        // Render function uses closures.
+        // Let's rely on finding element in DOM to get semesterId if editing, or use global if creating.
+        document.getElementById(`subject-${editingSubjectId}`).closest('.semester').dataset.id
+        : currentSemesterIdForSubjectCreate;
+
+    const semesterId = parseInt(semesterIdRaw);
+
+    if (!name || isNaN(weight)) {
+        alert("Bitte Namen und Gewichtung angeben.");
+        return;
+    }
+
+    const payload = { 
+        name, 
+        counts_average: countsAverage,
+        weight: weight,
+        parent_id: parentId
+    };
 
     try {
-        const response = await fetch(`/api/noten/semester/${semesterId}/subject`, {
-            method: "POST",
-            headers: getHeaders(),
-            body: JSON.stringify({ name: name, counts_average: name.toLowerCase() !== 'sport' })
-        });
+        let response;
+        if (isEdit) {
+            response = await fetch(`/api/noten/subject/${editingSubjectId}`, {
+                method: "PUT",
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+        } else {
+            response = await fetch(`/api/noten/semester/${semesterId}/subject`, {
+                method: "POST",
+                headers: getHeaders(),
+                body: JSON.stringify(payload)
+            });
+        }
+
         if (response.ok) {
             const data = await response.json();
-            // Append new subject
-            const container = document.getElementById(`subjects-container-${semesterId}`);
-            container.appendChild(renderSubject(data));
-            // Update semester stats
-            updateSemesterStats(semesterId, data.semester_stats);
+            
+            // Reload full semester to handle structural changes (nesting/unnesting) simpler than patching DOM tree
+            // Since structure might change drastically (moving subject to another parent), refreshing just one subject isn't enough.
+            // But refreshing whole semester is easy.
+            // We need updated semester data first.
+            // Does endpoint return updated semester? No, it returns subject data + semester_stats.
+            // But if structure changed, we'd need full list. 
+            // Actually, modifying parent_id definitely changes structure. 
+            // So we should reload the semester subjects list.
+            
+            // Re-fetch only this semester to update view
+            // Can we re-fetch effectively? 
+            // Or just update local data cache and re-render?
+            
+            // For now, let's just fetch all semesters again to be safe and simple, or implement single-semester fetch.
+            // To be efficient: fetch all is fine for now, or just reload page? No, SPA style.
+            
+            // Let's implement fetchSemester(id) or re-call loadSemesters().
+            await loadSemesters(); // Simple and robust
+
+            closeSubjectPopup();
+        } else {
+            const err = await response.json();
+            alert(err.error || "Fehler beim Speichern");
         }
     } catch (error) {
-        console.error("Error creating subject:", error);
+        console.error("Error saving subject:", error);
     }
 }
 
@@ -378,6 +466,11 @@ async function saveOrUpdateGrade() {
 
     if (!name || isNaN(value) || isNaN(weight)) {
         alert("Bitte alle Felder korrekt ausfüllen.");
+        return;
+    }
+
+    if (value < 1.0) {
+        alert("Note muss mindestens 1.0 sein.");
         return;
     }
 
@@ -439,43 +532,7 @@ async function saveOrUpdateGrade() {
     }
 }
 
-async function saveSubjectEdit() {
-    const name = document.getElementById("subjectNameEdit").value.trim();
-    const countsAverage = document.getElementById("subjectCountsAverage").checked;
-    const subjectId = editingSubjectId; 
-
-    if (!name) return;
-
-    try {
-        const response = await fetch(`/api/noten/subject/${subjectId}`, {
-            method: "PUT",
-            headers: getHeaders(),
-            body: JSON.stringify({ name, counts_average: countsAverage })
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            // Update DOM
-            const subjectDiv = document.getElementById(`subject-${subjectId}`);
-            subjectDiv.querySelector('.subject-title').textContent = data.name;
-            
-            // Update data attribute for counts_average
-            subjectDiv.dataset.countsAverage = data.counts_average ? "true" : "false";
-            
-            const avgSpan = document.getElementById(`subj-avg-${subjectId}`);
-            const avgText = data.average !== null ? data.average.toFixed(2) : "0";
-            avgSpan.textContent = `Schnitt: ${avgText}${data.counts_average ? '' : ' (zählt nicht)'}`;
-            
-            // Update semester stats
-            const semesterDiv = subjectDiv.closest('.semester');
-            updateSemesterStats(semesterDiv.dataset.id, data.semester_stats);
-            
-            closeSubjectPopup();
-        }
-    } catch (error) {
-        console.error("Error updating subject:", error);
-    }
-}
+// Function consolidated into saveOrUpdateSubject above.
 
 async function saveSemesterRename() {
     const name = document.getElementById("semesterNameEdit").value.trim();
@@ -684,6 +741,43 @@ async function saveSubjectOrder(semesterId, container) {
     }
 }
 
+function buildSubjectTree(subjects) {
+    const subjectMap = {};
+    const roots = [];
+
+    // First pass: Init map and children array
+    subjects.forEach(subject => {
+        // Clone to avoid mutating original if needed, or just modify in place
+        // Modifying in place is fine here as we rebuild on reload
+        subject.children = [];
+        subjectMap[subject.id] = subject;
+    });
+
+    // Second pass: Build hierarchy
+    subjects.forEach(subject => {
+        if (subject.parent_id && subjectMap[subject.parent_id]) {
+            subjectMap[subject.parent_id].children.push(subject);
+        } else {
+            roots.push(subject);
+        }
+    });
+    
+    // Sort roots by display_order (children are sorted by calling renderSemester which sorts roots, but for children...)
+    // Original code sorted by display_order in python serialize_semester.
+    // We should maintain that order.
+    // The input 'subjects' array is already sorted by display_order from backend usually?
+    // Actually backend returns sorted list.
+    // So iterating in order preserves order relative to siblings roughly, but let's be safe.
+    roots.sort((a, b) => a.display_order - b.display_order);
+    
+    // Also sort children
+    Object.values(subjectMap).forEach(subj => {
+        subj.children.sort((a, b) => a.display_order - b.display_order);
+    });
+
+    return roots;
+}
+
 // --- Popups ---
 
 function openGradePopup(subjectId, grade = null) {
@@ -715,12 +809,38 @@ function closeGradePopup() {
     document.getElementById("grade-popup").classList.add("hidden");
 }
 
-function openSubjectPopup(subjectId, name, countsAverage) {
-    editingSubjectId = subjectId;
-    document.getElementById("subjectNameEdit").value = name;
-    document.getElementById("subjectCountsAverage").checked = countsAverage;
+function openSubjectPopup(subject, semesterId, parentId = null) {
+    editingSubjectId = subject ? subject.id : null;
+    currentSemesterIdForSubjectCreate = !subject ? semesterId : null;
+    
+    // Store parent ID in global for saving later
+    editingParentId = parentId || (subject ? subject.parent_id : null);
+    
+    const effectiveSemesterId = subject ? (semesterId || subject.semester_id) : semesterId; 
+    
+    const popupTitle = document.getElementById("subject-popup-title");
+    const nameInput = document.getElementById("subjectNameEdit");
+    const countsCheck = document.getElementById("subjectCountsAverage");
+    const weightInput = document.getElementById("subjectWeightEdit");
+    
+    // Title
+    if (editingParentId && !subject) {
+        // Creating sub-subject
+        const parentSubject = semestersData[effectiveSemesterId]?.subjects.find(s => s.id === editingParentId);
+        popupTitle.textContent = parentSubject ? `Unterfach für ${parentSubject.name} hinzufügen` : "Unterfach hinzufügen";
+    } else {
+        popupTitle.textContent = subject ? (subject.parent_id ? "Unterfach bearbeiten" : "Fach bearbeiten") : "Fach hinzufügen";
+    }
+    document.getElementById("subject-popup-save-btn").textContent = subject ? "Speichern" : "Hinzufügen";
+    
+    // Basic fields
+    nameInput.value = subject ? subject.name : "";
+    countsCheck.checked = subject ? subject.counts_average : true;
+    weightInput.value = subject ? (subject.weight || 1.0) : 1.0;
+
     overlay.classList.remove("hidden");
     document.getElementById("subject-popup").classList.remove("hidden");
+    nameInput.focus();
 }
 
 function closeSubjectPopup() {
@@ -818,7 +938,7 @@ function setupGlobalEventHandlers() {
     if (subjectPopupCancelBtn) subjectPopupCancelBtn.addEventListener("click", closeSubjectPopup);
     
     const subjectPopupSaveBtn = document.getElementById("subject-popup-save-btn");
-    if (subjectPopupSaveBtn) subjectPopupSaveBtn.addEventListener("click", saveSubjectEdit);
+    if (subjectPopupSaveBtn) subjectPopupSaveBtn.addEventListener("click", saveOrUpdateSubject);
     
     const deleteConfirmCancelBtn = document.getElementById("delete-confirm-cancel-btn");
     if (deleteConfirmCancelBtn) deleteConfirmCancelBtn.addEventListener("click", closeDeleteConfirm);

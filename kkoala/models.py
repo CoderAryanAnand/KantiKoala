@@ -197,6 +197,18 @@ class Subject(db.Model):
     name = db.Column(db.String(100), nullable=False)
     counts_towards_average = db.Column(db.Boolean, nullable=False, default=True)
     display_order = db.Column(db.Integer, nullable=False, default=0)
+    
+    # Sub-subjects support
+    parent_id = db.Column(db.Integer, db.ForeignKey("subject.id"), nullable=True)
+    weight = db.Column(db.Float, nullable=False, default=1.0)
+    
+    # Relationships
+    children = db.relationship(
+        "Subject", 
+        backref=db.backref("parent", remote_side=[id]),
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
 
     # Grades for this subject
     grades = db.relationship(

@@ -43,6 +43,8 @@ def calculate_plus_points(rounded_grade):
 def calculate_subject_average(subject):
     """
     Calculate the weighted average for a subject.
+    If subject has children (sub-subjects), calculates from them.
+    Otherwise calculates from direct grades.
     
     Returns:
         dict: Contains 'average' (float or None if no grades) and 'has_grades' (bool)
@@ -50,6 +52,25 @@ def calculate_subject_average(subject):
     total_weighted = 0.0
     total_weight = 0.0
     
+    # Check for sub-subjects (children)
+    if subject.children:
+        has_grades_any = False
+        for child in subject.children:
+            if child.counts_towards_average:
+                child_res = calculate_subject_average(child)
+                if child_res["has_grades"] and child_res["average"] is not None:
+                    total_weighted += child_res["average"] * child.weight
+                    total_weight += child.weight
+                    has_grades_any = True
+        
+        if total_weight > 0:
+             return {
+                "average": round(total_weighted / total_weight, 2),
+                "has_grades": has_grades_any
+            }
+        return {"average": None, "has_grades": has_grades_any}
+
+    # Direct grades calculation
     for grade in subject.grades:
         if grade.counts:
             total_weighted += grade.value * grade.weight
@@ -66,6 +87,7 @@ def calculate_subject_average(subject):
 def calculate_semester_average(semester):
     """
     Calculate the average and plus points for a semester.
+    Only considers top-level subjects (parent_id is None).
     
     Returns:
         dict: Contains 'average', 'plus_points', and 'subject_count'
@@ -75,7 +97,8 @@ def calculate_semester_average(semester):
     total_plus_points = 0.0
     
     for subject in semester.subjects:
-        if subject.counts_towards_average:
+        # Only count top-level subjects towards semester average
+        if subject.parent_id is None and subject.counts_towards_average:
             subj_calc = calculate_subject_average(subject)
             if subj_calc["has_grades"] and subj_calc["average"] is not None:
                 avg_value = subj_calc["average"]
@@ -145,6 +168,8 @@ def serialize_semester(semester):
             "name": subject.name,
             "counts_average": subject.counts_towards_average,
             "display_order": subject.display_order,
+            "parent_id": subject.parent_id,
+            "weight": subject.weight,
             "average": subj_calc["average"],
             "has_grades": subj_calc["has_grades"],
             "grades": [
@@ -397,15 +422,30 @@ def create_subject(user, semester_id):
     payload = request.get_json(silent=True) or {}
     name = payload.get("name", "Neues Fach")
     counts_average = payload.get("counts_average", True)
-    
+    parent_id = payload.get("parent_id")
+    try:
+        weight = float(payload.get("weight", 1.0))
+    except (TypeError, ValueError):
+        weight = 1.0
+
     if not isinstance(name, str) or len(name) > 100:
         return jsonify({"error": "Invalid subject name"}), 400
     
+    if parent_id:
+        # Check if parent exists and is in the same semester
+        parent = Subject.query.filter_by(id=parent_id, semester_id=semester_id).first()
+        if not parent:
+             # Just ignore invalid parent to not break basic flow, or return error?
+             # For API consistency, ignoring or nulling is safer if frontend might send garbage
+             parent_id = None
+             
     try:
         new_subject = Subject(
             semester_id=semester_id,
             name=name,
-            counts_towards_average=bool(counts_average)
+            counts_towards_average=bool(counts_average),
+            parent_id=parent_id,
+            weight=weight
         )
         db.session.add(new_subject)
         db.session.commit()
@@ -415,6 +455,8 @@ def create_subject(user, semester_id):
             "id": new_subject.id,
             "name": new_subject.name,
             "counts_average": new_subject.counts_towards_average,
+            "parent_id": new_subject.parent_id,
+            "weight": new_subject.weight,
             "average": subj_calc["average"],
             "has_grades": subj_calc["has_grades"],
             "grades": [],
@@ -458,6 +500,23 @@ def update_subject(user, subject_id):
     
     if "counts_average" in payload:
         subject.counts_towards_average = bool(payload["counts_average"])
+        
+    if "weight" in payload:
+        try:
+            subject.weight = float(payload["weight"])
+        except (TypeError, ValueError):
+            return jsonify({"error": "Invalid weight"}), 400
+
+    if "parent_id" in payload:
+        pid = payload["parent_id"]
+        if pid is None:
+            subject.parent_id = None
+        else:
+            parent = Subject.query.filter_by(id=pid, semester_id=subject.semester_id).first()
+            if parent and parent.id != subject.id:
+                subject.parent_id = pid
+            else:
+                return jsonify({"error": "Invalid parent subject"}), 400
     
     try:
         db.session.commit()
@@ -466,6 +525,8 @@ def update_subject(user, subject_id):
             "id": subject.id,
             "name": subject.name,
             "counts_average": subject.counts_towards_average,
+            "parent_id": subject.parent_id,
+            "weight": subject.weight,
             "average": subj_calc["average"],
             "has_grades": subj_calc["has_grades"],
             "semester_stats": calculate_semester_average(subject.semester)
@@ -588,9 +649,9 @@ def create_grade(user, subject_id):
     
     counts = bool(payload.get("counts", True))
     
-    # Validate grade value (Swiss system: 1-6)
-    if value < 1.0 or value > 6.0:
-        return jsonify({"error": "Grade value must be between 1.0 and 6.0"}), 400
+    # Validate grade value (Swiss system: 1-6 but no upper limit requested)
+    if value < 1.0:
+        return jsonify({"error": "Grade value must be at least 1.0"}), 400
     
     if weight <= 0:
         return jsonify({"error": "Weight must be positive"}), 400
@@ -660,8 +721,8 @@ def update_grade(user, grade_id):
     if "value" in payload:
         try:
             value = float(payload["value"])
-            if value < 1.0 or value > 6.0:
-                return jsonify({"error": "Grade value must be between 1.0 and 6.0"}), 400
+            if value < 1.0:
+                return jsonify({"error": "Grade value must be at least 1.0"}), 400
             grade.value = value
         except (TypeError, ValueError):
             return jsonify({"error": "Invalid value"}), 400
